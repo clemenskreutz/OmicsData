@@ -1,0 +1,52 @@
+% set(O, property, value)
+% set(O, property, value, argument)
+% set(O, property1, value1, property2, value2, ...)
+%
+%
+
+function O = set(O,prop, val, varargin)
+
+if ~OmicsCheckFieldname(prop)
+    error('%s does not exist as poperty and is not a valid fieldname');
+end
+
+fn = fieldnames(O);
+fnconfig = fieldnames(O.config);
+fncontainer = fieldnames(O.container);
+fninfo = fieldnames(O.info);
+
+switch prop
+    case 'data'
+        if isempty(varargin)
+            error('Data can only be altered, if the change is annotated via a 3rd argument of this function (Example: set(O,''data'',d,''Data is divided by two.'').')
+        end
+        O.data.(O.config.default_data) = val;
+        O = OmicsAddAnalysis(O,varargin{1});  % 3rd argument has
+        O = OmicsNewID(O);
+    
+    case fn  % if it match to an existing field in O
+        O.(prop) = val;
+    case fnconfig  % if it match to an existing field in O.config
+        O.config.(prop) = val;
+    case fncontainer  % if it match to an existing field in O.container
+        O.container.(prop) = val;
+    case fninfo  % if it match to an existing field in O.info
+        O.info.(prop) = val;
+        
+        
+        
+    otherwise
+        dims = size(val);
+        nf = get(O,'nfeatures');
+        ns = get(O,'nsamples');
+        
+        if isnumeric(dims(1)==nf && dims(2)==ns)
+            O.data.(prop) = val;
+        elseif dims(1)==nf && dims(2)==1
+            O.rows.(prop) = val;
+        elseif dims(1)==1 && dims(2)==ns
+            O.cols.(prop) = val;
+        else
+            O.container.(prop) = val;
+        end
+end
