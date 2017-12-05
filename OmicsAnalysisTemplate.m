@@ -7,9 +7,9 @@ close all
 OmicsInit; % initialize
 
 addpath('E:\clemens\Repositories\OmicsData\Data\PXD000485\MaxQuantOutputValidationDataset') % add a path to the folder where the data is located.
-file = 'proteinGroups.txt';
 
 %% Load Data, perform log-transformation and normalization:
+file = 'proteinGroups.txt';
 O = OmicsData(file)
 O = log2(O);
 
