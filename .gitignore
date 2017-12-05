@@ -1,0 +1,13 @@
+.DS_Store
+.gitignore~
+
+*.dat
+# Examples
+#arFramework3/Examples/Becker_Science2010/arSimuCalc*
+#arFramework3/Examples/Beer_MolBiosyst2014/SBML/
+#arFramework3/Examples/Beer_MolBiosyst2014/arSimuCalc*
+#arFramework3/Examples/Beer_MolBiosyst2014/pthreadVC2.dll
+
+Data/PXD*
+Data/dynamicrangebenchmark
+Data/proteomebenchmark
