@@ -14,12 +14,13 @@ subfolders = {'Advanced','Data','Development','MatlabTools','Subfunctions','Tool
 
 %% Adding subfolders to Matlab's search path:
 w = which('OmicsInit');
-Path = w(1:end-length('OmicsInit.m'));
+Path = w(1:end-length('OmicsInit.m')-1  );
 
 for i=1:length(subfolders)
     path_i = [Path,filesep,subfolders{i}];
     if ~exist(path_i,'dir')
-        error('Folder % is not found as a subfolder below %s.',path_i,Path);
+        mkdir(path_i,Path);
+%         error('Folder % is not found as a subfolder below %s.',path_i,Path);
     end
     
     addpath(path_i);
