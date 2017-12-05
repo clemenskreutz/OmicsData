@@ -62,6 +62,8 @@ else
             
         case {'nf','nfeatures','nprot','ngene','ngenes'}
             varargout{1} = size(get(O,'data'),1);
+        case {'n','ndata'} 
+            varargout{1} = prod(size(get(O,'data'),1)); % the result of numel is wrong for empty data
         case {'ns','nsamples','na','narrays'}
             varargout{1} = size(get(O,'data'),2);
             

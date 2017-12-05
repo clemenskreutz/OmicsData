@@ -23,6 +23,20 @@ switch prop
         O.data.(O.config.default_data) = val;
         O = OmicsAddAnalysis(O,varargin{1});  % 3rd argument has
         O = OmicsNewID(O);
+        
+        case {'samplenames','snames','hy'}  % hy is accepted because of historic reasons
+            if size(val,2)==get(O,'ns') && size(val,1)==1
+                O.rows.(O.config.default_row) = val;
+            else
+                error('Dimension of val does not fit to the data.')
+            end
+            
+        case {'featurenames','fnames'}
+            if size(val,1)==get(O,'nf') && size(val,2)==1
+                O.cols.(O.config.default_col) = val;
+            else
+                error('Dimension of val does not fit to the data.')
+            end
     
     case fn  % if it match to an existing field in O
         O.(prop) = val;
@@ -47,6 +61,6 @@ switch prop
         elseif dims(1)==1 && dims(2)==ns
             O.cols.(prop) = val;
         else
-            O.container.(prop) = val;
+            O.container.(prop) = val;  % unknown properties are put in the container
         end
 end

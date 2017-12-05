@@ -9,9 +9,9 @@ Installation steps:
 
 
 =========== Folders: ===========
-@OmicsData	     The class functions which might overload other matlab functions
+@OmicsData	     The class functions which might overload other matlab functions, function which necessarily have to access properties via "." instead of get.
 Advanced	     Advanced analyses which are not of primary interest for routine analyes
-Data		     Data sets
+Data		     Data sets, put your data-library here. The github repository does not contain data due to publication issues.
 Development	     Functions which are not fully finished or require extensions
 MatlabTools	     Matlab functions which are general and not directly linked to the OmicsData project
 Subfunctions	     Functions which are usually not called by the user but implement recurrent task called by partent functions

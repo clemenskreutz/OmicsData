@@ -6,6 +6,7 @@
 
 function lab = str2label(str)
 if(iscell(str))
+    lab = cell(1,length(str));
     for i=1:length(str)
         lab{i} = str2label(str{i});
     end

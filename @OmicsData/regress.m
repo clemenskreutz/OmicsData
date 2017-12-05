@@ -72,9 +72,12 @@ P_ftest = cell(size(ind_ftest));
 for i=1:length(ind_ftest)
     warning('implementation not perfect. Check p-value calculation for F-Test.')
     
+    
     Xtmp = Xinter(:,setdiff(1:size(Xinter,2),ind_ftest{i}));
     Xtmp = [Xtmp,sum(Xinter(:,ind_ftest{i}),2)];
+%     warning('stats:regress:RankDefDesignMat','off')
     [b,bSE,pval,dummy,fstat,vest,C,Res] = regress_reg(y',Xtmp,0,0);
+%     warning('stats:regress:RankDefDesignMat','on')
     
     T = fold(:,ind_ftest{i})./foldSE(:,ind_ftest{i});
     T = T - mean(T,2)*ones(1,size(T,2));

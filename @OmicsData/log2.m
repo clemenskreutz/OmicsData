@@ -6,7 +6,13 @@
 function O = log2(O)
 
 dat = get(O,'data');
-dat = log2(dat);
-dat(isinf(dat)) = NaN;
+if sum(dat(:)<0)>0
+    warning('OmicsData/log2.m: Data has negative numbers, log2-transformation is refused.');
+else
+    
+    dat = log2(dat);
+    dat(isinf(dat)) = NaN;
+    
+    O = set(O,'data',dat,'log2-transformation');
+end
 
-O = set(O,'data',dat,'log2-transformation');

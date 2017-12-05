@@ -1,3 +1,14 @@
+% setConfig(O,varargin)
+% 
+%   This function can handle several pairs of property and value.
+%   If directly sets config fields and can thereby introduce new config
+%   fields.
+% 
+%   In contrast, the standard OmicsData/set.m function would put the
+%   unknown property into the containter-struct O.container.
+% 
+%  Exampmle:
+%  
 function setConfig(O,varargin)
 
 property_argin=varargin;

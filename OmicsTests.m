@@ -13,6 +13,8 @@ if ~exist('beaktime','var') || isempty(beaktime)
     beaktime = 0;
 end
 
+OmicsInit
+
 close all
 pfad = fileparts(which('OmicsInit'));
 
@@ -24,16 +26,62 @@ cmds = {...
     'hist(nanstd(O,[],2),100); drawnow',...
     'hist(get(O,''nna''),100); drawnow',...
     'hist(get(O,''propna''),100); drawnow',...
-    'O = OmicsData([pfad,filesep,''Data'',filesep,''dynamicrangebenchmark'',filesep,''proteinGroups.txt'']);',...
-    'O = OmicsData([pfad,filesep,''Data'',filesep,''proteomebenchmark'',filesep,''proteinGroups.txt'']);',...
-    'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD003813'',filesep,''MaxQuant_Output1'',filesep,''proteinGroups_1.txt'']);',...
-    'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD003813'',filesep,''MaxQuant_Output1'',filesep,''proteinGroups_1.xls'']);',...
-    'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD004816'',filesep,''MaxQuant_Output'',filesep,''proteinGroups.txt'']);',...
-    'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD000485'',filesep,''MaxQuantOutputValidationDataset'',filesep,''proteinGroups.txt'']);',...
+    };
+
+
+%% Try different real data sets: (if available)
+dataPfad = [pfad,filesep,'Data',filesep,'dynamicrangebenchmark'];
+if exist(dataPfad,'dir')
+    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''dynamicrangebenchmark'',filesep,''proteinGroups.txt'']);'}];
+else
+    fprintf('%s does not exist, skip this test.\n',dataPfad);
+end
+
+dataPfad = [pfad,filesep,'Data',filesep,'proteomebenchmark'];
+if exist(dataPfad,'dir')
+    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''proteomebenchmark'',filesep,''proteinGroups.txt'']);'}];
+else
+    fprintf('%s does not exist, skip this test.\n',dataPfad);
+end
+
+dataPfad = [pfad,filesep,'Data',filesep,'PXD003813',filesep,'MaxQuant_Output1'];
+if exist(dataPfad,'dir')
+    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD003813'',filesep,''MaxQuant_Output1'',filesep,''proteinGroups_1.txt'']);'}];
+else
+    fprintf('%s does not exist, skip this test.\n',dataPfad);
+end
+
+dataPfad = [pfad,filesep,'Data',filesep,'PXD003813',filesep,'MaxQuant_Output1'];
+if exist(dataPfad,'dir')
+    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD003813'',filesep,''MaxQuant_Output1'',filesep,''proteinGroups_1.xls'']);'}];
+else
+    fprintf('%s does not exist, skip this test.\n',dataPfad);
+end
+
+dataPfad = [pfad,filesep,'Data',filesep,'PXD004816',filesep,'MaxQuant_Output'];
+if exist(dataPfad,'dir')
+    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD004816'',filesep,''MaxQuant_Output'',filesep,''proteinGroups.txt'']);'}];
+else
+    fprintf('%s does not exist, skip this test.\n',dataPfad);
+end
+
+dataPfad = [pfad,filesep,'Data',filesep,'PXD000485',filesep,'MaxQuantOutputValidationDataset'];
+if exist(dataPfad,'dir')
+    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD000485'',filesep,''MaxQuantOutputValidationDataset'',filesep,''proteinGroups.txt'']);'}];
+else
+    fprintf('%s does not exist, skip this test.\n',dataPfad);
+end
+
+
+
+%% Additional commands with real data (if available)
+cmds = [cmds, {
     'O2 = log2(O);',...
     'O3 = quantilenorm(O2)',...
     'boxplot(O3);drawnow',...
-    };
+}];
+
+
 
 
 ok = 1;
