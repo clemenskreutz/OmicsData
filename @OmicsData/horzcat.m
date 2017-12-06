@@ -1,4 +1,7 @@
 %   O = horzcat(O,O2)
+% 
+%   O = horzcat(O,O2,O3, ...)
+%   O = horzcat(O,O2,O3, ..., 'force')
 %
 %   Horizontal catenation, i.e. lumping column-wise.
 % 
@@ -20,13 +23,29 @@ if length(unique(c1)) < length(c1)
     error('Default-column of O is not unique and cannot be used for horzcat. Generate a unique default-col first.')
 end
 
+doforce = 0;
+
+Os = cell(0);
 for v=1:length(varargin)
-    O2 = varargin{v};
+    arg = varargin{v};
     
-    if strcmp(class(O2),'OmicsData')~=1
-        v
+    if isa(arg,'OmicsData')
+        Os{end+1} = arg;
+    elseif ischar(arg)
+        switch(arg)
+            case 'force'
+                doforce = 1;
+            otherwise 
+                error('Option/flag %s unknown.',arg);
+        end
+    else
+        v,arg
         error('Only objects of type @OmicsData can be catenated.')
     end
+end
+
+for v=1:length(Os)
+    O2 = Os{v};
     
     fn1 = fieldnames(O.data);
     fn2 = fieldnames(O2.data);
@@ -35,22 +54,23 @@ for v=1:length(varargin)
         warning('Some data fields only occur in a subset of objects. Only common fields are maintained.');
     end    
     
-    c2 = O2.cols.(O2.config.default_col);
-    if length(unique(c2)) < length(c2)
-        error('Default-columns of O%i is not unique and cannot be used for horzcat. Generate a unique default-column first.',v)
+    if doforce==0
+        c2 = O2.cols.(O2.config.default_col);
+        if length(unique(c2)) < length(c2)
+            error('Default-columns of O%i is not unique and cannot be used for horzcat. Generate a unique default-column first.',v)
+        end
+        
+        [inb,locb] = ismember(c1,c2);
+        if sum(inb==0)>0
+            error('Some default-colss does not occur in all objects.')
+        else
+            % reorder 2nd object
+            S.type = '()';
+            S.subs = {locb,':'};
+            O2 = subsref(O2,S);
+            %         O2 = O2(locb,:); % does not work, why?
+        end
     end
-    
-    [inb,locb] = ismember(c1,c2);
-    if sum(inb==0)>0
-        error('Some default-colss does not occur in all objects.')
-    else
-        % reorder 2nd object
-        S.type = '()';
-        S.subs = {locb,':'};
-        O2 = subsref(O2,S)
-%         O2 = O2(locb,:); % does not work, why?
-    end
-    
     
     for i=1:length(fn)
         O.data.(fn{i}) = horzcat(O.data.(fn{i}),O2.data.(fn{i}));
