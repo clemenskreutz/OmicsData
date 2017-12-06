@@ -10,11 +10,13 @@ ns = get(O,'ns');
 
 % Proper font size
 if ns<10
-    pos = [573   438   560   420]; 
+    pos = [500   438   560   420]; 
 elseif ns<=20
-    pos = [573   438   750   420];
-elseif ns <=60
-    pos = [573   438   900   420];
+    pos = [500   438   750   420];
+elseif ns<=50
+    pos = [500   438   850   420];
+elseif ns <=70
+    pos = [500   438   950   420];
 else % more than 60
     pos = [100   438   1600   420];
 end
