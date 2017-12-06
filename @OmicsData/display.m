@@ -1,3 +1,5 @@
+%   display(O)
+% 
 % This function controls the printed text in Matlab's command line if an
 % @OmicsData Object is typed without semicolon
 % 

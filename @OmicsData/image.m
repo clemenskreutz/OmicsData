@@ -20,6 +20,10 @@ clim = NaN(1,2);
 clim(1) = Min;
 clim(2) = Max;
 
+if Max-Min > 1000
+    warning('Data spread over more than 3 orders of magnitude. No log-transformation applied.')
+end
+
 % NaNs ersetzen, so dass sie weiss sind (1. Zeile in der colormap)
 indnan = find(isnan(dat));
 
@@ -32,6 +36,8 @@ if(length(indnan)>0)%(nspots-get(O,'nf')))
 %     cmap = [0,0,1;rgmap];
 %     clim(1) = Min - 1*(Max-Min)./(size(cmap,1)-1);
 %     dat(indnot) = clim(1);
+else
+    cmap = rgmap;
 end
 dat(find(dat==Min)) = Min+10*eps; % Damit das runden nicht falsche Farbe macht
 
