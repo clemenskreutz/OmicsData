@@ -53,6 +53,10 @@ switch S.type
         
         O = OmicsAddAnalysis(O,sprintf('filtering with (%s,%s)',str1,str2));
         
+    case '.'
+        S
+        error('Direct access to fields is not allowed. Use get(O,property) by default or in rare necessary cases [but not recommended!] getfield(O,fieldname).')
+        
     otherwise
         error('OmicsData/subsref.m: Only () indexing implemneted so far.')
 end
