@@ -54,7 +54,7 @@ switch prop
         nf = get(O,'nfeatures');
         ns = get(O,'nsamples');
         
-        if isnumeric(dims(1)==nf && dims(2)==ns)
+        if isnumeric(val) && dims(1)==nf && dims(2)==ns
             O.data.(prop) = val;
         elseif dims(1)==nf && dims(2)==1
             O.rows.(prop) = val;
