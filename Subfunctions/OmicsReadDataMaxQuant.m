@@ -21,6 +21,8 @@ switch ext
             fprintf('The data contains several sheets. Please select the right sheet [Type in a number]!\n');
             isheet = OmicsInputSelection(sheets, 'Which sheet contains the data? ', 'int');
             sheet = sheets{isheet};
+        else 
+            sheet = sheets{1};
         end
         [~,~,raw] = xlsread(file,sheet);  % NaN are returned as numeric
                 
