@@ -14,8 +14,15 @@ end
 % dat, labels1 (row names), labels2 (column names)
 switch ext
     case {'','.xls','.xlsx'}
+%         ssds = spreadsheetDatastore(file)        
         fprintf('Reading excel file %s ... \n',file);
-        [~,~,raw] = xlsread(file);  % NaN are returned as numeric
+        [~,sheets] = xlsfinfo(file);
+        if iscell(sheets) && length(sheets)>1
+            fprintf('The data contains several sheets. Please select the right sheet [Type in a number]!\n');
+            isheet = OmicsInputSelection(sheets, 'Which sheet contains the data? ', 'int');
+            sheet = sheets{isheet};
+        end
+        [~,~,raw] = xlsread(file,sheet);  % NaN are returned as numeric
                 
     case '.txt'
         fprintf('Reading txt file %s ... \n',file)
@@ -25,7 +32,7 @@ switch ext
 
         ds.SelectedFormats(1:end)={'%q'}; % read everything as character
         tab = readall(ds);
-        ismis = ismissing(tab,{'' '.' 'NA' 'NaN'});
+        ismis = ismissing(tab,{'' '.' 'NA' 'NaN','na'});
         
         raw = table2cell(tab);
         raw(ismis) = {'NaN'};

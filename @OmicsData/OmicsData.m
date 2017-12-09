@@ -63,12 +63,14 @@ else  % filename for reading
         data = tmp.data;
         rownames = tmp.rownames;
         colnames = tmp.colnames;
+        default_data = tmp.default_data;
     else
         % Read data here
         fprintf('Read data from: %s ...\n',file);
         [data, rownames] = OmicsReadDataMaxQuant(file);
-        [data, rownames, colnames] = OmicsData2Datamatrix(data,rownames);
-        save(matfile,'data','rownames','colnames');
+        save tmp
+        [data, rownames, colnames,default_data] = OmicsData2Datamatrix(data,rownames);
+        save(matfile,'data','rownames','colnames','default_data');
         fprintf('Save data to %s ...\n',matfile);
     end
     
@@ -83,6 +85,9 @@ else  % filename for reading
     O.data = data;
     O.cols = rownames; % rownames are columns
     O.rows.SampleNames = colnames; % columnnames are rows
+    if exist('default_data','var');
+        O.config.default_data = default_data;
+    end
     
     O = class(O,'OmicsData');
     
