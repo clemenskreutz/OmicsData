@@ -1,6 +1,8 @@
 %   O = OmicsAddAnalysis(O,descr)
 % 
 % This function should be used to add analysis annotation to O.analyses
+% 
+%   Example:
 
 function O = OmicsAddAnalysis(O,descr)
 

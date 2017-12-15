@@ -8,7 +8,7 @@ dat = get(O,'data');
 
 ind = find(sum(~isnan(dat))>2);
 datnorm = dat;
-datnorm(:,ind) = quantilenorm(dat(:,ind));
+datnorm(:,ind) = quantilenorm(dat(:,ind), varargin{:});
 
 O = set(O,'data',datnorm,'quantile-normalization');
 

@@ -58,7 +58,7 @@ switch S.type
         error('Direct access to fields is not allowed. Use get(O,property) by default or in rare necessary cases [but not recommended!] getfield(O,fieldname).')
         
     otherwise
-        error('OmicsData/subsref.m: Only () indexing implemneted so far.')
+        error('OmicsData/subsref.m: Only () indexing implemented so far.')
 end
 
 

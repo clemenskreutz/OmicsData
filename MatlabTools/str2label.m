@@ -34,5 +34,4 @@ else
     lab = strrep(lab,'.800000e','.8e');
     lab = strrep(lab,'.900000e','.9e');
     lab = strtrim(lab);
-    lab = strrep(lab,' ','_');
 end

@@ -31,7 +31,7 @@ else
     switch lower(prop)  % misspecification of upper/lower cases is allowed in get (but not in set)
         case {'nna','nnan'}
             varargout{1} = sum(isnan(get(O,'data')),2);
-        case {'propna','propnan'}
+        case {'propna','propnan','freqna','freqnan'}
             varargout{1} = sum(isnan(get(O,'data')),2)/size(get(O,'data'),2);
             
         case 'data'
