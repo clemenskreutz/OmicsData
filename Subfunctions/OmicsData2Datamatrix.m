@@ -69,7 +69,7 @@ dataMat = struct;
 % initialized Matrix
 nrows = size(data.(fndata{1}),1);
 for j=1:length(uniDatNames)
-    dataMat.(str2label(uniDatNames{j})) = NaN(nrows,length(relatedNames));
+    dataMat.(str2fieldname(uniDatNames{j})) = NaN(nrows,length(relatedNames));
 end
 
 removeFromData = cell(0);
@@ -78,7 +78,7 @@ for i=1:length(relatedNames)
     [~,ia,ib] = intersect(relatedNames{i},uniDatNames);
     for ii=1:length(ia)
         removeFromData = [removeFromData,{fndata{related{i}(ia(ii))}}];
-        dataMat.(str2label(uniDatNames{ib(ii)}))(:,i) = data.(fndata{related{i}(ia(ii))});
+        dataMat.(str2fieldname(uniDatNames{ib(ii)}))(:,i) = data.(fndata{related{i}(ia(ii))});
     end
     
 end
