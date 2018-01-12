@@ -13,6 +13,11 @@
 %   fdr         FDR according to Storey2002
 %   fdrBH       FDR according to Benjamini-Hochberg1995
 %   q           q-value
+% 
+% 
+%   Examples:
+% fdr0 = fdr_calculations(res.p);
+% [fdr,fdrBH,q] = fdr_calculations(res.p,sum(isnan(O),2));
 
 function [fdr,q,fdrBH] = fdr_calculations(p,groupvar)
 if ~exist('groupvar','var')
