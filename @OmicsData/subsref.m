@@ -8,6 +8,14 @@
 % 
 % If O(1:2,:) is evaluated, then subsref is called with 
 % S.type='()' and S.subs={1:2,':'}
+% 
+%   Attention: It seems that subsref does not work in general (in Matlab)
+%   if indexing is used from inside a class function.
+%   A workaround is calling subsref instead of using indexing, e.g. replace
+%   O(rf,:) by 
+%   s = struct('type','()');
+%   s.subs = {rf,':'};
+%   subsref(O,s)
 
 function O = subsref(O,S)
  
@@ -40,15 +48,19 @@ switch S.type
             str1 = S.subs{1};
         elseif length(S.subs{1})==1
             str1 = num2str(S.subs{1});
-        else
+        elseif length(S.subs{1})==2
             str1 = sprintf('%i:%i',S.subs{1}(1),S.subs{1}(end));
+        else
+            str1 = sprintf('%i...%i',S.subs{1}(1),S.subs{1}(end));            
         end
         if ischar(S.subs{2})
             str2 = S.subs{2};
         elseif length(S.subs{2})==1
             str2 = num2str(S.subs{2});
-        else
+        elseif length(S.subs{2})==2
             str2 = sprintf('%i:%i',S.subs{2}(1),S.subs{2}(end));
+        else
+            str2 = sprintf('%i...%i',S.subs{2}(1),S.subs{2}(end));
         end
         
         O = OmicsAddAnalysis(O,sprintf('filtering with (%s,%s)',str1,str2));
