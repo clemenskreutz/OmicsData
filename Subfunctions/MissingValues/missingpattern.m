@@ -4,6 +4,9 @@
 
 function O = missingpattern(O,missing)
 
+if ~exist('O','var')
+    error('MissingValues/missingpattern.m requires class O as input argument.')
+end
 if ~exist('missing','var')
     missing = [];
 end
@@ -57,35 +60,38 @@ ylabel('Log10(Mean)')
 legend(['Pearson corr = ' num2str(RHO)])
 title('Correlation of measurement values and number of missing values')
 
+% logisitic regression, number of missing per row
+X = [ones(size(dat,2)/2,1),zeros(size(dat,2)/2,1)];
 
-% Count missing values per row
+
+
+% Count missing values per row old
 % [~,x] = sort(sum(isnan(dat),2));
-
-nrow = sum(isnan(dat),2);
-% dat(:,end+1) = nrow;
-% dat = sortrows(dat,size(dat,2));
-x = linspace(0,100,size(dat,1));
-y = nrow;
-n = (size(dat,2)-1) * ones(size(dat,1),1);
-[b,~,stats] = glmfit(x,[y n],'binomial','link','logit');
-yfit = glmval(b,x,'logit','size',n);
-figure
-plot(x, y./n,'-',x,yfit./n,'-','LineWidth',2)
-xlabel('ProteinID (other sorting)');
-ylabel('# missing values [%] per row');
-legend('data','logistic regression','Location','east')
-
-meanofrow = log10(nanmean(dat,2));
-meanofmeanofrowwithsamenumberofmissingvalues = grpstats(meanofrow,nrow/length(ncol));
-RHO = corr(unique(nrow/length(ncol)) ,meanofmeanofrowwithsamenumberofmissingvalues);
-figure
-%boxplot(meanofrow,round(nrow/length(ncol),2,'significant'),'PlotStyle','compact');
-plot(unique(nrow/length(ncol)),meanofmeanofrowwithsamenumberofmissingvalues,'o');
-lsline
-xlabel('#missing')
-ylabel('Log10(Mean)')
-legend(['Pearson corr = ' num2str(RHO)])
-title('Correlation of Protein values and number of missing values')
+% nrow = sum(isnan(dat),2);
+% % dat(:,end+1) = nrow;
+% % dat = sortrows(dat,size(dat,2));
+% x = linspace(0,100,size(dat,1));
+% y = nrow;
+% n = (size(dat,2)-1) * ones(size(dat,1),1);
+% [b,~,stats] = glmfit(x,[y n],'binomial','link','logit');
+% yfit = glmval(b,x,'logit','size',n);
+% figure
+% plot(x, y./n,'-',x,yfit./n,'-','LineWidth',2)
+% xlabel('ProteinID (other sorting)');
+% ylabel('# missing values [%] per row');
+% legend('data','logistic regression','Location','east')
+% 
+% meanofrow = log10(nanmean(dat,2));
+% meanofmeanofrowwithsamenumberofmissingvalues = grpstats(meanofrow,nrow/length(ncol));
+% RHO = corr(unique(nrow/length(ncol)) ,meanofmeanofrowwithsamenumberofmissingvalues);
+% figure
+% %boxplot(meanofrow,round(nrow/length(ncol),2,'significant'),'PlotStyle','compact');
+% plot(unique(nrow/length(ncol)),meanofmeanofrowwithsamenumberofmissingvalues,'o');
+% lsline
+% xlabel('#missing')
+% ylabel('Log10(Mean)')
+% legend(['Pearson corr = ' num2str(RHO)])
+% title('Correlation of Protein values and number of missing values')
 
 % Count Proteins with certain number of missing values
 for i=1:size(dat,2)

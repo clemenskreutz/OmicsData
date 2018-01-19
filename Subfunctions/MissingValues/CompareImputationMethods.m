@@ -1,0 +1,12 @@
+%  O = imputation(O,'pcambda');
+% O = imputation(O,'pcambia');
+% O = imputation(O,'pcambkdr');
+O = imputation(O,'pcambtsr');
+O = imputation(O,'pcambnipals');
+O = imputation(O,'previous');
+% O = imputation(O,'next');
+O = imputation(O,'nearest');
+O = imputation(O,'linear');
+O = imputation(O,'spline');
+% O = imputation(O,'pchip');
+O = imputation(O,'movmean');

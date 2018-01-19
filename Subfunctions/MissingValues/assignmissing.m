@@ -8,6 +8,10 @@
 
 function O = assignmissing(O,ndata,missing)
 
+if ~exist('O','var')
+    error('MissingValues/assignmissing.m requires class O as input argument.')
+end
+
 if ~exist('missing','var')
     missing = [];
 end
