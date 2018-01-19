@@ -67,7 +67,7 @@ X = [ones(size(dat,2)/2,1),zeros(size(dat,2)/2,1)];
 
 % Count missing values per row old
 % [~,x] = sort(sum(isnan(dat),2));
-% nrow = sum(isnan(dat),2);
+nrow = sum(isnan(dat),2);
 % % dat(:,end+1) = nrow;
 % % dat = sortrows(dat,size(dat,2));
 % x = linspace(0,100,size(dat,1));
