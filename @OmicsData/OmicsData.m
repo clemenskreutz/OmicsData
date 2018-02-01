@@ -75,13 +75,14 @@ else  % filename for reading
     end
     
     
-    if(isempty(name)) % falls []
-        name = '';
+    if(isempty(filename)) % falls []
+        filename = '';
     end
     
     
     O = OmicsStruct;
-    O.name  = name;
+    O.name  = filename;
+    O.info.path = file;
     O.data = data;
     O.cols = rownames; % rownames are columns
     O.rows.SampleNames = colnames; % columnnames are rows
