@@ -9,7 +9,10 @@
 %               calculated for each column.
 %
 %   method      Adjustment method as used by R function p.adjust
+%               The following methods are available: 'holm', 'hochberg',
+%               'hommel', 'bonferroni', 'BH', 'BY', 'fdr', 'none') 
 %
+%               Default: 'fdr'
 %
 %   naomit      If only ~isnan is used the calculate the adjusted p-values
 %               Default: 0.
