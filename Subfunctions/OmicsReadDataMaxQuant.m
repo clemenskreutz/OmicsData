@@ -29,7 +29,7 @@ switch ext
     case '.txt'
         fprintf('Reading txt file %s ... \n',file)
         warning('off','MATLAB:table:ModifiedVarnames');
-        ds = tabularTextDatastore(file,'TreatAsMissing','','Delimiter','\t');%,'MissingValue',0);
+        ds = tabularTextDatastore(file,'TreatAsMissing','','Delimiter','\t','CommentStyle','#');%,'MissingValue',0);
         warning('on','MATLAB:table:ModifiedVarnames');
 
         ds.SelectedFormats(1:end)={'%q'}; % read everything as character
