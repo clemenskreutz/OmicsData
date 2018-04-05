@@ -65,16 +65,19 @@ fprintf('Check into column of numbers ')
 for i=1:size(raw,2)
     fprintf('.')
     try
-        cell2mat(raw(isdat1,i));  % check whether conversion to numbers is feasible
-        isdat2(i)= true;
+        a = cell2mat(raw(isdat1,i));  % check whether conversion to numbers is feasible
+        isdat2(i) = true;
     end
 end
 fprintf('\n')
-dat = cell2mat(raw(isdat1,isdat2));
-labels1 = raw(isdat1,istxt2);
-labels2 = raw(1,isdat2);
+dat = cell2mat(raw(isdat1,~istxt2));
+labels1 = raw(isdat1,istxt2);       % rownames
+labels2 = raw(1,~istxt2);            % colnames
 txtlabels = raw(1,istxt2);
-
+% Changed these two lines, because cell2mat does not like mixture of data
+% types:
+%dat = cell2mat(raw(isdat1,isdat2));
+%labels2 = raw(1,isdat2); 
 
 data = struct;
 rownames = struct;
