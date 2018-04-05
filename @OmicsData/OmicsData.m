@@ -68,7 +68,7 @@ else  % filename for reading
         % Read data here
         fprintf('Read data from: %s ...\n',file);
         [data, rownames] = OmicsReadDataMaxQuant(file);
-        save tmp
+        %save tmp
         [data, rownames, colnames,default_data] = OmicsData2Datamatrix(data,rownames);
         save(matfile,'data','rownames','colnames','default_data');
         fprintf('Save data to %s ...\n',matfile);
