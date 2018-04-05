@@ -65,7 +65,7 @@ fprintf('Check into column of numbers ')
 for i=1:size(raw,2)
     fprintf('.')
     try
-        a = cell2mat(raw(isdat1,i));  % check whether conversion to numbers is feasible
+        cell2mat(raw(isdat1,i));  % check whether conversion to numbers is feasible
         isdat2(i) = true;
     end
 end
