@@ -12,21 +12,36 @@
 %   X       Design matrix % Do not put intercept (vector with one's) in X! 
 %           It's automatically added by glmfit.m and lassoglm.m
 % 
-%   p       p-values (indicating significance of differing dataset)
-%           for each column of design matrix (length(p) = size(X,2))
+%   p       p-values (indicating significance of different experiments)
+%           size(p,1) number of proteins
+%           size(p,2) column j switches off column j of design matrix 
 
 
-function pv = logreg(O,varargin)
+function [pv,Protein,Proteinline] = logreg(O,X,alpha,name,strpattern,group,varargin)
+
 if nargin<1
-    error('OmicsData/logreg.m requires an OmicsData set. glmfit_janine(O,varargin).')
+    error('OmicsData/logreg.m requires at least an OmicsData set. glmfit_janine(O,X,alpha,name,strpattern,varargin).')
 end
 
-%% Set predictor
-% [X,dat] = ReducebyName(O,1);    % Check for equal strings in SampleNames
-% if isempty(X) && isempty(dat)
-    dat = get(O,'data')';
-    X = get(O,'X');
-% end
+if ~exist('alpha','var') || isempty(alpha)
+    alpha = 0.05;
+end
+
+
+%% Set data
+if exist('name','var') && exist('strpattern','var') && ~isempty(name) && ~isempty(strpattern)
+    O = ReducebyName(O,name,strpattern);    % Check for equal strings in SampleNames
+else, fprintf('Uses complete dataset for logistic regression.\n')
+end
+
+dat = get(O,'data')';
+if isfield(O,'Proteinnames')
+    ProteinName = get(O,'Proteinnames');
+elseif isfield(O,'Proteinname')
+    ProteinName = get(O,'Proteinname');
+elseif isfield(O,'ProteinIDs')
+    ProteinName = get(O,'ProteinIDs');
+end
 
 if all(all(all(isnan(dat))))==0
     dat(dat==0) = nan;  % if missing values are not NaN but 0 in data matrix
@@ -43,6 +58,13 @@ end
 % dat = dat(:,9080:9101);
 
 %% Check design matrix
+if ~exist('X','var') || isempty(X)
+    if isfield(O,'X')
+        X = get(O,'X');
+    else
+        error('logreg.m: Design matrix X has to be passed in as second input argument (logreg(O,X)), or be saved in Omics class O by set(O,"X",X). For example use X = [zeros(size(dat,2)/2,1); ones(size(dat,2)/2,1)]; \n');
+    end
+end
 if size(X,1)~=size(dat,1)
     if size(X,2)==size(dat,1)
         X = X';
@@ -50,7 +72,6 @@ if size(X,1)~=size(dat,1)
         error('OmicsData/glmfit.m: Length of design matrix has to be the same size as data matrix. If a column should not be compared, fill in NaNs in design matrix.');
     end
 end
-
 
 %% Set output variables nan
 nf  = size(dat,2);  % number of features, e.g. number of proteins
@@ -60,6 +81,8 @@ dev = NaN(1,nf);
 dev0 = NaN(1,nf);
 pv   = NaN(nf,np);
 idx = NaN(1,nf);
+Protein = {};
+Proteinline = [];
 
 
 %% LogReg
@@ -69,14 +92,24 @@ for i=1:size(dat,2)
     if isempty(varargin)
         [b(:,i),dev(i)] = glmfit(X,dat(:,i),'binomial','link','logit');
     else
-        [b(:,i),dev(i)] = glmfit(X,dat(:,i),varargin);
+        [b(:,i),dev(i)] = glmfit(X,dat(:,i),varargin{:});
     end
-    
+        
     %% if perfectly separated: Lasso
     if strncmp(lastwarn,'The estimated coefficients perfectly separate failures from successes.',70)
         % Lasso for H1
-        [~, FitInfo] = lassoglm(X,dat(:,i),'binomial'); 
-        [dev(i),idx(i)]  = min(FitInfo.Deviance);
+%         if ~exist('lam','var')
+%             [Bl, Fitl] = lassoglm(X,X,'binomial','Lambda',1e-6); 
+%             [B2, Fit2] = lassoglm(X,X,'binomial','Lambda',0.5); 
+%             [B3, Fit3] = lassoglm(X,X,'binomial','Lambda',1e-4); 
+%             %lassoPlot(Bl,Fitl,'plottype','CV');
+%             [~,idx]  = min(Fitl.Deviance);
+%             lam = Fitl.Lambda(idx);
+%         end
+        lam = 1e-6;
+        [~, FitInfo] = lassoglm(X,dat(:,i),'binomial','Lambda',lam);
+        dev(i)  = min(FitInfo.Deviance);
+
         warning(['glmfit_janine.m (Line 88): Used penalization/lasso for Protein in line ' num2str(i)]);
         
         for j=1:size(X,2)               % To check if log regress is sinnvoll for this parameter switch off each parameter and check by lrt      
@@ -87,28 +120,95 @@ for i=1:size(dat,2)
                 Xtmp = X;
                 Xtmp(:,j) = [];
             end     
-            [~, FitInfo0] = lassoglm(Xtmp,dat(:,i),'binomial','Lambda',FitInfo.Lambda(idx(i)));  % Use same lambda as in H1     
+            [~, FitInfo0] = lassoglm(Xtmp,dat(:,i),'binomial','Lambda',lam);  % Use same lambda as in H1     
             dev0(i)  = FitInfo0.Deviance;                          % Dev = -2*(log(L1)-log(Ls))
             pv(i,j) = 1-chi2cdf(abs(dev(i)-dev0(i)),1);                 % Devi-dev0 = -2*(log(L1)-log(L0))
+            if pv(i,j)<alpha
+                 Protein = [ Protein, ProteinName{i}];
+                 Proteinline = [ Proteinline i];
+            end
         end
     %% Glm for H0 
     else    
-        for j=1:size(X,2)
-            % glm for H0
-            if size(X,2)==1
-                Xtmp = ones(size(dat,1),1);
+        if size(X,2)==1
+            Xtmp = ones(size(dat,1),1);
+            if isempty(varargin)
+                [~,dev0(i)] = glmfit(Xtmp,dat(:,i),'binomial','link','logit','constant','off');
             else
+                [~,dev0(i)] = glmfit(Xtmp,dat(:,i),varargin,'constant','off');
+            end
+            pv(i) = 1-chi2cdf(abs(dev(i)-dev0(i)),1);
+            if pv(i)<alpha
+                 Protein = [ Protein, ProteinName{i}];
+                 Proteinline = [ Proteinline i];
+            end
+        else
+            for j=1:size(X,2)
                 Xtmp = X;
                 Xtmp(:,j) = [];
+                if isempty(varargin)
+                    [~,dev0(i)] = glmfit(Xtmp,dat(:,i),'binomial','link','logit');
+                else
+                    [~,dev0(i)] = glmfit(Xtmp,dat(:,i),varargin);
+                end
+                pv(i,j) = 1-chi2cdf(abs(dev(i)-dev0(i)),1);
+                if pv(i,j)<alpha
+                    Protein = [ Protein, ProteinName{i}];
+                    Proteinline = [ Proteinline i];
+                end
             end
-            if isempty(varargin)
-                [~,dev0(i)] = glmfit(Xtmp,dat(:,i),'binomial','link','logit');
-            else
-                [~,dev0(i)] = glmfit(Xtmp,dat(:,i),varargin);
-            end
-            pv(i,j) = 1-chi2cdf(abs(dev(i)-dev0(i)),1);
         end
     end
 end
 
-pv
+%% FDR
+[fdr, q, fdrBH] = fdr_calculations(pv);
+if exist('group','var')
+    [fdrg,qg,fdrBHg]= fdr_calculations(pv,sum(isnan(O),2));
+end
+
+%% Write
+if isfield(O,'path')
+    file = get(O,'path');
+    [pfad,filename,~] = fileparts(file);
+    file = [pfad '/' filename];
+else, file = get(O,'name');
+end
+
+if ~isempty(file)
+    if exist('strpattern','var')
+        if exist('lam','var')
+            OmicsWrite(O,[file '_p_' name strpattern '.xls'],'logreg p',pv,'FDR',fdr,'lambda',lam);
+        else
+            OmicsWrite(O,[file '_p_' name strpattern '.xls'],'logreg p',pv,'FDR',fdr);
+        end
+    else
+        if exist('lam','var')
+            OmicsWrite(O,[file '_p.xls'],'logreg p',pv,'FDR',fdr,'lambda',lam);
+        else
+            OmicsWrite(O,[file '_p.xls'],'logreg p',pv,'FDR',fdr);
+        end
+    end
+else 
+    if exist('strpattern','var')
+        if exist('lam','var')
+            OmicsWrite(O,['p_' name strpattern '.xls'],'logreg p',pv,'FDR',fdr,'lambda',lam);
+        else
+            OmicsWrite(O,['p_' name strpattern '.xls'],'logreg p',pv,'FDR',fdr);
+        end
+    else
+        if exist('lam','var')
+            OmicsWrite(O,'p.xls','logreg p',pv,'FDR',fdr,'lambda',lam);
+        else
+            OmicsWrite(O,'p.xls','logreg p',pv,'FDR',fdr);
+        end
+    end
+end
+% if isfield(O,'X')
+%     X = get(O,'X');
+%     if exist('strpattern','var')
+%         save(['Data/DesignMatrix' name strpattern '.mat'],'X');
+%     else
+%         save(['Data/DesignMatrix.mat'],'X');
+%     end
+% end
