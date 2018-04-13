@@ -33,6 +33,9 @@ if(nargout>7)
     resout = NaN(size(y));
 end
 
+
+warning('off','stats:regress:RankDefDesignMat');
+
 for i=1:size(y,2)
     if sum(isnan(y(:,i)))>0
 %     [b,bint,r,rint,stats] = regress(y(:,i),X);
@@ -80,4 +83,8 @@ for i=1:size(y,2)
 end
 tstat = b./bSE;
 
-
+[~,l2] = lastwarn;
+warning('on','stats:regress:RankDefDesignMat')
+if strcmp('',l2)
+    warning(l2)
+end
