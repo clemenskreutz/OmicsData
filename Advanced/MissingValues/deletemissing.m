@@ -11,22 +11,28 @@ if ~exist('missing','var')
 end
 
 dat = get(O,'data');
-O = set(O,'data_original',dat,'Save original dataset');
 
-if missing == 0
-    dat = dat(all(dat,2),:);                % delete all zero elements
-elseif strcmp(missing,'nan') || strcmp(missing,'na') || strcmp(missing,'NaN') || strcmp(missing,'Na') || strcmp(missing,'NA')
-    dat = dat(all(~isnan(dat),2),:);        % delete all nan elements
+if missing == 0                          % delete all zero elements
+    [idx,~] = find(~dat);              % find looks for nonzero elements
+elseif strcmp(missing,'mix')
+    [idx,~] = find(isnan(dat));        % delete all zero elements AND all nan elements
+    [idx2,~] = find(~dat);               % in example dataset02 really a mixture exists
+    idx = [idx idx2];
 else
-    dat = dat(all(~isnan(dat),2),:);        % delete all zero elements AND all nan elements
-    dat = dat(all(dat,2),:);                % because often intensitys are zero, meaning not detected
-end                                         % in example data files, no nans, just zero intensities in 30%
-    
-if isempty(dat)
-    warning('Data is not changed. There is no line without a missing and/or zero value.');
+    [idx,~] = find(isnan(dat));       % delete all nan elements
+end                                     
+idx = unique(idx);
+rows = 1:size(dat,1);
+comp = setdiff(rows,idx);
+
+if isempty(idx)
+    warning('Data is not changed. There is no line without a missing and/or zero value.\n');
+elseif isempty(comp)
+    warning('Data is not changed. All lines have a missing and/or zero value.\n')
 else
-    O = set(O,'data',dat,'Delete all lines with missing values');
-    O = set(O,'data_full',dat,'Full dataset without missing values.');
-    fprintf('All lines with missing values deleted.\n')
+    O = set(O,'data_original',dat,'Original dataset.');
+    O = O(comp,:); 
+    warning('All lines with missing values deleted.\n')   
+
 end
 
