@@ -1,4 +1,4 @@
-function O = assignmis(O)
+function O = assignmissing(O)
 
 A = get(O,'data');
 dat = get(O,'data_original');
