@@ -1,8 +1,16 @@
-function O = assignmissing(O)
+function assignmissing
 
-A = get(O,'data');
-dat = get(O,'data_original');
-n_mis = length(find(isnan(dat)))/size(dat,1)/size(dat,2); % how many missing values in dataset ? 
+global O
+
+if ~exist('O','var')
+    error('MissingValues/assignmissing.m requires class O as global variable or input argument.')
+end
+
+A = get(O,'data');                                                      % Dataset without missing values
+O = set(O,'data_full',A,'Complete dataset without missing values');     % Remember full/complete dataset for comparing 'right' solutions with imputed afterwards
+dat = get(O,'data_original');                                           % Original with missing values
+out = get(O,'out');                                                     % Logreg coefficients
+% n_mis = length(find(isnan(dat)))/size(dat,1)/size(dat,2);             % how many missing values in original dataset ? 
 
 %% get coeff for each cell index
 t = out.type(:,1);                            % In the separation of datasets:
@@ -22,16 +30,34 @@ for i=1:size(A,1)
         logit(i,j) = exp(b1*m(i,j)+b2(j)+b3(i));
     end
 end
-p = 1./(1./logit+1);                    % Probability
+p = logit./(1+logit);                    % Probability
 
 %% assign nans
-ps = sort(p(~isnan(p)));
-thr = ps(ceil(length(ps)*(1-n_mis)));   % Find threshold where same percentage than in original dataset are missing
-A(p>thr) = NaN;
+r = rand(size(p,1),size(p,2));
+A(r<=p) = NaN;
 
 %% Plot comparison
 figure
-subplot(1,2,1)
+subplot(2,2,1)
 imagesc(dat)
-subplot(1,2,2)
+title('Original dataset')
+ylabel('Proteins')
+subplot(2,2,2)
 imagesc(A)
+title('Simulated missing values')
+
+subplot(2,2,3)
+imagesc(isnan(dat))
+title('Original dataset')
+xlabel('Experiments')
+ylabel('Proteins')
+subplot(2,2,4)
+imagesc(isnan(A))
+title('Simulated missing values')
+xlabel('Experiments')
+
+%% Set
+O = set(O,'data',A,'Missing values assigned/simulated.');
+O = set(O,'data_mis',A,'data with assigned missing values');
+O = set(O,'mis_pat',isnan(A),'pattern of missing values');
+save AssignedMissing O
