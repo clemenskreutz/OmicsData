@@ -2,33 +2,18 @@
 %  Analyze pattern of missing value
 %  save in O.pattern
 
-function O = plotmissing(O,bins,missing)
+function plotmissing
+
+global O
 
 if ~exist('O','var')
-    error('MissingValues/missingpattern.m requires class O as input argument.')
-end
-if ~exist('missing','var')
-    missing = [];
-end
-if ~exist('bins','var') || isempty(bins)
-    bins = 100;
+    error('MissingValues/missingpattern.m requires class O as global variable or input argument.')
 end
 
-
-
-%% Get data
 dat = get(O,'data');
-if missing == 0                          
-    dat(dat==0) = nan;
-elseif strcmp(missing,'mix')
-    dat(dat==0) = nan;        
-end   
 datn = isnan(dat);
-% figure
-% imagesc(dat)
-% title('Data matrix')
 
-%% Names
+% Names
 names = get(O,'SampleNames');
 if isfield(O,'Proteinnames')
     Pnames = get(O,'Proteinnames');
@@ -38,17 +23,12 @@ elseif isfield(O,'ProteinIDs')
     Pnames = get(O,'ProteinIDs');
 end
 
-%% Counts
+% Counts
 nrow = sum(datn)./size(dat,1);
 ncol = sum(datn,2);
-edges = 0:size(datn,2);
-ncol_rel = histcounts(ncol,edges)/histcounts(ncol,1);
-%ncol(ncol==size(dat,2)) = [];
-%ncol_rel = histcounts(ncol,size(datn,2))/histcounts(ncol,1);
+ncol_rel = histcounts(ncol,0:size(datn,2))/histcounts(ncol,1);
 n = sum(nrow)/size(dat,2);    % Total percentage of missing values
-%men = mean(nanmean(dat));
-mi = min(dat(~isnan(dat)));
-ma = max(dat(~isnan(dat)));
+
 % Sort
 % %[datsort,idx_nrow] = sort(datn);
 % [datsort2,idx_ncol] = sort(datn,2);
