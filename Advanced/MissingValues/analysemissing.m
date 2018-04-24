@@ -1,13 +1,16 @@
 
-function O = analysemissing(O)
+function analysemissing
 
 
-%% Get pattern of missing values
-out = LogisticNanModel(O);
-LogisticNanModelPlot(out);
+%% Plot correlation etc. of missing pattern
+% plotmissing
+
+%% logistic regression
+LogisticNanModel
+LogisticNanModelPlot
 
 %% delete missing values
-O = deletemissing(O);
+deletemissing
 
 %% assign missing values
-O = assignmis(O);
+assignmissing
