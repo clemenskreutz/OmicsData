@@ -7,7 +7,13 @@
 %   these subsets.
 %
 
-function out = LogisticNanModel(O)
+function LogisticNanModel
+
+global O
+
+if ~exist('O','var')
+    error('MissingValues/LogisticNanModel.m requires class O as global variable or input argument.')
+end
 
 isna = isnan(O);
 
@@ -49,14 +55,18 @@ if nfeat>1000
         out.b(1:length(out_tmp.b),i) = out_tmp.b;
         out.se(1:length(out_tmp.b),i) = out_tmp.stats.se;
         out.type(1:length(out_tmp.b),i) = out_tmp.type;
-        if i==1
-            out.out1 = out_tmp;
-        end
+%         if i==1
+%             out.out1 = out_tmp;
+%         end
     end
 else
     out = LogisticNanModel_core(isna, m);
 end
 out.type_names = {'mean intensity dependency','column-dependency','rows-dependency'};
+
+O = set(O,'out',out,'Logistic regression output.');
+save out out
+
 
 function out = LogisticNanModel_core(isna,m)
 row  = ((1:size(isna,1))') * ones(1,size(isna,2));
@@ -110,10 +120,10 @@ y = [y;yreg];
 removed = 0;
 fprintf('size(X,1) = %i\n',size(X,1));
 fprintf('size(X,2) = %i\n',size(X,2));
-con = cond(X'*X);
-if con>1e6
-    warning('Condition number = %d ',con);
-end
+% con = rcond(X'*X);                    % dauert zu lang für große Matrizen
+% if con>1e6
+%     warning('Condition number = %d ',con);
+% end
 
 if removed>0
     fprintf('%i columns removed in X due to non-identifiablity.\n',removed);
