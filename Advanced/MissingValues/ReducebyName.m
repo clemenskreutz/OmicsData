@@ -1,19 +1,35 @@
 
-function [X,dat] = ReducebyName(O,j)
+function O = ReducebyName(O,name,str1)
+
+% e.g. O = ReducebyName(O,'A_','Light')
+% Reduces dataset to SampleNames which include 'A_'
+% Creates/Saves design matrix X
+
+if nargin<3
+    error('OmicsData/ReducebyName.m requires at least 3 input arguments. ReducebyName(O,name,strpattern).')
+end
 
 dat = get(O,'data');
 Names = get(O,'SampleNames');
-Short = {'A','B','C','D','E'};
 
-rem = []; rem2=[];
+reducedata = [];
+rem = [];
 for i=1:length(Names)
-    if strncmp(Names{i},[Short{j} '_Day'],4) || strncmp(Names{i},[Short{j} '_Log'],4)
-        rem = [rem i];
-    elseif strncmp(Names{i},[Short{j} '_Light'],6)
-        rem2 = [rem2 i];
+    if strfind(Names{i},name)
+        reducedata = [reducedata i];
+        if strfind(Names{i},str1)
+            rem = [rem length(reducedata)];
+        end
     end
 end
-remges = [rem rem2];
-dat = dat(remges,:);
-X = [ ones(length(rem),1); zeros(length(rem2),1) ];
-X(:,2) = flipud(X);
+O = O(:,reducedata);
+%O = set(O,'data',dat,['Reduced by name (' name ')']);
+
+%% Design matrix
+% logreg compares 'Day' and 'Light'
+X = zeros(length(reducedata),1);
+X(rem) = 1;
+O = set(O,'X',X,['Reduced by name (' name ')']);
+% logreg for individual groups
+% X = [ ones(length(rem),1); zeros(length(rem2),1) ];
+% X(:,2) = flipud(X);
