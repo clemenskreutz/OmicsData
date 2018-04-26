@@ -1,4 +1,10 @@
-function O = imputation_clear(O)
+function imputation_clear
+
+global O
+
+if ~exist('O','var')
+    error('MissingValues/imputation_clear.m requires class O as global variable.')
+end
 
 Y = [];
 method = {};
