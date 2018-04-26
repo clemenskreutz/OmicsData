@@ -3,7 +3,7 @@ function assignmissing
 global O
 
 if ~exist('O','var')
-    error('MissingValues/assignmissing.m requires class O as global variable or input argument.')
+    error('MissingValues/assignmissing.m requires class O as global variable.')
 end
 
 A = get(O,'data');                                                      % Dataset without missing values
@@ -61,3 +61,8 @@ O = set(O,'data',A,'Missing values assigned/simulated.');
 O = set(O,'data_mis',A,'data with assigned missing values');
 O = set(O,'mis_pat',isnan(A),'pattern of missing values');
 save AssignedMissing O
+
+%% Write xls
+data_full = get(O,'data_full');
+xlswrite('AssignedMissing.xls',A);
+xlswrite('CompleteData.xls',data_full);
