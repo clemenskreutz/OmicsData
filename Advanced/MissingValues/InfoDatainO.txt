@@ -1,0 +1,6 @@
+O.data - always the current working horse
+O.container.data_original - Original dataset which was loaded (in container so it does not change during application)
+O.data.data_full - Deleted all rows with missing values from original dataset.
+O.data.data_mis - Data_full with self-assigned missing values.
+O.data.data_imput - Imputed dataset: size(X,4) = different imputation methods, size(X,3) = imputation with same imputation method (bootstrap)
+
