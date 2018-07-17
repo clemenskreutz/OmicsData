@@ -23,7 +23,7 @@ for i=1:length(subfolders)
 %         error('Folder % is not found as a subfolder below %s.',path_i,Path);
     end
     
-    addpath(path_i);
+    addpath(genpath(path_i));
 
 end
 

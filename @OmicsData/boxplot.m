@@ -29,6 +29,6 @@ set(gca,'YGrid','on','LineWidth',1.5)
 xlabel('sample','FontSize',10);
 ylabel(str2label(get(O,'default_data')),'FontSize',10);
 
-set(gcf,'Position',pos);
+% set(gcf,'Position',pos);
 
 
