@@ -13,8 +13,8 @@ if ~exist('method','var') || isempty(method)
     end
 end
 
-dat = get(O,'data');                            % data with missing pattern
-Y = nan(size(dat,1),size(dat,2),size(dat,3));   % Matrix for imputation
+dat = get(O,'data_mis');                            % data with simulated missing pattern
+Y = nan(size(dat,1),size(dat,2),size(dat,3));       % Matrix for imputation result
 
 % Imputation methods
 switch method
@@ -46,23 +46,23 @@ switch method
         for i=1:size(dat,3)
             Y(:,:,i) = fillmissing(dat(:,:,i),'movmean',5);
         end
-    case 'pcambda'
+    case 'pcada'
         for i=1:size(dat,3)
             Y(:,:,i) = pcambda(dat(:,:,i),3,10,3);
         end
-    case 'pcambia'
+    case 'pcaia'
         for i=1:size(dat,3)
             Y(:,:,i) = pcambia(dat(:,:,i),3,10,1e-6);
         end
-    case 'pcambkdr'
+    case 'pcakdr'
         for i=1:size(dat,3)
             Y(:,:,i) = pcambkdr(dat(:,:,i),3,10,1e-6);
         end
-    case 'pcambnipals'
+    case 'pcanipals'
         for i=1:size(dat,3)
             Y(:,:,i) = pcambnipals(dat(:,:,i),3,10,1e-6);
         end
-    case 'pcambtsr'
+    case 'pcatsr'
         for i=1:size(dat,3)
             Y(:,:,i) = pcambtsr(dat(:,:,i),3,10,1e-6);
         end
@@ -83,8 +83,13 @@ if exist('Y','var') && ~all(all(all(all(isnan(Y)))))
     O = set(O,'data_imput',Y,'Imputed dataset (of simulated missing values)');          
     O = set(O,'data',Y,'Imputed dataset (of simulated missing values)');
     O = set(O,'method_imput',cellstr(method)); 
-
-    save Imputed Y
+    
+    path = get(O,'path');
+    [filepath,name] = fileparts(path);
+    if ~exist([filepath '/' name],'dir')
+        mkdir(filepath, name)
+    end
+    save([filepath '/' name '/Imputed.mat'],'Y');
 else
     warning('MissingValues/impute.m: Data is not imputed!')
 end

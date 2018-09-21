@@ -7,6 +7,7 @@ if ~exist('O','var')
 end
 
 A = get(O,'data');                                                      % Dataset without missing values
+O = set(O,'data_womissing',A);                                          % Save dataset without missing values
 O = set(O,'data_full',A,'Complete dataset without missing values');     % Remember full/complete dataset for comparing 'right' solutions with imputed afterwards
 dat = get(O,'data_original');                                           % Original with missing values
 out = get(O,'out');                                                     % Logreg coefficients
@@ -34,35 +35,119 @@ p = logit./(1+logit);                    % Probability
 
 %% assign nans
 r = rand(size(p,1),size(p,2));
+full=A;
 A(r<=p) = NaN;
 
-%% Plot comparison
+%% Plot matrices original/simulated intensities/nans
+
+figure; set(gcf,'units','points','position',[10,10,600,300])
+subplot(1,3,1)
+nr = size(dat,1);
+nc = size(dat,2);
+pcolor([dat nan(nr,1); nan(1,nc+1)]);
+shading flat;
+set(gca, 'ydir', 'reverse');
+caxis manual
+caxis([0 max(max(dat))]);
+title('Original data')
+ylabel('Proteins')
+xlabel('Experiments')
+
+subplot(1,3,2)
+nr = size(full,1);
+nc = size(full,2);
+pcolor([full nan(nr,1); nan(1,nc+1)]);
+shading flat;
+set(gca, 'ydir', 'reverse');
+caxis manual
+caxis([0 max(max(dat))]);
+title({'Original data','without missing values'})
+c = colorbar('southoutside');
+c.Label.String = 'log10( LFQ Intensity )';
+
+subplot(1,3,3)
+nr = size(A,1);
+nc = size(A,2);
+pcolor([A nan(nr,1); nan(1,nc+1)]);
+shading flat;
+set(gca, 'ydir', 'reverse');
+caxis manual
+caxis([0 max(max(dat))]);
+title('Simulated missing pattern')
+c = colorbar('southoutside');
+c.Label.String = 'log10( LFQ Intensity )';
+
+% Save fig
+path = get(O,'path');
+[filepath,name] = fileparts(path);
+mkdir(filepath, name)
+saveas(gcf,[filepath '/' name '/' name '_datamatrices.png'])
+
+%% Plot missing values per row column, compare original/simulated
+%% Remove rows randomly, so original and assigned matrix size matches
+data_new = dat;
+if size(dat,1)>size(A,1)
+    r = randperm(size(dat,1),size(dat,1)-size(A,1));  % delete randomly, to keep pattern
+    data_new(r,:) = [];
+end
 figure
-subplot(2,2,1)
-imagesc(dat)
-title('Original dataset')
-ylabel('Proteins')
-subplot(2,2,2)
-imagesc(A)
-title('Simulated missing values')
+subplot(2,1,1)
+bar(sum(isnan(data_new),2)/size(data_new,2))
+hold on
+bar(sum(isnan(A),2)/size(data_new,2))
+xlabel('rows')
+ylabel('Missing values [%]')
+h = legend('Original','Simulated','Location','northeast');
+hold off
 
-subplot(2,2,3)
-imagesc(isnan(dat))
-title('Original dataset')
-xlabel('Experiments')
-ylabel('Proteins')
-subplot(2,2,4)
-imagesc(isnan(A))
-title('Simulated missing values')
-xlabel('Experiments')
+subplot(2,1,2)
+bar(sum(isnan(data_new),1)/size(data_new,1))
+hold on
+bar(sum(isnan(A),1)/size(data_new,1))
+xlabel('columns')
+ylabel('Missing values [%]')
+h = legend('Original','Simulated','Location','northeast');
+hold off
 
-%% Set
+% Save fig
+saveas(gcf,[filepath '/' name '/' name '_perrowcol.png'])
+
+
+% figure
+% subplot(2,1,1)
+% histogram(sum(isnan(data_new),2)/size(data_new,2),'BinWidth',0.05,'FaceColor','blue')
+% hold on
+% histogram(sum(isnan(A),2)/size(A,2),'BinWidth',0.05,'FaceColor','yellow')
+% xlabel('Missing values [%]')
+% h = legend('Original','Simulated','Location','northeast')
+% %set(h,'FontSize',8);
+% title('Compare columns')
+% 
+% subplot(2,1,2)
+% histogram(sum(isnan(data_new),1)/size(data_new,1),'BinWidth',0.01,'FaceColor','blue')
+% hold on
+% histogram(sum(isnan(A),1)/size(A,1),'BinWidth',0.01,'FaceColor','yellow')
+% xlabel('Missing values [%]')
+% ylabel('Frequency')
+% title('Compare rows')
+% %legend('Original','Simulated','Location','northoutside','Orientation','horizontal')
+% hold off
+
+% Save fig
+%saveas(gcf,[filepath '/' name '/' name '_perrowcol.png'])
+
+%% Save class O
 O = set(O,'data',A,'Missing values assigned/simulated.');
 O = set(O,'data_mis',A,'data with assigned missing values');
 O = set(O,'mis_pat',isnan(A),'pattern of missing values');
-save AssignedMissing O
+save([filepath '/' name '/AssignedMissing.mat'],'O')
 
 %% Write xls
 data_full = get(O,'data_full');
-xlswrite('AssignedMissing.xls',A);
-xlswrite('CompleteData.xls',data_full);
+
+dlmwrite([filepath '/' name '/AssignedMissing.txt'],A);
+
+%xlswrite([filepath '/' name '/AssignedMissing.xls'],A);
+%xlswrite([filepath '/' name '/CompleteData.xls'],data_full);
+
+
