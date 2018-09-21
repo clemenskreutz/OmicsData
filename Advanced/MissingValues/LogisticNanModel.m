@@ -82,8 +82,8 @@ clev = levels(col);
 m = m-mean(m);  % centered
 m = m./nanstd(m); % standardized
 X = m;%[ones(size(m)),m];
-type = NaN(1,1+length(rlev)+length(clev));
-bnames = cell(1,length(rlev)+length(clev)+1);
+type = NaN(1+length(rlev)+length(clev),1);
+bnames = cell(length(rlev)+length(clev)+1,1);
 bnames{1} = 'mean';
 
 X = [X,zeros(size(X,1),length(rlev)+length(clev))];
