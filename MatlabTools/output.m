@@ -1,37 +1,37 @@
-function output(O,file,name)
+function output(file,matname)
 
-di = pwd;
+global O
 
-if exist('file','var')                      % Go in data folder
-    [filepath,foldername,~] = fileparts(file);
-    cd(filepath)
-    if ~exist(foldername,'dir')
-        mkdir(foldername);
-    end
-    cd(foldername)
+if ~exist('file','var') || isempty(file)
+    file = get(O,'path');
 end
-if ~exist('name','var') || isempty(name)
-    name = 'workspace';
+if ~exist('matname','var') || isempty(matname)
+    matname = 'O';
 end
-save([name '.mat'],'O');                    % Save OmicsData class
-fprintf(['O saved in' name '.mat\n'])
+
+[path,folder,~] = fileparts(file);
+if ~exist([path '/' folder],'dir') % Create folder for data
+    mkdir(path, folder)
+end
+
+save([path '/' folder '/' matname '.mat'],'O');                    % Save OmicsData class
+fprintf(['O saved in ' path '/' folder '/' matname '.mat\n'])
+
 
 % Save open figures
-h =  findobj('type','figure');
-if isempty(h)
-    warning('No figures to save.')
-else
-    if ~exist(['Figures' name],'dir')
-        mkdir(['Figures' name]);
-    end
-    cd(['Figures' name])
-    for f = 1:length(h)
-          fig = figure(f);
-          filename = sprintf('Figure%02d.png', f);
-          print( fig, '-dpng', filename );
-    end
-    fprintf([num2str(length(h)) 'Figures saved in' filename '\n'])
-    cd ..
-end
-
-cd(di)
+% h =  findobj('type','figure');
+% if isempty(h)
+%     warning('No figures to save.')
+% else
+%     if ~exist(['Figures' name],'dir')
+%         mkdir(['Figures' name]);
+%     end
+%     cd(['Figures' name])
+%     for f = 1:length(h)
+%           fig = figure(f);
+%           filename = sprintf('Figure%02d.png', f);
+%           print( fig, '-dpng', filename );
+%     end
+%     fprintf([num2str(length(h)) 'Figures saved in' filename '\n'])
+%     cd ..
+% end
