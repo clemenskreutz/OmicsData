@@ -6,6 +6,7 @@ warning('off','MATLAB:DELETE:FileNotFound');
     delete('evalR.rData');
     
     delete('getRdata.mat');
+    delete('getRdata.mat.tmp');
     delete('getRdata.Rdata');
     delete('getRdata.R');
     delete('getRdata.Rout');
