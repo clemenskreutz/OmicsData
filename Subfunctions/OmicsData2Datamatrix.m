@@ -63,6 +63,10 @@ for i=1:length(snames)
 end
 tmp = [relatedNames{:}];
 uniDatNames = unique({tmp{:}});  % the fieldnames of the struct with data matrices
+idxempty = find(cellfun(@isempty,uniDatNames));
+if ~isempty(idxempty)
+    uniDatNames(idxempty) = [];
+end
 dataMat = struct;
 
 
