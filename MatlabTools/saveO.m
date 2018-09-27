@@ -1,4 +1,5 @@
 function saveO(O,file,matname)
+global O
 
 if ~exist('file','var') || isempty(file)
     file = get(O,'path');
