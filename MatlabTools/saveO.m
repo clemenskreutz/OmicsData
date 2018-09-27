@@ -1,6 +1,4 @@
-function output(file,matname)
-
-global O
+function saveO(O,file,matname)
 
 if ~exist('file','var') || isempty(file)
     file = get(O,'path');
