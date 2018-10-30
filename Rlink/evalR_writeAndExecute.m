@@ -53,8 +53,10 @@ if isfield(OPENR,'cmd')
     fclose(fid);
     
     fprintf('Starting execution now ... ')
-    system(sprintf('%s CMD BATCH --vanilla --slave "%s%sevalR.R"',OPENR.Rexe,pwd,filesep));
-    fprintf(' finished.\n');
-    
+    cmd = sprintf('%s CMD BATCH --vanilla --slave "%s%sevalR.R"',OPENR.Rexe,pwd,filesep);
+    status = system(cmd);
+
+    fprintf(' finished.\n');    
     OPENR = rmfield(OPENR,'cmd');
 end
+

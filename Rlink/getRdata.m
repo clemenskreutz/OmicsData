@@ -41,6 +41,6 @@ else
     if isfield(a,varname)
         val = a.(varname);
     else
-        error('%s does not exist.');
+        error('%s does not exist.',varname);
     end 
 end
