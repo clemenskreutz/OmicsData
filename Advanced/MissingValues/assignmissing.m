@@ -21,9 +21,6 @@ for b=1:boot
     %% Shift intensities of full dataset to N~(0,1)
     m = nanmean(A,2);
     A = (A-nanmean(m))./nanstd(m);
-    %% Get linearized mean matrix
-    Aexp = out.c(1)*exp(out.c(2)*A);
-    
 
     %% get coeff for each cell index
     t = out.type(:,1);                            % In the separation of datasets:
@@ -44,7 +41,7 @@ for b=1:boot
     logit = nan(size(A,1),size(A,2));
     for i=1:size(A,1)
         for j=1:size(A,2)
-            logit(i,j) = exp(b1*Aexp(i,j)+b2(j)+b3(i));
+            logit(i,j) = exp(b1*A(i,j)+b2(j)+b3(i));
         end
     end
     p = logit./(1+logit);                    % Probability
