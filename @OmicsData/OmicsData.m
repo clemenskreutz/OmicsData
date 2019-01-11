@@ -45,6 +45,7 @@ elseif(isnumeric(file_or_data)) % Falls Datenmatrix �bergeben wurde oder Gr�
     data = file_or_data;
     Ostruct = OmicsStruct;
     Ostruct.data.(Ostruct.config.default_data) = data;
+    Ostruct.info.path = name;
     O = OmicsData(Ostruct);
     
 else  % filename for reading
@@ -61,9 +62,17 @@ else  % filename for reading
         fprintf('Load data from %s (if not intended remove/rename this workspace).\n',matfile);
         tmp = load(matfile);
         data = tmp.data;
-        rownames = tmp.rownames;
-        colnames = tmp.colnames;
-        default_data = tmp.default_data;
+        if isfield(tmp,'rownames')
+            rownames = tmp.rownames;
+        end
+        if isfield(tmp,'colnames')
+            colnames = tmp.colnames;
+        end
+        if isfield(tmp,'default_data')
+            default_data = tmp.default_data;
+        else
+            default_data = data;
+        end
     else
         % Read data here
         fprintf('Read data from: %s ...\n',file);
@@ -84,9 +93,13 @@ else  % filename for reading
     O.name  = filename;
     O.info.path = file;
     O.data = data;
-    O.cols = rownames; % rownames are columns
-    O.rows.SampleNames = colnames; % columnnames are rows
-    if exist('default_data','var');
+    if exist('rownames','var')
+        O.rows = rownames; % rownames are columns
+    end
+    if exist('colnames','var')
+        O.cols.SampleNames = colnames; % columnnames are rows
+    end
+    if exist('default_data','var')
         O.config.default_data = default_data;
     end
     

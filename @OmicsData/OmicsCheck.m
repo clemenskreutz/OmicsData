@@ -15,10 +15,10 @@ end
 data = get(O,'data');
 
 if ~isfield(O.cols,O.config.default_col)
-    O.cols.(O.config.default_col) = strcat('Row',num2strArray(1:size(data,1)))'; % row-names is a column
+    O.cols.(O.config.default_col) = strcat('Col',num2strArray(1:size(data,2))); % row-names is a column
 end
 
 if ~isfield(O.rows,O.config.default_row)
-    O.rows.(O.config.default_row) = strcat('Col',num2strArray(1:size(data,2)));  % column-names is a row
+    O.rows.(O.config.default_row) = strcat('Row',num2strArray(1:size(data,1)))';  % column-names is a row
 end
 

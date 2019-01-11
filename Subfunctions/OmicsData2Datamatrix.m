@@ -99,7 +99,7 @@ for i=1:length(fn2)
     data = rmfield(data,fn2{i});
 end
 
-colnames = snames;  % sample names are the column names
+colnames = cellfun(@(c)[pattern c],snames,'uni',false);   % sample names are the column names
 
 fnMat = fieldnames(dataMat);
 default_data = fnMat{~cellfun(@isempty,regexp(fnMat,pattern,'ignorecase'))};

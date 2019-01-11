@@ -22,18 +22,16 @@ figure
 subplot(3,2,1)
 imagesc(isnan(data_original))
 title('Missing pattern of original dataset')
-colorbar
 subplot(3,2,2)
 imagesc(mispat(:,:,1))
-title('New created missing pattern')
-colorbar
+title('Simulated missing pattern')
 subplot(3,2,3)
 imagesc(data_full(:,:,1))
 title('All known data')
 colorbar
 subplot(3,2,4)
 imagesc(data_mis(:,:,1))
-title('Data with assigned missing values')
+title('Data with simulated missing values')
 colorbar
 subplot(3,2,5)
 imagesc(Imp(:,:,1,1))

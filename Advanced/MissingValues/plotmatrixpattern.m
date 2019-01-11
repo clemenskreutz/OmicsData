@@ -1,7 +1,7 @@
-function plotmatrixpattern(dat_mis,dat_imp,T,idx)
+function plotmatrixpattern(dat_mis,dat_imp,T)
 
-figure; set(gcf,'units','points','position',[10,10,1000,130])
-
+%figure; set(gcf,'units','points','position',[10,10,1000,130])
+   figure('units','normalized','outerposition',[0 0 1 1])  
 if length(size(dat_imp))<4
     n = size(dat_imp,3);  % number of imputations
 else
@@ -20,16 +20,16 @@ else %% Plot original values first
     set(gca, 'ydir', 'reverse');
     caxis manual
     caxis([0 max(max(max(dat_imp)))]);
-    %xlabel('Experiments')
     set(gca, 'XTickLabel', [])
     set(gca, 'YTickLabel', [])
-    %ylabel('Proteins')
-    title({'Original values'; 'to compare'})
+    ylabel('Imputed data values','Rotation',90,'FontSize',12)
+    title({'Original values'; 'to compare'},'FontSize',10)
 end
 
 nr = size(dat_imp,1);
 nc = size(dat_imp,2);
-d = T.Variables; % LS values for text in image
+d = T.Variables; % Var values for text in image
+
 for i=1:n
     subplot(1,n+c,i+c)
     if length(size(dat_imp))==3
@@ -41,13 +41,20 @@ for i=1:n
     set(gca, 'ydir', 'reverse');
     caxis manual
     caxis([0 max(max(max(dat_imp)))]);
- %   xlabel('Experiments')
     set(gca, 'XTickLabel', [])
     set(gca, 'YTickLabel', [])
- %   ylabel('Proteins')
-    title({'Imputed with'; [T.Properties.VariableNames{idx(i)+1}]},'Interpreter','none')
-    text(size(dat_imp,2)/3*2-1,size(dat_imp,1)/10,['LS = ' sprintf('%.2f',d(6,idx(i)+1))],'Interpreter','latex')
+    if c==0 && i==1
+        ylabel('Imputed data values','Rotation',90,'FontSize',12)
+    end
+    if contains(T.Properties.VariableNames{i+1},'_')
+        str = strsplit(T.Properties.VariableNames{i+1},'_');
+        title({str{1}; str{2}},'Interpreter','none','FontSize',10)
+    else
+        title(T.Properties.VariableNames{i+1},'Interpreter','none','FontSize',10)
+    end
+    text(size(dat_imp,2)/10,size(dat_imp,1)/20,['$\sqrt{LS}=$' sprintf('%.2f',d(6,i+1))],'Interpreter','latex','FontSize',8)
 end
+
 hp4 = get(subplot(1,n+c,n+c),'Position');
 c = colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.01  hp4(4)]);
 c.Label.String = 'log10(LFQ Intensity)';

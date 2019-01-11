@@ -1,20 +1,24 @@
 function saveO(O,file,matname)
 global O
-
 if ~exist('file','var') || isempty(file)
     file = get(O,'path');
+    if ~exist('file','var') || isempty(file)
+        file = get(O,'name');
+    end
 end
 if ~exist('matname','var') || isempty(matname)
     matname = 'O';
 end
 
+
 [path,folder,~] = fileparts(file);
-if ~exist([path '/' folder],'dir') % Create folder for data
+if ~exist([path '\' folder],'dir') % Create folder for data
     mkdir(path, folder)
 end
 
-save([path '/' folder '/' matname '.mat'],'O');                    % Save OmicsData class
-fprintf(['O saved in ' path '/' folder '/' matname '.mat\n'])
+set(O,'name',matname);
+save([path '\' folder '\' matname '.mat'],'O');                    % Save OmicsData class
+sprintf(['O saved in ' path '\' folder '\' matname '.mat\n'])
 
 
 % Save open figures
