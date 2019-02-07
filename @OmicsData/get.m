@@ -90,9 +90,8 @@ else
                 end
                 if found==0
                     warning('Property ''%s'' not found in the @OmicsData object.',prop);
+                    varargout{1} = [];
                 end
-                
-                
             end
     end
     

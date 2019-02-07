@@ -10,12 +10,28 @@
 
 
 function [dataMat, rownames,colnames,default_data] = OmicsData2Datamatrix(data,rownames,pattern)
-if ~exist('pattern','var') || isempty(pattern)
-    pattern = 'LFQintensity';
-end
 
+
+%% go for pattern search in fieldnames
 fndata = fieldnames(data)';  % should be a row
+
+if ~exist('pattern','var') || isempty(pattern)
+    pattern = 'LFQIntensity';
+end
 ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
+
+if isempty(ind)
+    pattern = 'LFQ Intensity';
+    ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
+end
+if isempty(ind)
+    pattern = 'IntensityLFQ';
+    ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
+end
+if isempty(ind)
+    pattern = 'Intensity';
+    ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
+end
 while isempty(ind)
     warning('Cannot determine sample names be replacing pattern ''%s''. The data might be SILAC. Alter code be introducing a new pattern.',pattern);
     fprintf('Column names in the file:\n');
@@ -26,7 +42,13 @@ while isempty(ind)
     end
     ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
 end
-
+if any(strcmp(fndata,pattern))
+    ind(ind==find(strcmp(fndata,pattern))) = []; %{[fndata{strcmp(fndata,pattern)} '_0']};
+    flag_replace = 0; %1;
+else
+    flag_replace = 0;
+end
+ 
 % Some later operations work only, if the data-type label is not in between
 % samples-specific names. I therefore resort each string in fn_data
 % accordingly
@@ -73,10 +95,16 @@ dataMat = struct;
 % initialized Matrix
 nrows = size(data.(fndata{1}),1);
 for j=1:length(uniDatNames)
+    if ~isletter(uniDatNames{j}(1))
+        uniDatNames{j} = uniDatNames{j}(2:end);
+    end
     dataMat.(str2fieldname(uniDatNames{j})) = NaN(nrows,length(relatedNames));
 end
 
 removeFromData = cell(0);
+if flag_replace==1
+    fndata(strcmp(fndata,[pattern '_0'])) = {pattern};
+end
 for i=1:length(relatedNames)
     % Find data fields which match to samplenames
     [~,ia,ib] = intersect(relatedNames{i},uniDatNames);

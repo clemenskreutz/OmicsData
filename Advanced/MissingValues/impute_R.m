@@ -18,19 +18,29 @@ if ~iscell(method)
 end
 
 % Get data
-data = get(O,'data');            % assigned missing pattern
+data = get(O,'data_mis');            % assigned missing pattern
+if ~exist('data','var') || isempty(data)
+    data = get(O,'data'); 
+end
+ImpM = nan(size(data,1),size(data,2),size(data,3),length(method));
+bootst = get(O,'boot');
+if isempty(bootst)
+    bootst = size(data,3);
+    warning(['"boot" is set to ' num2str(bootst) '.']);
+end
 
-
-for boot=1:size(data,3)
+for boot=1:bootst
     dat = data(:,:,boot);
     % rows with just NaNs?
     if get(O,'deleteemptyrows')
         idxnan = find(all(isnan(dat),2));
         if ~isempty(idxnan) && length(idxnan)<size(dat,1)
-            warning([num2str(length(idxnan)) ' rows containing all NaNs ignored for imputation. If you dont want this, set(O,deleteemptyrows,false).'])
+            warning([num2str(length(idxnan)) ' rows containing all NaNs ignored for imputation. If you dont want this, set(O,"deleteemptyrows",false).'])
             dat(idxnan,:) = [];
            % dat(end+1:end+length(idxnan),:) = nan(length(idxnan),size(dat,2));
         end
+    else
+        warning('Empty rows are not deleted. Consider deleting because empty rows can cause failure in imputation. You can delete empty rows by O = set(O,"deleteemptyrows",true).')
     end
 
     putRdata('dat',dat);
@@ -49,6 +59,49 @@ for boot=1:size(data,3)
         else
             return
         end
+        
+    % missMDA
+    elseif strcmp(lib,'missMDA')
+        %if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
+            for i=1:length(method)
+                evalR('dat <- data.frame(dat)');  
+                if contains(method{i},'MIPCA')
+                    evalR(['imp <- ' method{i} '(dat,nboot=1)']);    
+                    evalR(['ImpR' num2str(i) ' <- imp$res.imputePCA']);
+                else
+                    evalR(['imp <- ' method{i} '(dat)']);  
+                    evalR(['ImpR' num2str(i) ' <- imp$completeObs']);
+                end
+            end
+        
+    % rrcovNA
+    elseif strcmp(lib,'rrcovNA')
+       for i=1:length(method) 
+            if contains(method{i},'SeqRob')
+                evalR(['imp  <- imp' method{i} '(dat)'])
+                evalR(['ImpR' num2str(i) ' <- imp$xseq'])
+            else
+                evalR(['ImpR' num2str(i) ' <- imp' method{i} '(dat)'])
+            end
+            %method{i} = [lib '_' method{i}];
+        end
+        
+    % VIM
+    elseif strcmp(lib,'VIM')
+        %if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
+        evalR('dat<-as.matrix(dat)');
+            for i=1:length(method)
+                evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat)']);
+            end
+
+    % softImpute
+    elseif strcmp(lib,'softImpute')
+        for i=1:length(method)
+            evalR('dat <- as.matrix(dat)') 
+            evalR('f <- softImpute(dat)');
+            evalR(['ImpR' num2str(i) ' <- complete(dat,f)']);
+        end
+            
     % LCMD
     elseif strcmp(lib,'imputeLCMD')
         if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
@@ -129,8 +182,8 @@ for boot=1:size(data,3)
                 evalR(['ImpR' num2str(i) ' <- complete(I' num2str(i) ')']);
                 % if too many missing values, not all are capture due to
                 % multicollinearity, run a second time then
-                evalR(['if (sum(is.na(ImpR' num2str(i) '))>0) { I' num2str(i) ' <- mice(ImpR' num2str(i) ', m=1, method = "' method{i} '")']);
-                evalR(['ImpR' num2str(i) ' <- complete(I' num2str(i) ')}']);
+                %evalR(['if (sum(is.na(ImpR' num2str(i) '))>0) { I' num2str(i) ' <- mice(ImpR' num2str(i) ', m=1, method = "' method{i} '")']);
+                %evalR(['ImpR' num2str(i) ' <- complete(I' num2str(i) ')}']);
                 % if it still has missing values, ignore this method
                 evalR(['if (sum(is.na(ImpR' num2str(i) '))>0) { ImpR' num2str(i) ' <- {} }']);
                 %method{i} = [lib '_' method{i}];
@@ -149,7 +202,7 @@ for boot=1:size(data,3)
                 warning('Amelia is skipped because the matrix is singular. Try another method.')
             else
                 for i=1:length(method)
-                    evalR(['f' num2str(i) ' <- amelia(dat, m=1)']);
+                    evalR(['f' num2str(i) ' <- amelia(dat, m=1, ps2=0)']);
                     evalR(['ImpR' num2str(i) ' <- f' num2str(i) '$imputations[[1]]']);
                     evalR(['if (sum(is.na(ImpR' num2str(i) '))>0) { ImpR' num2str(i) ' <- {} }']);
                 end
@@ -161,8 +214,8 @@ for boot=1:size(data,3)
     % missForest
     elseif strcmp(lib,'missForest')
         for i=1:length(method)
-            evalR(['f' num2str(i) ' <- missForest(dat)']);
-            evalR(['ImpR' num2str(i) ' <- f' num2str(i) '$ximp']);
+            evalR('f <- missForest(dat)');
+            evalR(['ImpR' num2str(i) ' <- f$ximp']);
         end
 
     % Hmisc
@@ -194,7 +247,6 @@ for boot=1:size(data,3)
     end
 
     % order result
-    %ImpM = nan(size(dat,1),size(dat,2),boot,length(method));
     time=zeros(length(method),1);
     for i=1:length(method)
         try        
@@ -202,7 +254,7 @@ for boot=1:size(data,3)
             ImpR = getRdata(['ImpR' num2str(i)]);
             time(i) = cputime-t;
             if ~isempty(ImpR)
-                if strcmp(lib,'Hmisc') || strcmp(lib,'mice')
+                if strcmp(lib,'Hmisc') || strcmp(lib,'mice') || strcmp(lib,'VIM')
                     ImpR = cell2mat(struct2cell(ImpR)');
                 end
                  if size(ImpR,1) < size(data,1)  % aber dann mispat ändern
@@ -219,11 +271,17 @@ for boot=1:size(data,3)
                 warning(['Imputation with ' method{i} ' in package ' lib ' is not saved because it still contained missing values (possibly due to a full row of missing values). Try another method or delete rows without a value.'])
             end 
         catch
-            warning(['Imputation with ' method{i} ' in package ' lib ' was not feasible.'])
-            ImpM = [];
+            warning(['Imputation with ' method{i} ' in package ' lib ' was not feasible.'])  
         end
     end
 end
+% Delte not working methods
+if any(all(all(all(isnan(ImpM)))))
+    idx = squeeze(all(all(all(isnan(ImpM)))));
+    ImpM(:,:,:,idx) = [];
+    method(idx) = [];
+end
+
 
 % Write result
 if exist('ImpM','var') && ~isempty(ImpM)
@@ -231,6 +289,9 @@ if exist('ImpM','var') && ~isempty(ImpM)
         Imp = get(O,'data_imput');
         Imp(:,:,1:size(ImpM,3),(size(Imp,4)+1):(size(Imp,4)+size(ImpM,4))) = ImpM;
         method = [get(O,'method_imput'),method];
+        if size(Imp,4)~=size(method,2)
+            'stop'
+        end
         time = [get(O,'time_imput');time];
     else
         Imp = ImpM;

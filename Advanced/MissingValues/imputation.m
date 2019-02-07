@@ -21,7 +21,7 @@ lib= 'Amelia';
 impute_R(lib,[],[]);
 
 lib= 'Hmisc';
-methods = {'pmm','regression'};
+methods = {'regression'};
 impute_R(lib,methods,path);
 
 lib= 'pcaMethods';
@@ -39,6 +39,21 @@ impute_R(lib,methods,path);
 
 lib= 'missForest';
 impute_R(lib,[],[]);
+
+lib= 'softImpute';
+impute_R(lib,[],[]);
+
+lib= 'VIM';
+methods = {'irmi'}; %'kNN'
+impute_R(lib,methods);
+
+lib= 'rrcovNA';
+methods = {'Norm','Seq','SeqRob'};
+impute_R(lib,methods);
+
+lib= 'missMDA';
+methods = {'MIPCA','imputePCA'};
+impute_R(lib,methods);
 
 imputation_analysis;
 saveO

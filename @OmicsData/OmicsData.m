@@ -76,8 +76,9 @@ else  % filename for reading
     else
         % Read data here
         fprintf('Read data from: %s ...\n',file);
+%         raw = OmicsReadData(file);                   % I separated OmicsReadDataMaxQuant to OmicsReadData and OmicsData2Struct, so I can use OmicsReadData for copying peptides.txt to peptidesImp.txt
+%         [data, rownames] = OmicsData2Struct(raw);    
         [data, rownames] = OmicsReadDataMaxQuant(file);
-        %save tmp
         [data, rownames, colnames,default_data] = OmicsData2Datamatrix(data,rownames);
         save(matfile,'data','rownames','colnames','default_data');
         fprintf('Save data to %s ...\n',matfile);

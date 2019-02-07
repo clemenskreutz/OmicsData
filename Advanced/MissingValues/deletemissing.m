@@ -21,14 +21,15 @@ O = set(O,'data_original',dat,'Original dataset.');
 idx = unique(idx);
 rows = 1:size(dat,1);
 comp = setdiff(rows,idx);
-O = O(comp,:);
+
 
 %% Output message
 if isempty(idx)
     warning('Data is not changed. There is no line without a missing and/or zero value.\n');
 elseif isempty(comp)
     warning('Data is not changed. All lines have a missing and/or zero value.\n')
-else    
+else
+    O = O(comp,:);
     warning('All lines with missing values deleted.\n')   
 end
 

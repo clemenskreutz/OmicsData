@@ -18,9 +18,58 @@ end
 isna = isnan(O);
 
 drin = find(sum(isna,2)<size(isna,2));
-O = O(drin,:);
+% O = O(drin,:);  % not good because it changes globally
 isna = isna(drin,:);
-m = nanmean(O,2)*ones(1,size(isna,2));
+
+% Normalize mean
+m = nanmean(O(drin,:),2);
+m = m-mean(m);  % centered
+m = m./nanstd(m); % standardized
+
+m = m*ones(1,size(isna,2));
+
+% % % Linearize mean
+%  mis = sum(isna,2)./size(isna,2);
+% 
+%  % f=fit(m,mis,'exp2'); %  exponential fit of mean vs missing values
+% % coef = coeffvalues(f);
+% % mexp = coef(1)*exp(coef(2)*m)+coef(3)*exp(coef(4)*m);
+% % coef = glmfit(m,mis,'binomial','link','logit','constant','off');
+% % f = glmval(coef,m,'probit','constant','off');
+% % mexp = m*(-coef);
+% 
+% coef = glmfit(m,mis,'binomial','link','logit');
+% ue = exp(coef(1)+coef(2).*m);
+% mexp = ue./(1+ue);
+% f = glmval(coef,m,'logit');
+% lc = polyfit(mexp,mis,1);
+% lf = polyval(lc,mexp);
+% 
+% figure
+% subplot(1,2,1)
+% plot(m,mis,'.')
+% hold on; 
+% plot(m,f,'.')
+% xlabel('mean protein intensity m_p')
+% ylabel('Missing values [%]')
+% ylim([0 1])
+% legend('data','logistic fit')
+% 
+% subplot(1,2,2)
+% plot(mexp,mis,'.') % linearized data
+% hold on;
+% plot(mexp,lf) % linear fit
+% xlabel('$\frac{e^{b* m_p}}{1+e^{b* m_p}}$','Interpreter','latex')
+% ylabel('Missing values [%]')
+% ylim([0 1])
+% legend('linearized data','linear fit')
+% 
+% path = get(O,'path');
+% [filepath,name] = fileparts(path);
+% print([filepath '/' name '/' name '_IntensityShift'],'-dpng','-r100');
+
+% 
+% m = mexp*ones(1,size(isna,2)); % mean 
 
 nfeat = size(isna,1);
 
@@ -35,10 +84,11 @@ if nfeat>1000
         fprintf('%i out of %i ...\n',i,nboot);
 
         current = indlast + (1:nperboot);
-        current(current>length(indrand)) = [];
+        current(current>nfeat) = [];
         indlast = indlast+length(current);
         
         ind = indrand(current);
+        %ind = current;
         
         tic; 
         out_tmp = LogisticNanModel_core(isna(ind,:), m(ind,:));
@@ -50,7 +100,7 @@ if nfeat>1000
             out.type = NaN(size(out_tmp.b,1),nboot);
             out.current = cell(0);
         end
-        out.current{i} = current;
+        out.current{i} = ind;
         out.timing(i) = toc;
         out.b(1:length(out_tmp.b),i) = out_tmp.b;
         out.se(1:length(out_tmp.b),i) = out_tmp.stats.se;
@@ -63,9 +113,11 @@ else
     out = LogisticNanModel_core(isna, m);
 end
 out.type_names = {'mean intensity dependency','column-dependency','rows-dependency'};
-
+if exist('coef','var')
+    out.c = coef;
+end
 O = set(O,'out',out,'Logistic regression output.');
-save out out
+%save out out
 
 
 function out = LogisticNanModel_core(isna,m)
@@ -79,8 +131,6 @@ y = isna(:);
 
 rlev = levels(row);
 clev = levels(col);
-m = m-mean(m);  % centered
-m = m./nanstd(m); % standardized
 X = m;%[ones(size(m)),m];
 type = NaN(1+length(rlev)+length(clev),1);
 bnames = cell(length(rlev)+length(clev)+1,1);
@@ -112,7 +162,6 @@ for i=1:size(X,2)
     yreg(ind+1) = 1;
     ind = ind+2;
 end
-
 X = [X;xreg];
 y = [y;yreg];
 
@@ -136,5 +185,6 @@ out.dev = dev;
 out.stats = stats;
 out.y = y;
 out.bnames = bnames;
+
 out.type = type;
 
