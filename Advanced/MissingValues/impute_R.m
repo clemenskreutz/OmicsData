@@ -5,7 +5,7 @@ global OPENR
     
 % Start R
 openR;
-OPENR.librariesext{end+1} = lib;
+OPENR.librariesext = lib;
 
 % put method in right format
 if ~exist('method','var') || isempty(method)
