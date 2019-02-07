@@ -32,9 +32,8 @@ lib= 'imputeLCMD';
 methods = {'MinDet','KNN','MinProb','QRILC'};
 impute_R(lib,methods,path);
 
-lib= 'jeffwong';
-path = 'C://Users/Janine/Documents/Repositories/imputation';
-methods = {'SVTApproxImpute','SVDImpute','kNNImpute','lmImpute'};  %,'SVTImpute'
+lib= 'imputation';
+methods = {'SVTImpute','SVDImpute','kNNImpute'};  %,'SVTApproxImpute','lmImpute'
 impute_R(lib,methods,path);
 
 lib= 'missForest';

@@ -1,13 +1,11 @@
-function impute_R(lib,method,path)
+function impute_R(lib,method)
 
 global O
 global OPENR
     
 % Start R
 openR;
-if ~strcmp(lib,'jeffwong')
-    OPENR.libraries{end+1} = lib;
-end
+OPENR.libraries{end+1} = lib;
 
 % put method in right format
 if ~exist('method','var') || isempty(method)
@@ -54,7 +52,6 @@ for boot=1:bootst
                 evalR(['if (sum(rowSums(is.na(dat))>=ncol(dat))>0) { ImpR' num2str(i) ' <- {} } else {'])
                 evalR(['I' num2str(i) ' <- pca(dat,method="' method{i} '")'])
                 evalR(['ImpR' num2str(i) ' <- completeObs(I' num2str(i) ') }'])
-                %method{i} = [lib '_' method{i}];
             end
         else
             return
@@ -62,7 +59,6 @@ for boot=1:bootst
         
     % missMDA
     elseif strcmp(lib,'missMDA')
-        %if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
             for i=1:length(method)
                 evalR('dat <- data.frame(dat)');  
                 if ~isempty(strfind(method{i},'MIPCA'))
@@ -83,12 +79,10 @@ for boot=1:bootst
             else
                 evalR(['ImpR' num2str(i) ' <- imp' method{i} '(dat)'])
             end
-            %method{i} = [lib '_' method{i}];
         end
         
     % VIM
     elseif strcmp(lib,'VIM')
-        %if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
         evalR('dat<-as.matrix(dat)');
             for i=1:length(method)
                 evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat)']);
@@ -116,58 +110,27 @@ for boot=1:bootst
             else
                 evalR(['ImpR' num2str(i) ' <- impute.' method{i} '(dat)'])
             end
-            %method{i} = [lib '_' method{i}];
         end
         else
             return
         end
     % jeffwong
-    elseif strcmp(lib,'jeffwong')
-        if ~exist(path,'file')
-            path = strrep(path,'/','\');
-            path = strrep(path,'\\','\');
-            if ~exist(path,'file') || isempty(path)
-                fprintf('Select directory for R implementation of jeffwong')
-                path = uigetdir;
-            end
-        end
-        if ~exist(path,'file') || isempty(path)
-            warning('Jeffwong implementation ignored because directory of source files is unknown. Did you download it? Then specify in gui.')
-        else
+    elseif strcmp(lib,'imputation')
             for i=1:length(method)
-                if i==1
-                    path = strrep(path,'\','/');
-                    evalR(['file.sources = list.files(path="' path '/R/", pattern="*.R")'])
-                    evalR(['sapply(paste("' path '/R/",file.sources,sep=""),source,.GlobalEnv)'])               
-                end
-                if ~isempty(strfind(method{i},'gbm'))
-                    evalR('library("gbm")')
-                    evalR('datgbm <- data_putRdata$dat')
-                    evalR('datgbm[is.na(datgbm)] <- NA')
-                    evalR(['ImpR' num2str(i) ' <- ' method{i} '(datgbm)']);
+                if ~isempty(strfind(method{i},'SVD'))
+                    evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat, k=3)$x']);
+                elseif ~isempty(strfind(method{i},'kNN'))
+                    evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat, k=3)$x']);
+                elseif ~isempty(strfind(method{i},'SVT'))
+                    evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat,lambda=3)$x']);
                 else
-                    if ~isempty(strfind(method{i},'lm'))
-                        evalR('library("locfit")')
-                        evalR('dat <- data_putRdata$dat')
-                    end
-                    if ~isempty(strfind(method{i},'SVD'))
-                        evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat, k=3)$x']);
-                    elseif ~isempty(strfind(method{i},'kNN'))
-                        evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat, k=3)$x']);
-                    elseif ~isempty(strfind(method{i},'SVT'))
-                        evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat,lambda=3)$x']);
-                    else
-                        evalR(['I' num2str(i) ' <- ' method{i} '(dat)']);
-                        evalR(['ImpR' num2str(i) ' <- I' num2str(i) '$x']);
-                    end    
-                end
-                %method{i} = [lib '_' method{i}];
+                    evalR(['I' num2str(i) ' <- ' method{i} '(dat)']);
+                    evalR(['ImpR' num2str(i) ' <- I' num2str(i) '$x']);
+                end    
             end
-        end
 
     % MICE
     elseif strcmp(lib,'mice')
-        %if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
             for i=1:length(method)
                 if strcmp(method,'ri')
                     da = dat;
@@ -188,9 +151,6 @@ for boot=1:bootst
                 evalR(['if (sum(is.na(ImpR' num2str(i) '))>0) { ImpR' num2str(i) ' <- {} }']);
                 %method{i} = [lib '_' method{i}];
             end
-        %else
-        %    return
-        %end
 
     % Amelia (Expectation maximization with bootstrap)
     elseif strcmp(lib,'Amelia')
@@ -229,7 +189,6 @@ for boot=1:bootst
                 end
                 evalR(['f' num2str(i) ' <- aregImpute(' formula ', data=dat, n.impute=1, type="' method{i} '")']);
                 evalR(['ImpR' num2str(i) ' <- impute.transcan(f' num2str(i) ', imputation=TRUE, data=dat, list.out = TRUE)']);
-                %method{i} = [lib '_' method{i}];
             end
         else
             return
@@ -239,7 +198,6 @@ for boot=1:bootst
     elseif strcmp(lib,'DMwR')
         for i=1:length(method)
             evalR(['ImpR' num2str(i) ' <- knnImputation(dat)']);
-            %method{i} = [lib '_' method{i}];
         end
 
     else
