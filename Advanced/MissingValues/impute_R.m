@@ -65,7 +65,7 @@ for boot=1:bootst
         %if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
             for i=1:length(method)
                 evalR('dat <- data.frame(dat)');  
-                if contains(method{i},'MIPCA')
+                if ~isempty(strfind(method{i},'MIPCA'))
                     evalR(['imp <- ' method{i} '(dat,nboot=1)']);    
                     evalR(['ImpR' num2str(i) ' <- imp$res.imputePCA']);
                 else
@@ -77,7 +77,7 @@ for boot=1:bootst
     % rrcovNA
     elseif strcmp(lib,'rrcovNA')
        for i=1:length(method) 
-            if contains(method{i},'SeqRob')
+            if ~isempty(strfind(method{i},'SeqRob'))
                 evalR(['imp  <- imp' method{i} '(dat)'])
                 evalR(['ImpR' num2str(i) ' <- imp$xseq'])
             else
@@ -107,11 +107,11 @@ for boot=1:bootst
         if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
         evalR('dat <- data.matrix(dat)') 
         for i=1:length(method) 
-            if contains(method{i},'KNN')
+            if ~isempty(strfind(method{i},'KNN'))
                 evalR(['ImpR' num2str(i) ' <- impute.wrapper.KNN(dat,K=10)'])
-            elseif contains(method{i},'MLE')
+            elseif ~isempty(strfind(method{i},'MLE'))
                 evalR(['ImpR' num2str(i) ' <- impute.wrapper.MLE(dat)'])
-            elseif contains(method{i},'QRILC')
+            elseif ~isempty(strfind(method{i},'QRILC'))
                 evalR(['ImpR' num2str(i) ' <- impute.QRILC(dat)[[1]]'])
             else
                 evalR(['ImpR' num2str(i) ' <- impute.' method{i} '(dat)'])
@@ -140,21 +140,21 @@ for boot=1:bootst
                     evalR(['file.sources = list.files(path="' path '/R/", pattern="*.R")'])
                     evalR(['sapply(paste("' path '/R/",file.sources,sep=""),source,.GlobalEnv)'])               
                 end
-                if contains(method{i},'gbm')
+                if ~isempty(strfind(method{i},'gbm'))
                     evalR('library("gbm")')
                     evalR('datgbm <- data_putRdata$dat')
                     evalR('datgbm[is.na(datgbm)] <- NA')
                     evalR(['ImpR' num2str(i) ' <- ' method{i} '(datgbm)']);
                 else
-                    if contains(method{i},'lm')
+                    if ~isempty(strfind(method{i},'lm'))
                         evalR('library("locfit")')
                         evalR('dat <- data_putRdata$dat')
                     end
-                    if contains(method{i},'SVD')
+                    if ~isempty(strfind(method{i},'SVD'))
                         evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat, k=3)$x']);
-                    elseif contains(method{i},'kNN')
+                    elseif ~isempty(strfind(method{i},'kNN'))
                         evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat, k=3)$x']);
-                    elseif contains(method{i},'SVT')
+                    elseif ~isempty(strfind(method{i},'SVT'))
                         evalR(['ImpR' num2str(i) ' <- ' method{i} '(dat,lambda=3)$x']);
                     else
                         evalR(['I' num2str(i) ' <- ' method{i} '(dat)']);
