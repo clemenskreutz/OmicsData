@@ -15,7 +15,7 @@ methods = {'midastouch','rf'};
 impute_R(lib,methods)
 
 lib= 'Amelia';
-impute_R(lib,[],[]);
+impute_R(lib,[]);
 
 lib= 'Hmisc';
 methods = {'regression'};
