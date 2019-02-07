@@ -7,7 +7,7 @@
 %   The reason for buffering is that it is faster to execute serveral R
 %   commands together.
 
-function evalR_writeAndExecute
+function evalR_writeAndExecute_knecht
 global OPENR
 
 if isfield(OPENR,'cmd')
@@ -16,8 +16,8 @@ if isfield(OPENR,'cmd')
     for i=1:length(OPENR.libraries)
         fprintf(fid,'require(%s)\n',OPENR.libraries{i});
     end
-     for i=1:length(OPENR.librariesext)
-        fprintf(fid,'require(%s)\n',OPENR.librariesext{i});
+    for i=1:length(OPENR.librariesext)
+        fprintf(fid,'require(%s,lib.loc = "/home/je1037/Imputation/matlab/Rlib")\n',OPENR.librariesext{i});
     end
     fprintf(fid,'rm(list=ls())\n');
     fprintf(fid,'\n');
