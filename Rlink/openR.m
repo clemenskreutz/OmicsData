@@ -16,8 +16,8 @@ if exist('C:\Program Files\R\R-3.4.3\bin\x64\R.exe','file')
     OPENR.Rexe = '"C:\Program Files\R\R-3.4.3\bin\x64\R.exe"'; % evaluate R command R.home() to find this file
 elseif exist('c:\Program Files\R\R-3.3.1\bin\i386\R.exe','file')
     OPENR.Rexe = '"C:\Program Files\R\R-3.3.1\bin\i386\R.exe"'; 
-elseif exist('/usr/local/lib/R','dir')
-    OPENR.Rexe = '"/usr/local/lib/R/exec/R.exe"'; %"/usr/local/lib/R/Rscript.exe
+elseif exist('/usr/local/lib/R/bin/R.exe','dir')
+    OPENR.Rexe = '"/usr/local/lib/R/bin/R.exe"'; %"/usr/local/lib/R/Rscript.exe
 else
     error('OmicsData\Rlink\openR.m: Change your home directory of R here. You can find the directory by R.home() in R.')
 end
