@@ -11,3 +11,8 @@
 Data/PXD*
 Data/dynamicrangebenchmark
 Data/proteomebenchmark
+
+Data/Peikert*
+
+Data/*
+ToDo/*
