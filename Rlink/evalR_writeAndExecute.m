@@ -16,9 +16,6 @@ if isfield(OPENR,'cmd')
     for i=1:length(OPENR.libraries)
         fprintf(fid,'require(%s)\n',OPENR.libraries{i});
     end
-     for i=1:length(OPENR.librariesext)
-        fprintf(fid,'require(%s)\n',OPENR.librariesext{i});
-    end
     fprintf(fid,'rm(list=ls())\n');
     fprintf(fid,'\n');
     
