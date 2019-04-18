@@ -20,7 +20,7 @@ anastr = sprintf('@OmicsData horzcat: [%ix%i',get(O,'nf'),get(O,'ns'));
 
 c1 = O.cols.(O.config.default_col);
 if length(unique(c1)) < length(c1)
-    error('Default-column of O is not unique and cannot be used for horzcat. Generate a unique default-col first.')
+    error('Default-rowumn of O is not unique and cannot be used for horzcat. Generate a unique default-row first.')
 end
 
 doforce = 0;
@@ -57,12 +57,12 @@ for v=1:length(Os)
     if doforce==0
         c2 = O2.cols.(O2.config.default_col);
         if length(unique(c2)) < length(c2)
-            error('Default-columns of O%i is not unique and cannot be used for horzcat. Generate a unique default-column first.',v)
+            error('Default-rowumns of O%i is not unique and cannot be used for horzcat. Generate a unique default-rowumn first.',v)
         end
         
         [inb,locb] = ismember(c1,c2);
         if sum(inb==0)>0
-            error('Some default-colss does not occur in all objects.')
+            error('Some default-rowss does not occur in all objects.')
         else
             % reorder 2nd object
             S.type = '()';
@@ -73,6 +73,7 @@ for v=1:length(Os)
     end
     
     for i=1:length(fn)
+        fn{i}
         O.data.(fn{i}) = horzcat(O.data.(fn{i}),O2.data.(fn{i}));
     end
     

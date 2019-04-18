@@ -28,14 +28,14 @@ switch S.type
             end
             
             Stmp = S;
-            Stmp.subs{2} = 1;
+            Stmp.subs{1} = 1;
             fn = fieldnames(O.rows);
             for i=1:length(fn)
                 O.rows.(fn{i}) = subsref(O.rows.(fn{i}),Stmp);
             end
             
             Stmp = S;
-            Stmp.subs{1} = 1;
+            Stmp.subs{2} = 1;
             fn = fieldnames(O.cols);
             for i=1:length(fn)
                 O.cols.(fn{i}) = subsref(O.cols.(fn{i}),Stmp);

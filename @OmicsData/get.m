@@ -46,17 +46,17 @@ else
             
         case {'samplenames','snames','hy'}  % hy is accepted because of historic reasons
             try
-                varargout{1} = O.cols.(O.config.default_col);
+                varargout{1} = O.rows.(O.config.default_row);
             catch ERR
-                warning('Default col specified by O.config.default_col does not exist in O.cols. Did you change this property?')
+                warning('Default row specified by O.config.default_row does not exist in O.rows. Did you change this property?')
                 rethrow(ERR)
             end
             
         case {'featurenames','fnames'}
             try
-                varargout{1} = O.rows.(O.config.default_row);
+                varargout{1} = O.cols.(O.config.default_col);
             catch ERR
-                warning('Default toe specified by O.config.default_row does not exist in O.rows. Did you change this property?')
+                warning('Default toe specified by O.config.default_col does not exist in O.cols. Did you change this property?')
                 rethrow(ERR)
             end
             

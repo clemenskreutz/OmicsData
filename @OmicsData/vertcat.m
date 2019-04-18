@@ -3,9 +3,9 @@
 %   O = vertcat(O,O2,O3, ...)
 %   O = vertcat(O,O2,O3, ..., 'force')
 %
-%   Vertical catenation, i.e. lumping row-wise.
+%   Vertical catenation, i.e. lumping col-wise.
 %   The order of the columns is adjusted and is compared using
-%   OmicsData.config.default_row (e.g. by comparing sample names)
+%   OmicsData.config.default_col (e.g. by comparing sample names)
 % 
 %   The order of the first argument is maintained.
 %

@@ -14,6 +14,9 @@
 %                   4) Empty: an empty object is initialized
 %   
 %   name    Name of the project
+% 
+%   forceRead   forces reading the data file (instead of the *.mat
+%   workspace)
 %
 %
 %   Examples:
@@ -22,9 +25,12 @@
 % file = 'proteinGroups.txt';
 % O = OmicsData(file)
 
-function O = OmicsData(file_or_data, name)
+function O = OmicsData(file_or_data, name, forceRead)
 if ~exist('name','var') || isempty(name)
     name = '';
+end
+if ~exist('forceRead','var') || isempty(forceRead)
+    forceRead = false;
 end
 
 if(~exist('file_or_data','var') || isempty(file_or_data))  % load default data set
@@ -58,8 +64,8 @@ else  % filename for reading
     end
     matfile = [pfad,filesep,filename,'.mat'];
     
-    if exist(matfile,'file')
-        fprintf('Load data from %s (if not intended remove/rename this workspace).\n',matfile);
+    if exist(matfile,'file')  && ~forceRead
+        fprintf('Load data from %s (if not intended remove/rename this workspace or set forceRead=1).\n',matfile);
         tmp = load(matfile);
         data = tmp.data;
         if isfield(tmp,'rownames')
@@ -91,14 +97,15 @@ else  % filename for reading
     
     
     O = OmicsStruct;
-    O.name  = filename;
+    O.name  = name; % this is the user-defined name of the data object, not necessarily the filename
     O.info.path = file;
+    O.info.filename = filename;
     O.data = data;
     if exist('rownames','var')
-        O.rows = rownames; % rownames are columns
+        O.cols = rownames; % rownames are a column
     end
     if exist('colnames','var')
-        O.cols.SampleNames = colnames; % columnnames are rows
+        O.rows.SampleNames = colnames; % columnnames are a row
     end
     if exist('default_data','var')
         O.config.default_data = default_data;
