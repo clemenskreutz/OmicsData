@@ -7,7 +7,7 @@
 %
 %   Robust quantile-normalization of the samples.
 
-function O = OmicsDataRobustQuantilenorm(O,meanfun)
+function O = OmicsRobustQuantilenorm(O,meanfun)
 if ~exist('meanfun','var') || isempty(meanfun)
     meanfun = @nanmedian;
 end
@@ -21,7 +21,6 @@ end
 
 datnorm = dat;
 rowmedians = feval(meanfun,dat(:,ind),2)*ones(1,size(dat(:,ind),2));
-
 
 datnorm(:,ind) = quantilenorm(dat(:,ind)-rowmedians) + rowmedians;
 

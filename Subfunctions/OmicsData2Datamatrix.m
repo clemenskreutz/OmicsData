@@ -42,9 +42,12 @@ while isempty(ind)
     end
     ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
 end
-if any(strcmp(fndata,pattern))
+if any(strcmp(fndata,pattern)) % remove column Intensity because it has other meaning in MaxQuant
     ind(ind==find(strcmp(fndata,pattern))) = []; %{[fndata{strcmp(fndata,pattern)} '_0']};
     flag_replace = 0; %1;
+    if isempty(ind)
+        warning('ind is empty')
+    end
 else
     flag_replace = 0;
 end

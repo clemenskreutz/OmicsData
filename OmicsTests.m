@@ -35,48 +35,22 @@ cmds = {...
 
 
 %% Try reading different real data sets: (if available)
-dataPfad = [pfad,filesep,'Data',filesep,'dynamicrangebenchmark'];
-if exist(dataPfad,'dir')
-    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''dynamicrangebenchmark'',filesep,''proteinGroups.txt'']);'}];
+dataPfad = [pfad,filesep,'TestData'];
+if ~exist(dataPfad,'dir')
+    error('Folder TestData not found.');
 else
-    fprintf('%s does not exist, skip this test.\n',dataPfad);
+    delete(sprintf('%s%s*.mat',dataPfad,filesep));    
 end
 
-dataPfad = [pfad,filesep,'Data',filesep,'proteomebenchmark'];
-if exist(dataPfad,'dir')
-    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''proteomebenchmark'',filesep,''proteinGroups.txt'']);'}];
-else
-    fprintf('%s does not exist, skip this test.\n',dataPfad);
-end
+d = dir(dataPfad);
+files = {d.name};
+files = files(strmatch('Test',files));
 
-dataPfad = [pfad,filesep,'Data',filesep,'PXD003813',filesep,'MaxQuant_Output1'];
-if exist(dataPfad,'dir')
-    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD003813'',filesep,''MaxQuant_Output1'',filesep,''proteinGroups_1.txt'']);'}];
-else
-    fprintf('%s does not exist, skip this test.\n',dataPfad);
+for i=1:length(files)
+    cmd_tmp = sprintf('O = OmicsData(''%s'','''',1);',[dataPfad,filesep,files{i}]);
+    disp(cmd_tmp);
+    cmds = [cmds, {cmd_tmp}];
 end
-
-dataPfad = [pfad,filesep,'Data',filesep,'PXD003813',filesep,'MaxQuant_Output1'];
-if exist(dataPfad,'dir')
-    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD003813'',filesep,''MaxQuant_Output1'',filesep,''proteinGroups_1.xls'']);'}];
-else
-    fprintf('%s does not exist, skip this test.\n',dataPfad);
-end
-
-dataPfad = [pfad,filesep,'Data',filesep,'PXD004816',filesep,'MaxQuant_Output'];
-if exist(dataPfad,'dir')
-    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD004816'',filesep,''MaxQuant_Output'',filesep,''proteinGroups.txt'']);'}];
-else
-    fprintf('%s does not exist, skip this test.\n',dataPfad);
-end
-
-dataPfad = [pfad,filesep,'Data',filesep,'PXD000485',filesep,'MaxQuantOutputValidationDataset'];
-if exist(dataPfad,'dir')
-    cmds = [cmds, {'O = OmicsData([pfad,filesep,''Data'',filesep,''PXD000485'',filesep,''MaxQuantOutputValidationDataset'',filesep,''proteinGroups.txt'']);'}];
-else
-    fprintf('%s does not exist, skip this test.\n',dataPfad);
-end
-
 
 
 %% Additional commands with real data (if available)

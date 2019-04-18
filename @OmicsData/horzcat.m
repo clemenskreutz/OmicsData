@@ -73,7 +73,6 @@ for v=1:length(Os)
     end
     
     for i=1:length(fn)
-        fn{i}
         O.data.(fn{i}) = horzcat(O.data.(fn{i}),O2.data.(fn{i}));
     end
     

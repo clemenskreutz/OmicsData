@@ -24,7 +24,7 @@ end
 
 boxplot(dat,'labels',snames,'labelorientation','inline');
 
-set(gca,'YGrid','on','LineWidth',1.5)
+set(gca,'YGrid','on','LineWidth',1.5);
 
 xlabel('sample','FontSize',10);
 ylabel(str2label(get(O,'default_data')),'FontSize',10);

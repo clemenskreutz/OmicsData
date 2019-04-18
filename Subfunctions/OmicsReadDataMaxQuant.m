@@ -25,7 +25,8 @@ switch ext
             sheet = sheets{1};
         end
         [~,~,raw] = xlsread(file,sheet);  % NaN are returned as numeric
-                
+        
+        raw = xlsProcessRaw(raw);
     case '.txt'
         fprintf('Reading txt file %s ... \n',file)
         warning('off','MATLAB:table:ModifiedVarnames');
@@ -54,7 +55,7 @@ switch ext
 end
 
 % at this point, the variable "raw" is a cell matrix containing numbers or
-% text.
+% text.b
 
 % Now checkt, which columns contain only numbers:
 isnum = cellfun(@isnumeric,raw);
@@ -65,21 +66,23 @@ fprintf('Check into column of numbers ')
 for i=1:size(raw,2)
     fprintf('.')
     try
-        cell2mat(raw(isdat1,i));  % check whether conversion to numbers is feasible
-        isdat2(i) = true;
+        tmp = cell2mat(raw(isdat1,i));  % check whether conversion to numbers is feasible
+        if isnumeric(tmp)
+            isdat2(i) = true;
+        end
     end
 end
-fprintf('\n')
+
 % dat = cell2mat(raw(isdat1,isdat2));
-% labels1 = raw(isdat1,isdat2);       % rownames
+% labels1 = raw(isdat1,istxt2);       % rownames
 % labels2 = raw(1,isdat2);            % colnames
-% txtlabels = raw(1,isdat2);
+% txtlabels = raw(1,istxt2);
 % Changed above lines, because cell2mat does not like mixture of types
 % (Janine)
 % Clemens version:
-dat = cell2mat(raw(isdat1,~istxt2));
+dat = cell2mat(raw(isdat1,isdat2));
 labels1 = raw(isdat1,istxt2);       % rownames
-labels2 = raw(1,~istxt2);            % colnames
+labels2 = raw(1,isdat2);            % colnames
 txtlabels = raw(1,istxt2);
 
 

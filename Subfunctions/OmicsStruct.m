@@ -11,8 +11,8 @@ O.analyses = cell(0);       % documentation of analysis steps
 O.cols = struct;            % annotation as columns (info for features)
 
 O.config = OmicsConfigStruct;       % Configuration parameters
-O.config.default_row = 'ProteinIDs';          % default field of annotation in the row format
-O.config.default_col = 'SampleNames';% default field of annotation in the column format
+O.config.default_col = 'ProteinIDs';        % default field of annotation in the column format
+O.config.default_row = 'SampleNames';       % default field of annotation in the row format
 O.config.default_data = 'LFQIntensity';     % default field of annotation in the matrix format
 
 O.container = struct;       % for additional info
