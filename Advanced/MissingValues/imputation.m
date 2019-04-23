@@ -1,8 +1,11 @@
 function imputation(clean)
+if ~exist('clean','var') || isempty(clean)
+    clean = true;
+end
 
 global O
 
-if ~exist('clean','var') || clean
+if clean
     imputation_clear  % clear previous imputations in O, optional
 end
 

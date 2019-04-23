@@ -12,13 +12,13 @@ end
 
 
 [path,folder,~] = fileparts(file);
-if ~exist([path '\' folder],'dir') % Create folder for data
+if ~exist([path filesep folder],'dir') % Create folder for data
     mkdir(path, folder)
 end
 
 set(O,'name',matname);
-save([path '\' folder '\' matname '.mat'],'O');                    % Save OmicsData class
-sprintf(['O saved in ' path '\' folder '\' matname '.mat\n'])
+save([path filesep folder filesep matname '.mat'],'O');                    % Save OmicsData class
+fprintf('%s%s%s%s%s%s%s\n','O saved in ', path, filesep, folder, filesep, matname, '.mat')
 
 
 % Save open figures
