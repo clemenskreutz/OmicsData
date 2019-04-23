@@ -6,13 +6,15 @@
 % 
 % Example
 %   openR
-%   global openR
-%   openR.Rexe = '\user\bin\R\R.exe'
+%   global OPENR
+%   OPENR.Rexe = '\user\bin\R\R.exe'
 
 function openR
 global OPENR
 OPENR = struct;
-if exist('C:\Program Files\R\R-3.5.1\bin\x64\R.exe','file')
+if exist('C:\Program Files\R\R-3.5.3\bin\x64\R.exe','file')
+    OPENR.Rexe = '"C:\Program Files\R\R-3.5.3\bin\x64\R.exe"'; % evaluate R command R.home() to find this file
+elseif exist('C:\Program Files\R\R-3.5.1\bin\x64\R.exe','file')
     OPENR.Rexe = '"C:\Program Files\R\R-3.5.1\bin\x64\R.exe"'; % evaluate R command R.home() to find this file
 elseif exist('C:\Program Files\R\R-3.5.1\bin\i386\R.exe','file')
     OPENR.Rexe = '"C:\Program Files\R\R-3.5.1\bin\i386\R.exe"'; % evaluate R command R.home() to find this file
