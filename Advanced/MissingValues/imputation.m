@@ -1,17 +1,14 @@
 function imputation(clean)
-if ~exist('clean','var') || isempty(clean)
-    clean = true;
-end
 
 global O
 
-if clean
+if ~exist('clean','var') || clean
     imputation_clear  % clear previous imputations in O, optional
 end
 
-lib= 'mice';
-methods = {'mean','norm','ri','pmm','sample','cart'};
-impute_R(lib,methods)
+% lib= 'mice';
+% methods = {'mean','norm','ri','pmm','sample','cart'};
+% impute_R(lib,methods)
 
 lib= 'mice';
 methods = {'midastouch','rf'};

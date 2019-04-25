@@ -47,8 +47,12 @@ if ~isempty(Imp)
 
     % calculate just imputed values (before and after imputation)
     dat_mis_ges = nan(size(mispat,1),size(mispat,2),size(mispat,3));
-    for nn = 1:size(mispat,3)
-        dat_mis_ges(:,:,nn) = dat.*mispat(:,:,nn);
+    if length(size(dat))<3
+        for nn = 1:size(mispat,3)
+            dat_mis_ges(:,:,nn) = dat.*mispat(:,:,nn);
+        end
+    else
+        dat_mis_ges = dat.*mispat;
     end
     dat_imp_ges = nan(size(Imp,1),size(Imp,2),size(Imp,3),size(Imp,4));
     for i=1:size(Imp,4)
@@ -309,7 +313,7 @@ if ~isempty(Imp)
             set(gca,'XTick',1:size(dat_imp,4)+1);
             set(gca,'XTickLabel',method,'XTickLabelRotation',45, 'FontSize',11);  
             ylabel('Imputed - Original', 'FontSize',11)
-            ylim([0 5])
+            %ylim([0 5])
             legend('RMSE')
             title('Imputation error', 'FontSize',15)
             fig=gcf;  print([filepath '/' name '/' name '_Boxplot_Difference_' num2str(b)],'-dpng','-r200');

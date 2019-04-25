@@ -62,11 +62,12 @@ ylabel('Frequency')
 fig =gcf;   print([filepath '/' name '/' name '_LogRegrow'],'-dpng','-r100');
 
 %% Log Plot
-try
-    dat = get(O,'data_original');
-catch
-    dat = get(O,'data');
-end
+% try
+%     dat = get(O,'data_original');
+% catch
+%     dat = get(O,'data');
+% end
+dat = get(O,'data');
 
 figure
 subplot(1,2,1)

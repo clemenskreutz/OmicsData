@@ -9,21 +9,12 @@ path = get(O,'path');
 if ~exist([filepath '/' name],'dir')
     mkdir(filepath, name)
 end
-%saveO(O,[],'O_sim')
-%save([filepath '/' name '/O_sim.mat'],'O');
-
-%% Get
-method = get(O,'method_imput');
-Table = get(O,'Table');
-boot = get(O,'boot');
+saveO(O,[],'O_sim')
+save([filepath '/' name '/O_sim.mat'],'O');
 
 %% find lowest ranked algo
-idx = ones(boot,size(Table,2)-1)*30;       % -1 because first column ignored (RMSE=0)
-for b=1:boot
-    [~,idx(b,1:size(Table,2)-1)] = sort(Table(6,2:end,b));          
-end
-[~,idxrank] = sort(sum(idx),2,'MissingPlacement','last'); 
-algo = method(idxrank(1));
+algos = GetRankTable;
+algo = algos{1};
 lib = FindLib(algo);
 
 %% Load O new 
@@ -49,27 +40,23 @@ O = set(O,'data_original',dat_original,'Save original');
 
 %% Impute original dataset
 O = set(O,'deleteemptyrows',false);
-if strcmp(lib,'jeffwong')
-    path = 'C://Users/Janine/Documents/Repositories/imputation';
-    impute_R(lib,algo,path)
-else
-    impute_R(lib,algo,[])
-end
+impute_R(lib,algo)
+
 % did it work? else try delete empty rows
 if ~isfield(O,'data_imput')
     O = set(O,'deleteemptyrows',true);
     imputation_clear  % clear previous imputations in O
-    impute_R(lib,algo,[])
+    impute_R(lib,algo)
 end
 % no nans in imputed ? else try second algo
 if ~isfield(O,'data_imput')
-    algo = method(idxrank(2));
+    algo = methods{2};
     imputation_clear  % clear previous imputations in O
     impute_R(lib,algo,[])
     if ~isfield(O,'data_imput')
         O = set(O,'deleteemptyrows',true);
         imputation_clear  % clear previous imputations in O
-        impute_R(lib,algo,[])
+        impute_R(lib,algo)
     end
 end
 if ~isfield(O,'data_imput')
@@ -110,7 +97,7 @@ xlabel('Experiments')
 caxis manual
 caxis([bottom top]);
 c=colorbar;
-c.Label.String = 'Log10(LFQ Intensity)';
+c.Label.String = 'Log2(LFQ Intensity)';
 print([filepath '/' name '/' name '_Imputed'],'-dpng','-r200');
 
 %% Sort/plot (for #nans)
@@ -136,6 +123,6 @@ xlabel('Experiments')
 caxis manual
 caxis([bottom top]);
 c=colorbar;
-c.Label.String = 'Log10(LFQ Intensity)';
+c.Label.String = 'Log2(LFQ Intensity)';
 print([filepath '/' name '/' name '_Imputed_Sorted'],'-dpng','-r200');
 
