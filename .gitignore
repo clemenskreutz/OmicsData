@@ -15,6 +15,9 @@ Data/proteomebenchmark
 Data/Peikert*
 
 Data/*
+
+TestData/*.mat
+
 ToDo/*
 
 user/*
