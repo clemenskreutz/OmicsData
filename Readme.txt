@@ -13,7 +13,11 @@ Installation steps:
 Advanced	     Advanced analyses which are not of primary interest for routine analyes
 Data		     Data sets, put your data-library here. The github repository does not contain data due to publication issues.
 Development	     Functions which are not fully finished or require extensions
+Documentation	     Files for explaining the code or for demonstrating its usage.
+Examples	     Code for demonstrating example analyses
 MatlabTools	     Matlab functions which are general and not directly linked to the OmicsData project
+Plot		     Functions for plotting purpose.
+Rfunctions	     Basic Matlab inferface functions enabling functionality/usage of R functions or packages and do NOT require @OmicsData class objects.
 Subfunctions	     Functions which are usually not called by the user but implement recurrent task called by partent functions
 Tools		     Non-Matlab software tools 
 user		     This folder is for placing custom own functions which are not intended to be synchronized via github. 
