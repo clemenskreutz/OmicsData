@@ -42,6 +42,7 @@ end
 y = get(O,'data');
 
 if(sum(sum(abs(X),1)==size(X,1))==0)
+    disp('regress.m: Intercept is added.');
     interAdded = 1;
     XwInter = [ones(size(X,1),1),X]; % 1st column Intercept hinzufuegen
 else
