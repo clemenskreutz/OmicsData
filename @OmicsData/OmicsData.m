@@ -1,6 +1,6 @@
 % Konstruktor der Klasse OmicsData
 %
-% O = OmicsData(file_or_data, name)
+% O = OmicsData(file_or_data, [name], [forceRead], [pattern])
 %
 %   file_or_data    1) filename: file to be read, if the respecitve
 %                   workspace *.mat is available, it is read instead!
@@ -16,21 +16,26 @@
 %   name    Name of the project
 % 
 %   forceRead   forces reading the data file (instead of the *.mat
-%   workspace)
+%               workspace)
 %
-%
+%   pattern     Pattern for specifying relevant columns in the data file
+%               If not specified, the user will be asked.
+% 
 %   Examples:
 %   O = OmicsData;   % empty Object
 % 
 % file = 'proteinGroups.txt';
 % O = OmicsData(file)
 
-function O = OmicsData(file_or_data, name, forceRead)
+function O = OmicsData(file_or_data, name, forceRead, pattern)
 if ~exist('name','var') || isempty(name)
     name = '';
 end
 if ~exist('forceRead','var') || isempty(forceRead)
     forceRead = false;
+end
+if ~exist('pattern','var') || isempty(pattern)
+    pattern = '';
 end
 
 if(~exist('file_or_data','var') || isempty(file_or_data))  % load default data set
@@ -85,7 +90,7 @@ else  % filename for reading
 %         raw = OmicsReadData(file);                   % I separated OmicsReadDataMaxQuant to OmicsReadData and OmicsData2Struct, so I can use OmicsReadData for copying peptides.txt to peptidesImp.txt
 %         [data, rownames] = OmicsData2Struct(raw);    
         [data, rownames] = OmicsReadDataMaxQuant(file);
-        [data, rownames, colnames,default_data] = OmicsData2Datamatrix(data,rownames);
+        [data, rownames, colnames,default_data] = OmicsData2Datamatrix(data,rownames,pattern);
         save(matfile,'data','rownames','colnames','default_data');
         fprintf('Save data to %s ...\n',matfile);
     end

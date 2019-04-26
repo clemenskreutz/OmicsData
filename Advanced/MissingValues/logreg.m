@@ -1,8 +1,9 @@
-% p = logreg(O,X,varargin)
+% [p,res] = logreg(O,X,varargin)
 % 
 %   LOGREG Fit a generalized linear model if necessary with penalty
 %          Estimate p-values if H1(all parameters) is different from H0
 %          (set one parameter sequentiell = 0)
+% 
 %   The function calls glmfit.m(X,dat(i,:)',varargin)
 %   If 'perfect separation of data' 
 %       lassoglm.m(X,dat(i,:)') overwrites coefficients of glmfit.m
@@ -15,12 +16,18 @@
 %   p       p-values (indicating significance of different experiments)
 %           size(p,1) number of proteins
 %           size(p,2) column j switches off column j of design matrix 
+% 
+%   res     result struct
+%           res.b   estimated coefficient
+%           res.p   p-value (the same as p)
+%           res.fdr 
+%           res.dev
+% 
 
-
-function [pv,Protein,Proteinline] = logreg(O,X,alpha,name,strpattern,group,varargin)
+function [pv,res, Protein,Proteinline] = logreg(O,X,alpha,name,strpattern,group,varargin)
 
 if nargin<1
-    error('OmicsData/logreg.m requires at least an OmicsData set. glmfit_janine(O,X,alpha,name,strpattern,varargin).')
+    error('OmicsData/logreg.m requires at least one argument.')
 end
 
 if ~exist('alpha','var') || isempty(alpha)
@@ -77,12 +84,13 @@ end
 nf  = size(dat,2);  % number of features, e.g. number of proteins
 np = size(X,2);     % number of parameters, e.g. means
 b   = NaN(np+1,nf);
-dev = NaN(1,nf);
-dev0 = NaN(1,nf);
+dev = NaN(nf,1);
+dev0 = NaN(nf,1);
 pv   = NaN(nf,np);
 idx = NaN(1,nf);
 Protein = {};
 Proteinline = [];
+didL1 = zeros(nf,1);
 
 
 %% LogReg
@@ -108,6 +116,7 @@ for i=1:size(dat,2)
 %         end
         lam = 1e-6;
         [~, FitInfo] = lassoglm(X,dat(:,i),'binomial','Lambda',lam);
+        didL1(i) = 1;
         dev(i)  = min(FitInfo.Deviance);
 
         warning(['glmfit_janine.m (Line 88): Used penalization/lasso for Protein in line ' num2str(i)]);
@@ -121,23 +130,23 @@ for i=1:size(dat,2)
                 Xtmp(:,j) = [];
             end     
             [~, FitInfo0] = lassoglm(Xtmp,dat(:,i),'binomial','Lambda',lam);  % Use same lambda as in H1     
-            dev0(i)  = FitInfo0.Deviance;                          % Dev = -2*(log(L1)-log(Ls))
-            pv(i,j) = 1-chi2cdf(abs(dev(i)-dev0(i)),1);                 % Devi-dev0 = -2*(log(L1)-log(L0))
+            dev0(i,j)  = FitInfo0.Deviance;                          % Dev = -2*(log(L1)-log(Ls))
+            pv(i,j) = 1-chi2cdf(abs(dev(i)-dev0(i,j)),1);                 % Devi-dev0 = -2*(log(L1)-log(L0))
             if pv(i,j)<alpha
                  Protein = [ Protein, ProteinName{i}];
                  Proteinline = [ Proteinline i];
             end
         end
-    %% Glm for H0 
+    %% Glm for H0, Why not L1 for H0 ???
     else    
         if size(X,2)==1
             Xtmp = ones(size(dat,1),1);
             if isempty(varargin)
-                [~,dev0(i)] = glmfit(Xtmp,dat(:,i),'binomial','link','logit','constant','off');
+                [~,dev0(i,j)] = glmfit(Xtmp,dat(:,i),'binomial','link','logit','constant','off');
             else
-                [~,dev0(i)] = glmfit(Xtmp,dat(:,i),varargin,'constant','off');
+                [~,dev0(i,j)] = glmfit(Xtmp,dat(:,i),varargin,'constant','off');
             end
-            pv(i) = 1-chi2cdf(abs(dev(i)-dev0(i)),1);
+            pv(i) = 1-chi2cdf(abs(dev(i)-dev0(i,j)),1);
             if pv(i)<alpha
                  Protein = [ Protein, ProteinName{i}];
                  Proteinline = [ Proteinline i];
@@ -147,11 +156,11 @@ for i=1:size(dat,2)
                 Xtmp = X;
                 Xtmp(:,j) = [];
                 if isempty(varargin)
-                    [~,dev0(i)] = glmfit(Xtmp,dat(:,i),'binomial','link','logit');
+                    [~,dev0(i,j)] = glmfit(Xtmp,dat(:,i),'binomial','link','logit');
                 else
-                    [~,dev0(i)] = glmfit(Xtmp,dat(:,i),varargin);
+                    [~,dev0(i,j)] = glmfit(Xtmp,dat(:,i),varargin);
                 end
-                pv(i,j) = 1-chi2cdf(abs(dev(i)-dev0(i)),1);
+                pv(i,j) = 1-chi2cdf(abs(dev(i)-dev0(i,j)),1);
                 if pv(i,j)<alpha
                     Protein = [ Protein, ProteinName{i}];
                     Proteinline = [ Proteinline i];
@@ -166,6 +175,15 @@ end
 if exist('group','var')
     [fdrg,qg,fdrBHg]= fdr_calculations(pv,sum(isnan(O),2));
 end
+
+res.b = b';
+res.p = pv;
+res.dev = dev;
+res.dev0 = dev0;
+res.fdr = fdr;
+res.q = q;
+res.fdrBH = fdrBH;
+res.didL1 = didL1;
 
 %% Write
 if isfield(O,'path')
