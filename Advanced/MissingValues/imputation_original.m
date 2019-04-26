@@ -27,7 +27,7 @@ else
 end
 O = O(:,~all(isnan(O)));                      % delete columns/experiments with all nan
 if max(O)>1000                                % data not logged yet? Log!
-    O=log10(O);   
+    O=log2(O);   
 end
 if ~checknan(O)                                  % no nans in data, so write zeros as nans
     dat = get(O,'data');                          
@@ -50,7 +50,7 @@ if ~isfield(O,'data_imput')
 end
 % no nans in imputed ? else try second algo
 if ~isfield(O,'data_imput')
-    algo = methods{2};
+    algo = algos{2};
     imputation_clear  % clear previous imputations in O
     impute_R(lib,algo,[])
     if ~isfield(O,'data_imput')
