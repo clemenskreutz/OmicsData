@@ -189,7 +189,7 @@ ind = 1;
 yreg = zeros(2*size(X,2),1);
 xreg = zeros(2*size(X,2),size(X,2));
 for i=1:size(X,2)
-    xreg(ind:(ind+1),i) = median(m);
+    xreg(ind:(ind+1),i) = mean(m);
     yreg(ind+1) = 1;
     ind = ind+2;
 end

@@ -18,17 +18,14 @@ end
 path = get(O,'path');
 [filepath,name] = fileparts(path);
 % Remove existing figures (Matlab does not overwrite images)
-if exist([filepath '\' name '\' name '_SimulatedMissingPattern_1.tif'],'file')
-    delete([filepath '\' name '\' name '_SimulatedMissingPattern*.tif']);
+if exist([filepath '\' name '\' name '_MissingRowCol*.tif'],'file')
     delete([filepath '\' name '\' name '_MissingRowCol*.tif']);
 else
     mkdir(filepath, name)
 end
 
 % Sort for plotting
-[~,idx] = sort(sum(isnan(dat),2));
-datplot = dat(idx,:);
-comp = datplot(~any(isnan(datplot),2),:);  % Complete matrix is used for pattern simu
+comp = dat(~any(isnan(dat),2),:);  % Complete matrix is used for pattern simu
 
 %% normalize/linearize mean matrix
 full_norm = (comp-nanmean(comp(:)))./nanstd(comp(:));
@@ -95,115 +92,11 @@ for b=1:boot
         end
     end
     
-    sum(sum(isnan(dat)))/size(dat,1)/size(dat,2)
-    sum(sum(isnan(A)))/size(A,1)/size(A,2)
-    
     % Shift intensities of simulated pattern to original distribution, shift values of complete matrix the same to compare imputation
      full = (full-nanmean(A(:)))./nanstd(A(:));
      A = (A-nanmean(A(:)))./nanstd(A(:));
    full = full.*nanstd(dat(:))+nanmean(dat(:));
     A = A.*nanstd(dat(:))+nanmean(dat(:));
-    
-    
-%     dat = get(O,'data_original');
-%     dat_full = get(O,'data_full');
-%     dat_mis = get(O,'data_mis');
-%     figure
-%     histogram(dat,100)
-%     hold on
-%     histogram(dat_full,100)
-%     histogram(dat_mis,100)
-%     
-%     for i=1:5
-%         A = dat_mis(:,:,i);
-%         fullsave = (dat_full-nanmean(A(:)))./nanstd(A(:));
-%         fullsave = fullsave.*nanstd(dat(:))+nanmean(dat(:));
-%         A = (A-nanmean(A(:)))./nanstd(A(:));
-%         A = A.*nanstd(dat(:))+nanmean(dat(:));
-%         dat_mis(:,:,i) = A;
-%         full(:,:,i) = fullsave;
-%         figure
-%         histogram(dat,100)
-%         hold on
-%         histogram(full,100)
-%         histogram(dat_mis,100)
-%     end
-%     %save
-%     O = set(O,'data_full',full,'Complete dataset without missing values');     % Remember full/complete dataset for comparing 'right' solutions with imputed afterwards
-%     O = set(O,'data',dat_mis,'Missing values assigned/simulated.');
-%     O = set(O,'data_mis',dat_mis,'data with assigned missing values');
-
-    % Sort for plotting
-    [~,idx] = sort(sum(isnan(A),2));
-    Aplot = A(idx,:);
-    
-    %% Plot matrices original/simulated intensities/nans
-
-    figure; set(gcf,'units','points','position',[10,10,600,300])
-    h1 = subplot(1,3,1);
-    nr = size(dat,1);
-    nc = size(dat,2);
-    pcolor([datplot nan(nr,1); nan(1,nc+1)]);
-    shading flat;
-    caxis manual
-    caxis([min(nanmin(dat)) max(nanmax(dat))]);
-    title({'original data O'})
-    %ylabel('Proteins')
-    xlabel('Samples')
-    set(gca, 'ydir', 'reverse');
-    
-    h2 = subplot(1,3,2);
-    nr = size(full,1);
-    nc = size(full,2);
-    pcolor([comp nan(nr,1); nan(1,nc+1)]);
-    shading flat;
-    caxis manual
-    caxis([min(nanmin(dat)) max(nanmax(dat))]);
-    c = colorbar('southoutside');
-    c.Label.String = 'log_{2}(Intensity)';
-    h2.Position = [h2.Position(1) h1.Position(2)+h1.Position(4)*(1-size(full,1)/size(dat,1)) h2.Position(3) h1.Position(4)/size(dat,1)*size(full,1)];
-    title({'complete data C'})
-    set(gca, 'ydir', 'reverse');
-    ylim([0 size(full,1)])
-    
-    %linkaxes([h2,h1])
-
-    subplot(1,3,3)
-    nr = size(A,1);
-    nc = size(A,2);
-    pcolor([Aplot nan(nr,1); nan(1,nc+1)]);
-    shading flat;
-    set(gca, 'ydir', 'reverse');
-    caxis manual
-    caxis([min(nanmin(dat)) max(nanmax(dat))]);
-    title({'pattern simulation S'})
-    xlabel('Samples')
-    %c = colorbar('southoutside');
-    %c.Label.String = 'log_{2}(Intensity)';
-    %ylim([0 size(Aplot,1)])
-    yticks([0,round(size(Aplot,1)/4,1,'significant'),round(size(Aplot,1)/2,1,'significant'),round(size(Aplot,1)*0.9,2,'significant')])
-    yticklabels([0,round(size(Aplot,1)/4,1,'significant'),round(size(Aplot,1)/2,1,'significant'),round(size(Aplot,1)*0.9,2,'significant')])
-
-    saveas(gcf,[filepath '/' name '/' name '_SimulatedMissingPattern_' num2str(b) '.tif'])
-     
-    figure
-    histogram(dat,100)
-    hold on
-    histogram(full,100)
-    histogram(A,100)
-    legend('original','complete','simulated')
-    saveas(gcf,[filepath '/' name '/' name '_Histograms_' num2str(b) '.tif'])
-     
-    %% Histogram
-%     figure
-%     edges = nanmin(nanmin(dat)):0.1:nanmax(nanmax(dat));
-%     histogram(dat,edges)
-%     hold on
-%     histogram(full,edges)
-%     histogram(A,edges)
-%     legend('O','F','S')
-%     title('Intensity distribution')
-%     saveas(gcf,[filepath '/' name '/' name '_Histograms_' num2str(b) '.tif'])
     
     %% Plot missing values per row column, compare original/simulated
     figure
@@ -241,5 +134,7 @@ O = set(O,'data_full',dat_full,'Complete dataset without missing values');     %
 O = set(O,'data',dat_mis,'Missing values assigned/simulated.');
 O = set(O,'data_mis',dat_mis,'data with assigned missing values');
 O = set(O,'mis_pat',isnan(dat_mis),'pattern of missing values');
+
+PlotSimulatedPattern;
 
 
