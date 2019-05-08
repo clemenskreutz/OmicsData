@@ -92,10 +92,11 @@ for b=1:boot
         end
     end
     
-    % Shift intensities of simulated pattern to original distribution, shift values of complete matrix the same to compare imputation
-     full = (full-nanmean(A(:)))./nanstd(A(:));
-     A = (A-nanmean(A(:)))./nanstd(A(:));
-   full = full.*nanstd(dat(:))+nanmean(dat(:));
+    
+    % Shift intensities to original distribution, shift values of complete matrix the same to compare imputation
+    full = (full-nanmean(A(:)))./nanstd(A(:));
+    A = (A-nanmean(A(:)))./nanstd(A(:));
+    full = full.*nanstd(dat(:))+nanmean(dat(:));
     A = A.*nanstd(dat(:))+nanmean(dat(:));
     
     %% Plot missing values per row column, compare original/simulated
@@ -108,7 +109,7 @@ for b=1:boot
     plot(datsimrow,'LineWidth',1.5)
     xlabel('proteins')
     ylabel('missing values')
-    h = legend('Original','Simulated','Location','northwest');
+    legend('Original','Simulated','Location','northwest');
     hold off
 
     subplot(2,1,2)
@@ -117,7 +118,7 @@ for b=1:boot
     bar(sum(isnan(A),1)/size(A,1),'FaceAlpha',.7)
     xlabel('experiments')
     ylabel('Missing values')
-    h = legend('Original','Simulated','Location','northwest');
+    legend('Original','Simulated','Location','northwest');
     hold off
 
     % Save fig
@@ -129,6 +130,7 @@ end
 %% Save class O
 if size(dat_mis,2)>size(dat_mis,1)*2
     dat_mis = rot90(dat_mis);
+    dat_full = rot90(dat_full);
 end
 O = set(O,'data_full',dat_full,'Complete dataset without missing values');     % Remember full/complete dataset for comparing 'right' solutions with imputed afterwards
 O = set(O,'data',dat_mis,'Missing values assigned/simulated.');

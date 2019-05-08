@@ -67,7 +67,7 @@ end
 dat = get(O,'data_imput');
 O = set(O,'data',dat,['Imputed with ' algo ]);
 saveO
-ImpToTxt
+%ImpToTxt
 
 %% PLOT
 path = get(O,'path');
@@ -122,7 +122,7 @@ title(['Imputed data with ' algo])
 xlabel('Experiments')
 caxis manual
 caxis([bottom top]);
-c=colorbar;
+%c=colorbar;
 c.Label.String = 'Log2(LFQ Intensity)';
 print([filepath '/' name '/' name '_Imputed_Sorted'],'-dpng','-r200');
 

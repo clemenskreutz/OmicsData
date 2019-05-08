@@ -64,8 +64,8 @@ for b=1:size(dat_mis,3)
     caxis([min(nanmin(dat)) max(nanmax(dat))]);
     title({'pattern simulation S'})
     xlabel('Samples')
-    yticks([0,round(size(A,1)/4,1,'significant'),round(size(A,1)/2,1,'significant'),round(size(A,1)*0.9,2,'significant')])
-    yticklabels([0,round(size(A,1)/4,1,'significant'),round(size(A,1)/2,1,'significant'),round(size(A,1)*0.9,2,'significant')])
+    %yticks([0,round(size(A,1)/4,1,'significant'),round(size(A,1)/2,1,'significant'),round(size(A,1)*0.9,2,'significant')])
+    %yticklabels([0,round(size(A,1)/4,1,'significant'),round(size(A,1)/2,1,'significant'),round(size(A,1)*0.9,2,'significant')])
 
     saveas(gcf,[filepath '/' name '/' name '_SimulatedMissingPattern_' num2str(b) '.tif'])
 

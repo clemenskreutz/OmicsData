@@ -62,12 +62,11 @@ ylabel('Frequency')
 fig =gcf;   print([filepath '/' name '/' name '_LogRegrow'],'-dpng','-r100');
 
 %% Log Plot
-% try
-%     dat = get(O,'data_original');
-% catch
-%     dat = get(O,'data');
-% end
-dat = get(O,'data');
+try
+    dat = get(O,'data_original');
+catch
+    dat = get(O,'data');
+end
 
 figure
 subplot(1,2,1)
@@ -90,4 +89,46 @@ title('Missing values per experiment')
 ylabel('Missing values [%]')
 hold off
 fig =gcf;   print([filepath '/' name '/' name '_LogReg'],'-dpng','-r100');
+
+%% Mean Boxplot
+n_mis_row_rel = round(sum(isnan(dat),2)/size(dat,2),1);
+meandat = round(nanmean(dat,2),1);
+mi = 17.3;%nanmin(meandat);
+ma = 26.5; %nanmax(meandat);
+c=1;
+meanmis = nan(round((ma-mi)*10+1),length(n_mis_row_rel));
+ for i=mi:0.1:ma
+    d = n_mis_row_rel(meandat==i);
+    meanmis(c,1:length(d)) = d;
+    c=c+1;
+ end
+ 
+%% fit
+m = mi:0.1:ma;
+mis = nanmean(meanmis.');
+m(isnan(mis))=[];   % nan values can not be fitted
+mis(isnan(mis))=[];
+ 
+x0=[1;-nanmean(meandat)];
+fun=@(x)(nanmax(mis)./(1+exp(x(1)*(m+x(2))))-mis);
+options = optimset('TolFun',1e-20,'TolX',1e-20);
+[x,~] = lsqnonlin(fun,x0,[],[],options);
+
+% Calc logregpoints
+m = mi:0.1:ma;
+mexp = nanmax(mis)./(1+exp(x(1)*(m+x(2)))); 
+
+
+%% Boxplot
+figure; set(gca,'fontname','arial'); set(gcf,'units','points','position',[10,10,550,300])
+boxplot(meanmis.','Symbol','.','OutlierSize',2)
+set(gca,'XTick',1:5:size(meanmis,1),'XTickLabel',mi:0.5:ma, 'FontSize',11,'XTickLabelRotation',90);  
+ylabel('Missing values [%]')
+xlabel('Mean protein intensity')
+hold on
+plot(mexp)
+legend('logistic fit')
+ylim([-0.05 nanmax(mis)+0.05])
+title('Missing values per protein intensity')
+print([filepath '/' name '/' name '_MeanBoxplot'],'-dpng','-r100');
  

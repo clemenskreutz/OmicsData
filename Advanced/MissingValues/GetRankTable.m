@@ -25,3 +25,8 @@ O = set(O,'RankTable',T);
 O = set(O,'RankMethod',algo);
 path = get(O,'path');
 save([path(1:end-4) '/RankTable.mat'],'T','algo')
+
+RowName = {'MeanError';'RMSE';'Acc';'PCC';'time'};
+figure
+uitable('Data',T(:,1:6),'ColumnName',algo(1:6),'RowName',RowName,'Units', 'Normalized', 'Position',[0, 0, 1, 0.28]);
+fig =gcf;   print([path(1:end-4) filesep 'Table_Rank'],'-dpng','-r100');
