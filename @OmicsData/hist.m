@@ -44,6 +44,7 @@ for i=1:size(dat,2)
     
     xl(i,:) = xlim;
     yl(i,:) = ylim;
+    grid on
 end
 
 xl = [min(xl(:,1)),max(xl(:,2))];
