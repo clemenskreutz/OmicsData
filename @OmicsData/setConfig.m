@@ -9,6 +9,8 @@
 % 
 %  Example:
 %   O = setConfig(O,'default_data','evi')
+%   O = setConfig(O,'default_col','Genenames');
+
 function O = setConfig(O,varargin)
 
 property_argin=varargin;

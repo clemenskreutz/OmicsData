@@ -7,7 +7,7 @@
 %           the type of change, e.g.
 %           'na'    The fraction of missing values is added
 % 
-%   newname     the new rowname (used as fieldname)
+%   newname     the new colname (used as fieldname)
 %               Default: 
 %               [get(O,'default_row'),'_user']  OR
 %               [get(O,'default_row'),'_NA'] 

@@ -171,7 +171,13 @@ for i=1:size(dat,2)
 end
 
 %% FDR
-[fdr, q, fdrBH] = fdr_calculations(pv);
+try
+    [fdr, q, fdrBH] = fdr_calculations(pv);
+catch
+    fdr = NaN(size(pv));
+    q = NaN(size(pv));
+    fdrBH = NaN(size(pv));
+end
 if exist('group','var')
     [fdrg,qg,fdrBHg]= fdr_calculations(pv,sum(isnan(O),2));
 end
