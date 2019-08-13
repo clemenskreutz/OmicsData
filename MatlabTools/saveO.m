@@ -1,10 +1,8 @@
 function saveO(O,file,matname)
-global O
+
 if ~exist('file','var') || isempty(file)
     file = get(O,'path');
-    if ~exist('file','var') || isempty(file)
-        file = get(O,'name');
-    end
+    file = [file get(O,'name')];
 end
 if ~exist('matname','var') || isempty(matname)
     matname = 'O';

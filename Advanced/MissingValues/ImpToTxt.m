@@ -1,6 +1,4 @@
-function ImpToTxt
-
-global O
+function ImpToTxtOld(O)
 
 path = get(O,'path');
 
@@ -17,10 +15,6 @@ elseif contains(name,'protein','IgnoreCase',true)
 else
     filename = [name 'Imp'];
 end
-
-%% Read original file and find pattern indices
-raw = OmicsReadData(path);
-ind = OmicsFindPattern(raw);
 
 %% Replace intensity with imputed intensity
 Imp = 10.^(get(O,'data'));
