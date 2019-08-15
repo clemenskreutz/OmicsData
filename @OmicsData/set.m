@@ -54,13 +54,18 @@ switch prop
         nf = get(O,'nfeatures');
         ns = get(O,'nsamples');
         
-        if isnumeric(val) && dims(1)==nf && dims(2)==ns
-            O.data.(prop) = val;
-        elseif dims(1)==nf && dims(2)==1
-            O.rows.(prop) = val;
-        elseif dims(1)==1 && dims(2)==ns
-            O.cols.(prop) = val;
+        if isempty(get(O,prop,true))
+            if isnumeric(val) && dims(1)==nf && dims(2)==ns
+                O.data.(prop) = val;
+            elseif dims(1)==nf && dims(2)==1
+                O.rows.(prop) = val;
+            elseif dims(1)==1 && dims(2)==ns
+                O.cols.(prop) = val;
+            else
+                O.container.(prop) = val;  % unknown properties are put in the container
+            end
         else
-            O.container.(prop) = val;  % unknown properties are put in the container
+            [~,s] = get(O,prop,true);
+            O.(s).(prop) = val;
         end
 end
