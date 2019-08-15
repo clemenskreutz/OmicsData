@@ -14,8 +14,8 @@ end
 if strcmp(algo,'MinDet') || strcmp(algo,'KNN') || strcmp(algo,'MinProb') || strcmp(algo,'QRILC')
     lib= 'imputeLCMD';
 end
-if strcmp(algo,'SVTApproxImpute') || strcmp(algo,'SVDImpute') || strcmp(algo,'knnImpute') || strcmp(algo,'lmImpute')
-    lib= 'jeffwong';
+if strcmp(algo,'SVTApproxImpute') || strcmp(algo,'SVTImpute') || strcmp(algo,'SVDImpute') || strcmp(algo,'knnImpute') || strcmp(algo,'lmImpute')
+    lib= 'imputation';
     %path = 'C://Users/Janine/Documents/Repositories/imputation';
 end
 if strcmp(algo,'missForest')

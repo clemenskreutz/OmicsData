@@ -1,6 +1,5 @@
-function impute_R(lib,method)
+function O = impute_R(O,lib,method)
 
-global O
 global OPENR
     
 % Start R
@@ -259,7 +258,7 @@ if exist('ImpM','var') && ~isempty(ImpM)
     O = set(O,'data_imput',Imp,'Imputed with R packages');
     O = set(O,'method_imput',method);
     O = set(O,'time_imput',time);
-    saveO
+    saveO(O)
 end 
 
 closeR;

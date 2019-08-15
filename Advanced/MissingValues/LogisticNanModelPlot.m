@@ -1,13 +1,10 @@
 
-function LogisticNanModelPlot
-
-global O
+function LogisticNanModelPlot(O,out)
 
 if ~exist('O','var')
     error('MissingValues/LogisticNanModel.m requires class O as global variable or input argument.')
 end
 
-out = get(O,'out');
 path = get(O,'path');
 [filepath,name] = fileparts(path);
 mkdir(filepath, name)   
@@ -62,9 +59,8 @@ ylabel('Frequency')
 fig =gcf;   print([filepath '/' name '/' name '_LogRegrow'],'-dpng','-r100');
 
 %% Log Plot
-try
-    dat = get(O,'data_original');
-catch
+dat = get(O,'data_original');
+if isempty(dat)
     dat = get(O,'data');
 end
 
@@ -93,8 +89,8 @@ fig =gcf;   print([filepath '/' name '/' name '_LogReg'],'-dpng','-r100');
 %% Mean Boxplot
 n_mis_row_rel = round(sum(isnan(dat),2)/size(dat,2),1);
 meandat = round(nanmean(dat,2),1);
-mi = 17.3;%nanmin(meandat);
-ma = 26.5; %nanmax(meandat);
+mi = nanmin(meandat);
+ma = 25.7;% nanmax(meandat);
 c=1;
 meanmis = nan(round((ma-mi)*10+1),length(n_mis_row_rel));
  for i=mi:0.1:ma

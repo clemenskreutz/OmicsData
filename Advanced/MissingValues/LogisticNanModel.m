@@ -6,9 +6,7 @@
 %   features are drawn and the predictors are estimated nboot times for
 %   these subsets.
 %
-function LogisticNanModel
-
-global O
+function out = LogisticNanModel(O)
 
 if ~exist('O','var')
     error('MissingValues/LogisticNanModel.m requires class O as global variable or input argument.')
@@ -48,17 +46,12 @@ m = m-mean(m);  % centered
 m = m./nanstd(m); % standardized
 
 % Linearize mean
- mis = sum(isna,2)./size(isna,2);
+mis = sum(isna,2)./size(isna,2);
 
-%x0=[0.5;-1];
-%x0=[min(m)/max(m);-min(m)];
 x0=[-1;0];
 fun=@(x)(1./(1+exp(x(1)*m+x(2)))-mis);
-%fun=@(x)(exp(x(1)*m+x(2))./(1+exp(x(1)*m+x(2)))-mis);
 options = optimset('TolFun',1e-20,'TolX',1e-20);
-%options = optimset('MaxFunEval',10000,'MaxIter',5000);
 [x,~] = lsqnonlin(fun,x0,[],[],options);
-%[x,~] = lsqnonlin(fun,x0);
 mexp = 1./(1+exp(x(1)*m+x(2))); 
 %mis = mis+rand(size(isna,1),1)*0.1;
 
@@ -72,7 +65,7 @@ ylabel('Missing values [%]')
 ylim([0 1])
 legend('data','logistic fit')
 
-m = -mexp;     % negative, so that coefficients are interpretable (same slope)
+m = mexp;                   % linearized mean for logreg
 
 lc = polyfit(m,mis,1);
 lf = polyval(lc,m);
@@ -131,12 +124,9 @@ if nfeat>1000
         out.current{i} = ind;
         out.timing(i) = toc;
         out.b(1:length(out_tmp.b),i) = out_tmp.b;
-        out.se(1:length(out_tmp.b),i) = out_tmp.stats.se;
-        out.type(1:length(out_tmp.b),i) = out_tmp.type;
+        out.se(1:length(out_tmp.stats.se),i) = out_tmp.stats.se;
+        out.type(1:length(out_tmp.type),i) = out_tmp.type;
         
-%         if i==1
-%             out.out1 = out_tmp;
-%         end
     end
 else
     out = LogisticNanModel_core(isna, m);
@@ -145,7 +135,7 @@ out.type_names = {'mean intensity dependency','column-dependency','rows-dependen
 if exist('coef','var')
     out.c = coef;
 end
-O = set(O,'out',out,'Logistic regression output.');
+%O = set(O,'out',out,'Logistic regression output.');
 %save out out
 
 
@@ -163,9 +153,12 @@ clev = levels(col);
 type = NaN(1+length(rlev)+length(clev),1);
 bnames = cell(length(rlev)+length(clev)+1,1);
 c = 1;
+%type(c) = 0;
+%bnames{c} = 'offset';
+%c = c+1;
 
 % Mean to X
-X = m; %[ones(size(m)),m];
+X = m; 
 bnames{c} = 'mean';
 type(c) = 1; % mean-dependency
 
@@ -188,8 +181,9 @@ end
 ind = 1;
 yreg = zeros(2*size(X,2),1);
 xreg = zeros(2*size(X,2),size(X,2));
-for i=1:size(X,2)
-    xreg(ind:(ind+1),i) = mean(m);
+xreg(:,1) = median(m)*ones(size(xreg,1),1);  % for regularization set first column to median(intensity)
+for i=2:size(X,2)
+    xreg(ind:(ind+1),i) = 1;
     yreg(ind+1) = 1;
     ind = ind+2;
 end

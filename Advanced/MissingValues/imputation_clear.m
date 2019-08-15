@@ -1,9 +1,7 @@
-function imputation_clear(move)
-
-global O
+function O = imputation_clear(O,move)
 
 if ~exist('O','var')
-    error('MissingValues/imputation_clear.m requires class O as global variable.')
+    error('MissingValues/imputation_clear.m requires class O as input variable.')
 end
 
 if exist('move','var')

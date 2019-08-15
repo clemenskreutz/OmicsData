@@ -1,60 +1,81 @@
-function imputation(clean)
-
-global O
+function O = imputation(O,clean,ttest,indg1,indg2)
 
 if ~exist('clean','var') || isempty(clean)
-    clean = true;
+    clean = false;
+end
+if ~exist('ttest','var') || isempty(ttest)
+    ttest=false;
 end
 
 if clean
-    imputation_clear  % clear previous imputations in O, optional
+    O = imputation_clear(O);  % clear previous imputations in O, optional
 end
 
 lib= 'mice';
 methods = {'mean','norm','ri','pmm','sample','cart'};
-impute_R(lib,methods)
+O = impute_R(O,lib,methods);
 
 lib= 'mice';
 methods = {'midastouch','rf'};
-impute_R(lib,methods)
+O = impute_R(O,lib,methods);
 
 lib= 'Amelia';
-impute_R(lib,[]);
+O = impute_R(O,lib,[]);
 
 lib= 'Hmisc';
 methods = {'regression'};
-impute_R(lib,methods);
+O = impute_R(O,lib,methods);
 
 lib= 'pcaMethods';
 methods = {'ppca','bpca','nipals','svd','svdImpute'};
-impute_R(lib,methods);
+O = impute_R(O,lib,methods);
 
 lib= 'imputeLCMD';
 methods = {'MinDet','KNN','MinProb','QRILC'};
-impute_R(lib,methods);
+O = impute_R(O,lib,methods);
 
 lib= 'imputation';
 methods = {'SVTImpute','SVDImpute','kNNImpute'};  %,'SVTApproxImpute','lmImpute'
-impute_R(lib,methods);
+O = impute_R(O,lib,methods);
 
 lib= 'missForest';
-impute_R(lib,[]);
+O = impute_R(O,lib,[]);
 
 lib= 'softImpute';
-impute_R(lib,[]);
+O = impute_R(O,lib,[]);
 
 lib= 'VIM';
 methods = {'irmi'}; %'kNN'
-impute_R(lib,methods);
+O = impute_R(O,lib,methods);
 
 lib= 'rrcovNA';
 methods = {'Norm','Seq','SeqRob'};
-impute_R(lib,methods);
+O = impute_R(O,lib,methods);
 
 lib= 'missMDA';
 methods = {'MIPCA','imputePCA'};
-impute_R(lib,methods);
+O = impute_R(O,lib,methods);
 
-imputation_analysis;
-saveO
-%Paper_plots;
+saveO(O);
+if isfield(O,'data_imput') && ~isempty(get(O,'data_imput'))
+    O = imputation_analysis(O);
+    T = get(O,'Table');
+    if ~all(isnan(T))
+        if ttest
+            O = RMSEttest(O,indg1,indg2);  
+        end
+
+        O = GetRankTable(O);
+        saveO(O)
+    else
+        p = get(O,'path');
+        delete([p(1:end-4) '.mat']);
+        rmdir(p(1:end-4));
+    end
+else
+    p = get(O,'path');
+    delete([p(1:end-4) '.mat']);
+    rmdir(p(1:end-4));
+end
+
+%Paper_plots(O);

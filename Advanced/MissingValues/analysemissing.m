@@ -1,12 +1,12 @@
 
-function analysemissing
+function O = analysemissing(O)
 
-% plotmissing
-LogisticNanModel
+% LogisticNanModelcomp(int,rowID,colID,rowint,colint,pepCount,SeqCov,lin,norm)
+out = LogisticNanModel(O);
 %LogisticNanModelPlot
 
-deletemissing
+O = deletemissing(O);
 
-assignmissing
+O = assignmissing(O,out);
 
-saveO
+saveO(O)

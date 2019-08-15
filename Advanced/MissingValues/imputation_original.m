@@ -1,32 +1,33 @@
-function imputation_original
-
-global O
+function O = imputation_original(O)
 
 %% save copy 
 %to remember imputation from simulated pattern
-path = get(O,'path');
-[filepath,name] = fileparts(path);
-if ~exist([filepath '/' name],'dir')
-    mkdir(filepath, name)
-end
-saveO(O,[],'O_sim')
-save([filepath '/' name '/O_sim.mat'],'O');
+% path = get(O,'path');
+% [filepath,name] = fileparts(path);
+% if ~exist([filepath filesep name],'dir')
+%     mkdir(filepath, name)
+% end
+% if isempty(filepath)
+%     save([name filesep 'O_sim.mat'],'O');
+% else
+%     save([filepath filesep name filesep 'O_sim.mat'],'O');
+% end
 
 %% find lowest ranked algo
-algos = GetRankTable;
+[O,algos] = GetRankTable(O);
 algo = algos{1};
 lib = FindLib(algo);
 
 %% Load O new 
 %because simulated pattern was much smaller, and also names etc. were shortened
-if strncmp(path,'Data\Simu',9)
-    load([path '\' path(6:end) '.mat']);
+if strncmp(path,['Data' filesep 'Simu'],9)
+    load([path filesep path(6:end) '.mat']);
     O = OmicsData(data,path);
 else
     O = OmicsData(path);
 end
 O = O(:,~all(isnan(O)));                      % delete columns/experiments with all nan
-if max(O)>1000                                % data not logged yet? Log!
+if max(O)>100                                 % data not logged yet? Log!
     O=log2(O);   
 end
 if ~checknan(O)                                  % no nans in data, so write zeros as nans
@@ -39,24 +40,24 @@ O = set(O,'data_original',dat_original,'Save original');
 
 
 %% Impute original dataset
-O = set(O,'deleteemptyrows',false);
-impute_R(lib,algo)
+O = set(O,'deleteemptyrows',true);
+O = impute_R(O,lib,algo);
 
-% did it work? else try delete empty rows
-if ~isfield(O,'data_imput')
-    O = set(O,'deleteemptyrows',true);
-    imputation_clear  % clear previous imputations in O
-    impute_R(lib,algo)
-end
+% % did it work? else try delete empty rows
+% if ~isfield(O,'data_imput')
+%     O = set(O,'deleteemptyrows',true);
+%     O = imputation_clear(O);  % clear previous imputations in O
+%     O = impute_R(O,lib,algo);
+% end
 % no nans in imputed ? else try second algo
 if ~isfield(O,'data_imput')
     algo = algos{2};
-    imputation_clear  % clear previous imputations in O
-    impute_R(lib,algo,[])
+    O = imputation_clear(O);  % clear previous imputations in O
+    O = impute_R(O,lib,algo,[]);
     if ~isfield(O,'data_imput')
         O = set(O,'deleteemptyrows',true);
-        imputation_clear  % clear previous imputations in O
-        impute_R(lib,algo)
+        O = imputation_clear(O);  % clear previous imputations in O
+        O = impute_R(O,lib,algo);
     end
 end
 if ~isfield(O,'data_imput')
@@ -66,7 +67,7 @@ end
 %% SAVE
 dat = get(O,'data_imput');
 O = set(O,'data',dat,['Imputed with ' algo ]);
-saveO
+saveO(O,[],'O_imp')
 %ImpToTxt
 
 %% PLOT
@@ -77,8 +78,8 @@ if ~exist([filepath '/' name],'dir')
 end
 
 % Limits for colorbar
-bottom = min(min(min(dat)),min(min(dat_original)));
-top  = max(max(max(dat_original)),max(max(dat)));
+bottom = min(quantile(dat(:),0.01),quantile(dat_original(:),0.01));
+top  = max(quantile(dat(:),0.99),quantile(dat_original(:),0.99));
 
 figure; %set(gcf,'units','points','position',[10,10,600,300])
 subplot(1,2,1)
@@ -88,12 +89,12 @@ caxis manual
 caxis([bottom top]);
 title('Original data')
 ylabel('Proteins')
-xlabel('Experiments')
+xlabel('Samples')
 subplot(1,2,2)
 b = imagesc(dat);
 set(b,'AlphaData',~isnan(dat))
 title(['Imputed data with ' algo])
-xlabel('Experiments')
+xlabel('Samples')
 caxis manual
 caxis([bottom top]);
 c=colorbar;
@@ -104,6 +105,8 @@ print([filepath '/' name '/' name '_Imputed'],'-dpng','-r200');
 [~,idx] = sort(sum(isnan(dat_original),2));
 dat_original = dat_original(idx,:);
 dat = dat(idx,:);
+dat_original(all(isnan(dat_original),2),:)= [];
+dat(all(isnan(dat),2),:)= [];
 
 figure; %set(gcf,'units','points','position',[10,10,600,300])
 subplot(1,2,1)
@@ -113,13 +116,13 @@ caxis manual
 caxis([bottom top]);
 title('Original data')
 ylabel('Proteins')
-xlabel('Experiments')
+xlabel('Samples')
 subplot(1,2,2)
 b = imagesc(dat);
 set(b,'AlphaData',~isnan(dat))
 title(['Imputed data with ' algo])
 %ylabel('Proteins')
-xlabel('Experiments')
+xlabel('Samples')
 caxis manual
 caxis([bottom top]);
 %c=colorbar;
