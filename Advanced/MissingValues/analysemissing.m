@@ -3,7 +3,7 @@ function O = analysemissing(O)
 
 % LogisticNanModelcomp(int,rowID,colID,rowint,colint,pepCount,SeqCov,lin,norm)
 out = LogisticNanModel(O);
-%LogisticNanModelPlot
+% LogisticNanModelPlot(O,out)
 
 O = deletemissing(O);
 

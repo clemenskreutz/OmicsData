@@ -18,6 +18,9 @@ end
 % Save directory
 path = get(O,'path');
 [filepath,name] = fileparts(path);
+if isempty(filepath)
+    filepath = '.';
+end
 % Remove existing figures (Matlab does not overwrite images)
 if exist([filepath '\' name '\' name '_MissingRowCol*.tif'],'file')
     delete([filepath '\' name '\' name '_MissingRowCol*.tif']);
@@ -31,14 +34,14 @@ comp = get(O,'data');  % Complete matrix is used for pattern simu
 %% normalize/linearize mean matrix
 full_norm = (comp-nanmean(comp(:)))./nanstd(comp(:));
 if isfield(out,'c')
-    linmean = 1./(1+exp(out.c(1)*full_norm+out.c(2)));
+    linmean = feval(out.mean_trans_fun,full_norm,out.c);
+%     linmean = 1./(1+exp(out.c(1)*full_norm+out.c(2)));
     % Compare linearized for logreg
-    me = out.m;
-    figure; histogram(me,100)
+    figure; histogram(out.m,100)
     hold on; histogram(linmean,100)
     title('Normalized & linearized for log reg')
     legend('original means','complete data')
-    saveas(gcf,[filepath '/' name '/' name '_Histogram_linearized.tif'])
+    saveas(gcf,[filepath filesep name filesep name '_Histogram_linearized.tif'])
 end
 
 

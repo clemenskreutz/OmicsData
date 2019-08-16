@@ -7,6 +7,9 @@ dat_mis = get(O,'data_mis');
 % Save directory
 path = get(O,'path');
 [filepath,name] = fileparts(path);
+if isempty(filepath)
+    filepath = '.';
+end
 % Remove existing figures (Matlab does not overwrite images)
 if exist([filepath '\' name '\' name '_SimulatedMissingPattern_1.png'],'file')
     delete([filepath '\' name '\' name '_SimulatedMissingPattern*.png']);
