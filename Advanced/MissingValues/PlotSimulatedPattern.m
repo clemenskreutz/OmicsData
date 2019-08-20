@@ -13,14 +13,17 @@ end
 % Remove existing figures (Matlab does not overwrite images)
 if exist([filepath '\' name '\' name '_SimulatedMissingPattern_1.png'],'file')
     delete([filepath '\' name '\' name '_SimulatedMissingPattern*.png']);
+else
+    mkdir(filepath, name)
 end
 
 % Sort for plotting
 [~,idx] = sort(sum(isnan(dat),2));
 dat = dat(idx,:);
 dat = dat(~all(isnan(dat),2),:);
-comp = get(O,'data_full');  % Complete matrix is used for pattern simu
+comp = get(O,'data_complete');  % Complete matrix is used for pattern simu
 fileID = fopen([filepath filesep name filesep '%Mis.txt'],'w');
+fprintf(fileID,'%s\t%s\n','MV in original','MV in pattern');
 
 for b=1:size(dat_mis,3)
     A = dat_mis(:,:,b);
@@ -46,7 +49,7 @@ for b=1:size(dat_mis,3)
     h2 = subplot(1,3,2);
     nr = size(comp,1);
     nc = size(comp,2);
-    pcolor([comp(:,:,b) nan(nr,1); nan(1,nc+1)]);
+    pcolor([comp nan(nr,1); nan(1,nc+1)]);
     shading flat;
     caxis manual
     caxis([min(nanmin(dat)) max(nanmax(dat))]);
@@ -73,9 +76,9 @@ for b=1:size(dat_mis,3)
     set(gca,'FontSize', 20)
     print(gcf,[filepath '/' name '/' name '_SimulatedMissingPattern_' num2str(b)],'-dpng');%,'-r1000')
 
-    misdat = sum(sum(isnan(dat)))/size(dat,1)/size(dat,2)
-    misA = sum(sum(isnan(A)))/size(A,1)/size(A,2)
-    fprintf(fileID,'%i\t%i\n',misdat,misA);
+    misori = sum(sum(isnan(dat)))/size(dat,1)/size(dat,2)
+    mispat = sum(sum(isnan(A)))/size(A,1)/size(A,2)
+    fprintf(fileID,'%i\t%i\n',misori,mispat);
     
 end
 fclose(fileID);

@@ -70,12 +70,18 @@ if isfield(O,'data_imput') && ~isempty(get(O,'data_imput'))
     else
         p = get(O,'path');
         delete([p(1:end-4) '.mat']);
-        rmdir(p(1:end-4));
+        A = dir(p);
+        for k = 1:length(A)
+            delete([p filesep A(k).name])
+        end
     end
 else
     p = get(O,'path');
     delete([p(1:end-4) '.mat']);
-    rmdir(p(1:end-4));
+    A = dir(p);
+    for k = 1:length(A)
+        delete([p filesep A(k).name])
+    end
 end
 
 %Paper_plots(O);

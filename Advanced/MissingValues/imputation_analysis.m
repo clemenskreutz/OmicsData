@@ -16,63 +16,42 @@ end
 
 
 % Get variables from class
-dat = get(O,'data_full');                % Complete dataset without missing values, to compare "right" solution
-dat_sim_mis = get(O,'data_mis');         % simulated missing values
-mispat = isnan(dat_sim_mis);             % simulated missing pattern                
-Imp = get(O,'data_imput');               % Imputed data
+dat = get(O,'data_complete');                % Complete dataset without missing values, to compare "right" solution
+dat_mis_ges = get(O,'data_mis');         % simulated missing values              
+dat_imp_ges = get(O,'data_imput');               % Imputed data
 method = get(O,'method_imput');
 t = get(O,'time_imput'); 
 
 
-if ~isempty(Imp)
-    mispat = double(mispat);
-    mispat(mispat==0)=nan;
-    n_mis_row_rel = round(1- sum(isnan(mispat),2)/size(mispat,2),1);
-    n_mis_row = sum(isnan(dat_sim_mis),2);
+if ~isempty(dat_imp_ges)
 
-    % No method double ? Can happen by trying stuff.
-    if length(unique(method)) < length(method)
-        [uniqueM,~,ind] = unique(method);
-        repeatedM = uniqueM(histc(ind,1:max(ind))>1);
-        for i=1:length(repeatedM)
-            [~,idxdouble] = find(strcmp(method,repeatedM{i}));
-            method(idxdouble(2)) = [];
-            Imp(:,:,:,idxdouble(2)) = [];
-            O = set(O,'data_imput',Imp);
-            O = set(O,'method_imput',method);
-        end
-    end
+%     % No method double ? Can happen by trying stuff.
+%     if length(unique(method)) < length(method)
+%         [uniqueM,~,ind] = unique(method);
+%         repeatedM = uniqueM(histc(ind,1:max(ind))>1);
+%         for i=1:length(repeatedM)
+%             [~,idxdouble] = find(strcmp(method,repeatedM{i}));
+%             method(idxdouble(2)) = [];
+%             dat_imp_ges(:,:,:,idxdouble(2)) = [];
+%             O = set(O,'data_imput',dat_imp_ges);
+%             O = set(O,'method_imput',method);
+%         end
+%     end
 
-    % calculate just imputed values (before and after imputation)
-    dat_mis_ges = nan(size(mispat,1),size(mispat,2),size(mispat,3));
-    if length(size(dat))<3
-        for nn = 1:size(mispat,3)
-            dat_mis_ges(:,:,nn) = dat.*mispat(:,:,nn);
-        end
-    else
-        dat_mis_ges = dat.*mispat;
-    end
-    dat_imp_ges = nan(size(Imp,1),size(Imp,2),size(Imp,3),size(Imp,4));
-    for i=1:size(Imp,4)
-        dat_imp_ges(:,:,:,i) = Imp(:,:,:,i).*mispat;
-    end
     Tsave = nan(10,size(dat_imp_ges,4)+1,size(dat_mis_ges,3));
 
     for b=1:size(dat_mis_ges,3)
         dat_mis = dat_mis_ges(:,:,b);
         dat_imp = dat_imp_ges(:,:,b,:);
-        method = get(O,'method_imput');
+        
         % Columns of just imputed data
         Y = dat_mis(~isnan(dat_mis));
         X = nan(size(Y,1),size(dat_imp,4));
         for i=1:size(dat_imp,4)
             im = dat_imp(:,:,1,i);
-            %if all(all(isnan(im),2))
-            %    break
-            %end
             X(:,i) = im(~isnan(dat_mis));
         end
-        if length(Y)<10
+        if length(Y)<20 || sum(sum(~isnan(X)))<20
             continue
         end
         %% Table    
@@ -146,7 +125,7 @@ if ~isempty(Imp)
             %violin(Diffc,'facecolor',[0 0 1],'facealpha',1,'medc','','mc','k','bw',0.05);
             hold on;
             p2 = plot(T{6,2:end},'rd','MarkerFaceColor','r','LineWidth',1);
-            ylim([-0.02 5.05])
+%            ylim([-0.02 5.05])
             set(gca,'XTick',1:size(dat_imp,4)+1);
             set(gca,'XTickLabel',method,'XTickLabelRotation',45, 'FontSize',14);  
             ylabel('|Imputed - Original|', 'FontSize',14)
@@ -225,8 +204,8 @@ if ~isempty(Imp)
     histogram(dat_original)
     hold on
     histogram(dat)
-    histogram(dat_sim_mis)
-    histogram(Imp(:,:,:,idx(1)));
+    histogram(dat_mis_ges)
+    histogram(dat_imp_ges(:,:,:,idx(1)));
     legend('Original','Complete','Simulated','Imputed')
     print([filepath '/' name '/' name '_Histogram'],'-dpng','-r100');
     
