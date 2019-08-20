@@ -1,11 +1,7 @@
-%   A logistic regression model for the occurance of missing values
+%   A logistic regression model for the occurence of missing values
 %
 %       O       @OmicsData object
-%       
-%   If O has more than 1000 features, nboot bootstap subset of 1000
-%   features are drawn and the predictors are estimated nboot times for
-%   these subsets.
-%
+
 function out = LearnPattern(O)
 
 if ~exist('O','var')
@@ -59,6 +55,7 @@ for i=1:nboot
     end
     
     [X,y,type,typenames] = GetDesign(isna(ind,:),m(ind));
+    [X,y] = GetRegularization(X,m,y);
     
     % Log Reg
     [bfit,devfit,statsfit] = glmfit(X,y,'binomial','link','logit');
@@ -69,8 +66,8 @@ for i=1:nboot
 end
 
 % Generate output struct
-out.b = nanmean(b,2);
-out.dev = dev;
+out.b = nanmean(b,2);  % mean because not all are necessary
+out.dev = dev;         % not used, but saved for one pattern to check
 out.stats = stats;
 out.type = [0; type]; % offset gets type=0
 out.typenames = ['offset'; typenames];

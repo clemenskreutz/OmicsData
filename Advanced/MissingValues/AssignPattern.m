@@ -1,3 +1,17 @@
+% Assign MVs to complete matrix
+% with the logistic regression coefficients learned on the original data
+% in out = LearnPattern(O)
+%
+% O - OmicsData class object
+% out - logistic regression coefficients
+% npat - # patterns to simulate (if >1, 3D array is returned)
+%
+% Example:
+% out = LearnPattern(O);
+% O = GetComplete(O);
+% O = AssignPattern(O,out);
+
+
 function O = AssignPattern(O,out,npat)
 
 if ~exist('O','var')
@@ -33,9 +47,10 @@ m = feval(out.mean_trans_fun,m,out.lincoef);
 
 % Design matrix
 X = GetDesign(isna,m);
+%X = GetRegularization(X,m);
 
 % Initialize
-dat_mis = repmat(dat,1,1,npat);
+dat_patterns = nan(size(dat,1),size(dat,2),npat);
 
 for i=1:npat
     
@@ -49,13 +64,14 @@ for i=1:npat
     yhat = glmval( [b;brow], X, 'logit');
 
     % assign nans
-    p = reshape(yhat(1:size(isna,1)*size(isna,2)),size(isna,1),size(isna,2)); % here yhat from the rgularization is cut off
+    p = reshape(yhat(1:size(isna,1)*size(isna,2)),size(isna,1),size(isna,2)); % here yhat from regularization is cut off
     r = rand(size(p,1),size(p,2));
     dat_mis = dat;
     dat_mis(r<=p) = NaN;
     dat_patterns(:,:,i) = dat_mis;
 end
-sum(sum(isnan(dat_patterns)))/size(dat_patterns,1)/size(dat_patterns,2)
+
+%% Save
 O = set(O,'data',dat_patterns,'assign NA');
 O = set(O,'data_mis',dat_patterns);
 

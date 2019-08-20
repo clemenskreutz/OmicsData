@@ -30,4 +30,7 @@ legend('Original','Simulated','Location','northwest');
 
 % Save fig
 [path, name] = fileparts(path);
+if isempty(path)
+    path = pwd;
+end
 saveas(gcf,[path filesep name filesep 'MissingRowCol.tif'])
