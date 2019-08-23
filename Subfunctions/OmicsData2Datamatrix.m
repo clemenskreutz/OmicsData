@@ -84,7 +84,10 @@ for i=1:length(snames)
         % if shorter sample names fit to the fieldnames, don't assing it again:
         related{i} = setdiff(related{i},[related{1:(i-1)}]); % only chosing once, first match
     end
-    relatedNames{i} = strrep(fndata_resort(related{i}),snames{i},'');
+    relatedNames{i} = fndata_resort(related{i});
+%    relatedNames{i} = strrep(fndata_resort(related{i}),snames{i},'');  %
+%    did not work when Intensity is numbered by letters: IntensityA,
+%    IntensityB, ... then I is replaced by: ntensityA
 end
 tmp = [relatedNames{:}];
 uniDatNames = unique({tmp{:}});  % the fieldnames of the struct with data matrices
