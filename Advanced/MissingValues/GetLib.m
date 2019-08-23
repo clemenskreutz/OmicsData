@@ -1,4 +1,4 @@
-function lib = FindLib(algo)
+function lib = GetLib(algo)
 if strcmp(algo,'midastouch') || strcmp(algo,'rf') || strcmp(algo,'mean') || strcmp(algo,'norm') || strcmp(algo,'ri') || strcmp(algo,'pmm') || strcmp(algo,'sample') || strcmp(algo,'cart')
     lib= 'mice';
 end
@@ -14,7 +14,7 @@ end
 if strcmp(algo,'MinDet') || strcmp(algo,'KNN') || strcmp(algo,'MinProb') || strcmp(algo,'QRILC')
     lib= 'imputeLCMD';
 end
-if strcmp(algo,'SVTApproxImpute') || strcmp(algo,'SVTImpute') || strcmp(algo,'SVDImpute') || strcmp(algo,'knnImpute') || strcmp(algo,'lmImpute')
+if strcmp(algo,'SVTApproxImpute') || strcmp(algo,'SVTImpute') || strcmp(algo,'SVDImpute') || strcmp(algo,'kNNImpute') || strcmp(algo,'lmImpute')
     lib= 'imputation';
     %path = 'C://Users/Janine/Documents/Repositories/imputation';
 end

@@ -68,6 +68,15 @@ for i=1:npat
     r = rand(size(p,1),size(p,2));
     dat_mis = dat;
     dat_mis(r<=p) = NaN;
+
+    % Replace complete missingness
+    drin = find(all(isnan(dat_mis),2));
+    if sum(drin)>0
+        r = ceil(rand(sum(drin),1)*size(dat_mis,2));
+        for d = 1:length(drin)
+            dat_mis(drin(d),r(d)) = dat(drin(d),r(d));
+        end
+    end
     dat_patterns(:,:,i) = dat_mis;
 end
 

@@ -10,11 +10,12 @@ path = get(O,'path');
 if isempty(filepath)
     filepath = '.';
 end
+if ~exist([filepath filesep name],'dir')
+    mkdir(filepath,name)
+end
 % Remove existing figures (Matlab does not overwrite images)
 if exist([filepath '\' name '\' name '_SimulatedMissingPattern_1.png'],'file')
     delete([filepath '\' name '\' name '_SimulatedMissingPattern*.png']);
-else
-    mkdir(filepath, name)
 end
 
 % Sort for plotting

@@ -5,10 +5,7 @@ function [O,algo] = GetRankTable(O)
 method = get(O,'method_imput');
 Tab = get(O,'Table');
 Tab = Tab(:,2:end,:); % clear 0 first column
-boot = get(O,'boot');
-if isempty(boot)
-    boot = 1;
-end
+npat = size(Tab,3);
 
 %% find lowest rank
 % if size(Tab,1)==11
@@ -16,15 +13,15 @@ end
 % else
     n=6;
 % end
-idx = ones(boot,size(Tab,2))*size(Tab,2);    
-idboot = zeros(boot,size(Tab,2));
-for b=1:boot
+idx = ones(npat,size(Tab,2))*size(Tab,2);    
+idboot = zeros(npat,size(Tab,2));
+for b=1:npat
     [~,idx(b,:)] = sort(Tab(n,:,b),'MissingPlacement','last'); 
     idx(b,end-sum(isnan(Tab(n,:,b)))+1:end) = size(Tab,2);
     idboot(b,idx(b,:)) = 1:size(Tab,2);
 end
 idboot(idboot==0) = size(Tab,2);
-if boot==1
+if npat==1
     [~,idxrank] = sort(idboot,2,'MissingPlacement','last'); 
 else
     [~,idxrank] = sort(sum(idboot),2,'MissingPlacement','last'); 
@@ -35,6 +32,8 @@ algo = method(idxrank);
 
 O = set(O,'RankTable',T);
 O = set(O,'RankMethod',algo);
+
+% plot Ranktable
 path = get(O,'path');
 [path,filename,~] = fileparts(path);
 save([path filesep filename filesep 'RankTable.mat'],'T','algo')
