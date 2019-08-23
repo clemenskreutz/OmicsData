@@ -9,22 +9,26 @@ if ~exist('O','var')
 end
 
 % Delete empty proteins for logreg
-drin = sum(isnan(O),2)<size(O,2);
+drin = 1:size(O,1); % sum(isnan(O),2)<size(O,2);
 O = O(drin,:);
 
 % Get data
 isna = isnan(O);
 m = nanmean(O,2);
-m = m-mean(m);  % centered
+m = m-nanmean(m);  % centered
 m = m./nanstd(m); % standardized
+
+mNotNan = m(~isnan(m));
 
 % Linearize mean
 mis = sum(isna,2)./size(isna,2);    
-mean_trans_fun = @(m,x)(1./(1+exp(x(1)*m+x(2))));
+mean_trans_fun = @(mNotNan,x)(1./(1+exp(x(1)*mNotNan+x(2))));
 x0=[-1;0];
-fun=@(x)(1./(1+exp(x(1)*m+x(2)))-mis);
-options = optimset('TolFun',1e-20,'TolX',1e-20);
+
+fun=@(x)(1./(1+exp(x(1)*mNotNan+x(2)))-mis(~isnan(m)));
+options = optimset('TolFun',1e-20,'TolX',1e-20);%,'Display','iter');
 [lincoef,~] = lsqnonlin(fun,x0,[],[],options);
+
 m = feval(mean_trans_fun,m,lincoef); 
 
 % Subsample indices
