@@ -6,6 +6,9 @@
 % This faktor controls the postion in vertical direction of the labels.
 
 function boxplot(O)
+% if ~exist('xtick','var')
+%     xtick = false;
+% end
 
 dat = get(O,'data');
 snames  = str2label(get(O,'snames'));
@@ -34,6 +37,9 @@ else % more than 60
 end
 boxplot(dat,'labels',snames,'labelorientation','inline');
 set(gca,'YGrid','on','LineWidth',1.5,'FontSize',9);
+% if xtick
+%     set(gca,'XTick',1:size(O,2),'XGrid','on');
+% end
 hlabel = findobj(gca,'FontSize',10);
 yl = ylim;
 for i=1:length(hlabel)

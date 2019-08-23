@@ -9,7 +9,7 @@
 function OmicsInit
 
 %% Folders to be added: (If new folders are added to the project, specify them here:
-subfolders = {'Advanced','Data','Development','MatlabTools','Plot','Rlink','Rfunctions','Subfunctions','Tools','user'};
+subfolders = {'Advanced','Data','Development','MatlabTools','Pipelines','Plot','Rlink','Rfunctions','Subfunctions','Tools','user'};
 
 
 %% Adding subfolders to Matlab's search path:

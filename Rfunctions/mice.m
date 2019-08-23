@@ -1,4 +1,4 @@
-% y = mice(x,method)
+% y = mice(x,method,[seed])
 %
 %   This function generates a single realization of the mice imputation
 %   algorithm.
@@ -31,10 +31,14 @@
 %         2lonly.norm	numeric	Level-2 class normal
 %         2lonly.pmm	any     Level-2 class predictive mean matching
 
-function y = mice(x, method)
+function y = mice(x, method, seed)
 if ~exist('method','var') || isempty(method)
     method = 'pmm';
 end
+if ~exist('seed','var') || isempty(seed)
+    seed = ceil(rand*10000);  % random
+end
+
 
 if min(sum(~isnan(x),2))==0
     find(sum(~isnan(x),2)==0)
@@ -46,6 +50,8 @@ global OPENR
 openR
 OPENR.libraries{end+1} = 'mice';
 putRdata('x',x);
+putRdata('seed',seed);
+evalR('set.seed(seed)')
 evalR(['x2 <- as.matrix(complete(mice(x, m=1, method = "' method '")))']);
 y = getRdata('x2');
 closeR

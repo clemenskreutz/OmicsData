@@ -18,7 +18,7 @@
 %               variance prior.
 %               priorweight=0 coincides with unregularized regression
 
-function [p,t,fold,varest] = regress_reg(O,X,varprior,priorw)
+function [p,t,fold,varest,foldSE] = regress_reg(O,X,varprior,priorw)
 % varprior = median(varprior);
 if ~exist('priorw','var') || isempty(priorw)
     priorw = 0;
@@ -51,7 +51,7 @@ else
 end
 
 try
-    [fold,bSE,p,dummy,t,varest] = regress_reg(y',XwInter,varprior,priorw);
+    [fold,foldSE,p,dummy,t,varest] = regress_reg(y',XwInter,varprior,priorw);
     
 catch ERR
     save error
@@ -62,10 +62,12 @@ if interAdded==1
     p = p(2:end,:)';
     t = t(2:end,:)';
     fold = fold(2:end,:)';
+    foldSE = foldSE(2:end,:)';
 else
     p = p';
     t = t';
     fold = fold';
+    foldSE = foldSE';
     varest = varest';
 end
 

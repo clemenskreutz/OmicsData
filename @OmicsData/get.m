@@ -35,7 +35,7 @@ else
     switch lower(prop)  % misspecification of upper/lower cases is allowed in get (but not in set)
         case {'nna','nnan'}
             varargout = sum(isnan(get(O,'data')),2);
-        case {'propna','propnan','freqna','freqnan'}
+        case {'propna','propnan','freqna','freqnan','antna'}
             varargout = sum(isnan(get(O,'data')),2)/size(get(O,'data'),2);
             
         case 'data'
@@ -55,6 +55,9 @@ else
                 warning('Default row specified by O.config.default_row does not exist in O.rows. Did you change this property?')
                 rethrow(ERR)
             end
+            
+        case 'ids'
+            varargout = get(O,'MajorityproteinIDs');
             
         case {'featurenames','fnames'}
             try

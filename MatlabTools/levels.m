@@ -1,10 +1,11 @@
 % l = levels(df);
 % Ermittelt die Levels l des discreten Faktors df.
 % 
-% [l,anz] = levels(df)
+% [l,anz,ilev] = levels(df)
 %   anz     Anzahl der entlevels l in df.
+%   ilev    lev(i) indicates the level of df(i)
 
-function [l,anz] = levels(df)
+function [l,anz,ilev] = levels(df)
 
 if(~isempty(df))
     if iscell(df) && sum(cellfun(@iscell,df))>0  % same cells are again cells
@@ -45,7 +46,8 @@ if(~isempty(df))
         [~,anz] = levels(ib);
     elseif(iscell(df)) %strings
 %     if(iscell(df)) %strings
-		nan = find(cellempty(df));
+% 		nan = find(cellempty(df));
+        nan = find(cellfun('isempty',df));
 		df(nan) = [];
         if(~isempty(df))
 			l{1} = df{1};
@@ -65,13 +67,15 @@ if(~isempty(df))
         end
 	else  % numerisch
 		nan = find(isnan(df));
-		df(nan) = [];
-        if(~isempty(df))
-			l(1) = df(1);
-			for i=2:length(df)
-%                 if(isempty(find(abs(df(i)-l)<eps)))
-                if(isempty(find(df(i)==l)))
-                    l(length(l)+1) = df(i);
+        dfnum = df;
+        
+		dfnum(nan) = [];
+        if(~isempty(dfnum))
+			l(1) = dfnum(1);
+			for i=2:length(dfnum)
+%                 if(isempty(find(abs(dfnum(i)-l)<eps)))
+                if(isempty(find(dfnum(i)==l)))
+                    l(length(l)+1) = dfnum(i);
                 end
 			end
             if(~isempty(nan))
@@ -102,6 +106,21 @@ if(nargout>1)
             else
                 anz(i) = sum(isnan(df));
             end            
+        end
+    end
+end
+
+if nargout>2
+    ilev = NaN(size(df));
+    for i=1:numel(df)
+        if isnumeric(df(i))
+            if ~isnan(df(i))
+                ilev(i) = find(l==df(i));
+            else
+                ilev(i) = find(isnan(l));
+            end
+        else
+            ilev(i) = strmatch(df(i),l,'exact');
         end
     end
 end
