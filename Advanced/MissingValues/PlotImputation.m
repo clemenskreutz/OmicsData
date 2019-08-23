@@ -14,11 +14,11 @@ end
 dat_imp = get(O,'data_imput');               % Imputed data
 dat_original = get(O,'data_original');           % Original input data
 method = get(O,'method_imput');
-T = get(O,'Table');
+Tab = get(O,'Table');
 path = get(O,'path');
 [filepath,name] = fileparts(path);
 
-if isempty(T)
+if isempty(Tab)
     warning('imputation_analysis.m: Table in class O is empty. Try running O = GetTable(O) first.')
 else
 
@@ -29,16 +29,16 @@ for b=1:size(dat_mis,3)
     X = nan(size(Y,1),size(dat_imp,4));
     for i=1:size(dat_imp,4)
         im = dat_imp(:,:,b,i);
-        X(:,i) = im(isnan(dat_mis));                 % for imputed data
+        X(:,i) = im(isnan(dat_mis(:,:,b)));                 % for imputed data
     end
     if length(Y)<20 || sum(sum(~isnan(X)))<20        % if too less data
         continue
     end
     
     %% Sort by RMSE
-    [~,idx] = sort(T(6,2:end),'MissingPlacement','last');
+    [~,idx] = sort(Tab(6,2:end,b),'MissingPlacement','last');
 
-    T = [T(:,1) T(:,idx+1)];
+    T = [Tab(:,1,b) Tab(:,idx+1,b)];
     dat_imp = dat_imp(:,:,:,idx);
 
     X = X(:,idx);
@@ -66,7 +66,7 @@ for b=1:size(dat_mis,3)
     set(gca,'XTick',1:size(dat_imp,4)+1);
     set(gca,'XTickLabel',method,'XTickLabelRotation',45, 'FontSize',14);  
     ylabel('|Imputed - Original|', 'FontSize',14)
-    legend(p2,'Location','northwest','RMSE')
+    legend(p2,'RMSE','Location','northwest')
     title('Imputation error', 'FontSize',18)
     %set(gca,'FontSize', 20)
     print([filepath '/' name '/' name '_Boxplot_Difference_' num2str(b)],'-dpng','-r100');

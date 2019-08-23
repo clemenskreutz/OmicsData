@@ -24,7 +24,7 @@ end
 npat = get(O,'npat',true);
 if isempty(npat)
     npat = size(data,3);
-    warning(['"npat" is set to ' num2str(npat) '.']);
+    fprintf(['"npat" is set to ' num2str(npat) '.']);
 end
 
 % initialize
@@ -192,10 +192,13 @@ for ii=1:npat
         %% Get imputation from R
         try
             tic
-            if strcmp(lib(i),'mice') || strcmp(lib(i),'Hmisc') || strcmp(lib(i),'VIM') || strcmp(lib(i),'Amelia')
-                ImpM(:,:,ii,i) = struct2array(getRdata('ImpR'));
+            if strcmp(lib(i),'softImpute') || strcmp(lib(i),'rrcovNA') || strcmp(lib(i),'missMDA')
+                ImpM(:,:,ii,i) = getRdata('ImpR');
+            elseif strcmp(lib(i),'VIM')
+                Imptemp = struct2array(getRdata('ImpR'));
+                ImpM(:,:,ii,i) = Imptemp(:,1:size(ImpM,2));  % VIM outputs [imputed_double,imputed_boolean] so columns are doubled
             else
-                ImpM(:,:,ii,i) = getRdata('ImpR');    
+                ImpM(:,:,ii,i) = struct2array(getRdata('ImpR'));
             end
             time(i) = toc;            
         catch
