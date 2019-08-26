@@ -1,5 +1,9 @@
 function WriteinR(lib,method)
 
+if iscell(method)
+    method = method{:};
+end
+
 % pcaMethods
 if strcmp(lib,'pcaMethods')
     evalR('dat[is.na(dat)] <- NA') 

@@ -35,19 +35,18 @@ time = nan(length(method),npat);
 for ii=1:npat
     dat = data(:,:,ii);
     
+    %% Remove not working algorithms
+    rem = [];
     if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
-        lib = lib(~strcmp(lib,'pcaMethods') || ~strcmp(lib,'imputeLCMD') || ~strcmp(lib,'Hmisc') || ~strcmp(lib,'Amelia'));
-        method = method(~strcmp(lib,'pcaMethods') || ~strcmp(lib,'imputeLCMD') || ~strcmp(lib,'Hmisc') || ~strcmp(lib,'Amelia'));
+        rem = find(ismember(lib,{'pcaMethods','imputeLCMD','Hmisc','Amelia'}));
         warning('Impute.m: Amelia, imputeLCMD, Hmisc and pcaMethods packages are skipped because there are more than 50% MV. Try other methods.')
-
     end
     da = dat;
     da(isnan(da))=0;
     sv = abs(svd(da));
     if min(sv) < max(sv)*1e-8
         warning('Impute.m: Amelia and ri are skipped because the matrix is singular. Try other methods.')
-        lib = lib(~strcmp(method,'ri') || ~strcmp(method,'amelia'));
-        method = method(~strcmp(method,'ri') || ~strcmp(method,'amelia'));
+        rem = [rem find(ismember(method,{'ri','Amelia'}))];
     end
     % rows with just NaNs?
 %     if get(O,'deleteemptyrows')
@@ -62,34 +61,40 @@ for ii=1:npat
 
 %% Loop over imputation algorithms    
     for i=1:length(method)    
+        if ~ismember(i,rem)
         
-        %% Write in R
-        putRdata('dat',dat);
-        OPENR.libraries{end} = lib{i};
-        WriteinR(lib(i),method(i))
-        
-        %% Get imputation from R
-        try
-            tic
-            Imptemp = getRdata('ImpR');
-            if isstruct(Imptemp)
-                Imptemp = struct2array(Imptemp);
-            end
-            if size(Imptemp,2)>size(ImpM,2)
-                Imptemp = Imptemp(:,1:size(Imptemp,2)/2);  % VIM outputs [imputed_double,imputed_boolean] so columns are doubled
-            end
-            ImpM(:,:,ii,i) = Imptemp;
-            time(i) = toc;            
-        catch
-            warning(['Imputation with ' method{i} ' in package ' lib{i} ' was not feasible.'])  
-        end    
+            %% Write in R
+            putRdata('dat',dat);
+            OPENR.libraries{end} = lib{i};
+            WriteinR(lib{i},method{i})
+
+            %% Get imputation from R
+            try
+                tic
+                Imptemp = getRdata('ImpR');
+                if isstruct(Imptemp)
+                    Imptemp = struct2array(Imptemp);
+                end
+                if size(Imptemp,2)>size(ImpM,2)
+                    Imptemp = Imptemp(:,1:size(Imptemp,2)/2);  % VIM outputs [imputed_double,imputed_boolean] so columns are doubled
+                end
+                ImpM(:,:,ii,i) = Imptemp;
+                time(i) = toc;            
+            catch
+                warning(['Imputation with ' method{i} ' in package ' lib{i} ' was not feasible.'])  
+            end    
+        end
     end
 end
 closeR;
 
 % Delte not working methods
-if any(all(all(all(isnan(ImpM)))))
-    idx = squeeze(all(all(all(isnan(ImpM)))));
+if any(any(all(all(isnan(ImpM)))))
+    if size(ImpM,3)>1
+        idx = squeeze(all(all(all(isnan(ImpM)))));
+    else
+        idx = squeeze(all(all(isnan(ImpM))));
+    end
     ImpM(:,:,:,idx) = [];
     method(idx) = [];
 end

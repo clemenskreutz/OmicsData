@@ -77,6 +77,7 @@ for b=1:size(dat_mis,3)
      figure; set(gcf,'units','normalized','outerposition',[0 0 .5 .8])                       
      methodhist = method(:,~all(isnan(X))); % if a method did not work
      X = X(:,~all(isnan(X)));
+     X(isinf(X)) = nanmax(nanmax(X(~isinf(X))));
      n = [1,round(size(X(~all(isnan(X))),2)/2),size(X(~all(isnan(X))),2)];
      bottom = 0; top = 13;
      myColorMap = jet(256);
