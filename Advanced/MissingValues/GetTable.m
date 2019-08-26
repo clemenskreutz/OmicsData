@@ -12,13 +12,14 @@ if isempty(dat_mis_ges)
     dat_mis_ges = get(O,'data');
 end
 dat_imp_ges = get(O,'data_imput');           % Imputed data
-method = get(O,'method_imput');
+meth = get(O,'method_imput');
+method = meth.name;
 t = get(O,'time_imput'); 
 
 
 if ~isempty(dat_imp_ges)
 
-    Tsave = nan(10,size(dat_imp_ges,4)+1,size(dat_mis_ges,3));
+    Tsave = nan(11,size(dat_imp_ges,4)+1,size(dat_mis_ges,3));
 
     for b=1:size(dat_mis_ges,3)
         dat_mis = dat_mis_ges(:,:,b);
@@ -36,13 +37,14 @@ if ~isempty(dat_imp_ges)
         end
         
         % Initialize 
-        T = table([nanmean(Y);nanstd(Y);nanmin(Y);nanmax(Y);0;0;0;0;0;0]);
+        T = table([nanmean(Y);nanstd(Y);nanmin(Y);nanmax(Y);0;0;0;0;0;0;0]);
         T.Properties.VariableNames = {'original'};
-        T.Properties.RowNames = {'mean','std','min','max','MeanError','RMSE','F','Acc','PCC','time'};
+        T.Properties.RowNames = {'mean','std','min','max','MeanError','RMSE','RSR','F','Acc','PCC','time'};
         Diffm = nan(size(X,1),size(dat_imp,4));
         Diffrel = nan(size(X,1),size(dat_imp,4));
         Acc = nan(size(X,1),size(dat_imp,4));
         RMSE = nan(size(dat_imp,4),1);
+        RSR = nan(size(dat_imp,4),1);
         F = nan(size(dat_imp,4),1);
         PCC = corrcoef([Y X],'Rows','complete');
         
@@ -58,9 +60,10 @@ if ~isempty(dat_imp_ges)
             MeanDiff = nansum(nansum(Diffm(:,i)))/size(Y,1);
             
             RMSE(i) = sqrt(Quad/size(Y,1)); 
+            RSR(i) = RMSE(i)./nanstd(dat(:));
             F(i) = nansum((X(:,i)-nanmean(X(:,i))).^2)/sum(~isnan(X(:,i)))/nansum((Y-nanmean(Y)).^2)*sum(~isnan(Y));
             Acc(i) = length(find(Diffrel(:,i)<0.05))/size(Y,1)*100;   % #values <5% deviation to original value
-            T = [T table([nanmean(X(:,i)); nanstd(X(:,i)); nanmin(X(:,i)); nanmax(X(:,i)); Dev; RMSE(i); F(i); Acc(i); PCC(i+1,1); t(i)])];
+            T = [T table([nanmean(X(:,i)); nanstd(X(:,i)); nanmin(X(:,i)); nanmax(X(:,i)); Dev; RMSE(i); RSR(i); F(i); Acc(i); PCC(i+1,1); t(i)])];
             T.Properties.VariableNames(i+1) = method(i);
         end
         Tsave(:,:,b) = T{:,:};

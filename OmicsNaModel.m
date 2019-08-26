@@ -30,7 +30,7 @@ errorbar(1:length(b),b,stats.se,'o')
 ylabel('p_{est}')
 title('parameters')
 axis tight
-abplot(0,0)
+%abplot(0,0)
 subplot(5,1,2)
 imagesc(X(1:100:end,:))
 ylabel('data points')

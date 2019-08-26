@@ -2,7 +2,8 @@
 function [O,algo] = GetRankTable(O)
 
 %% Get
-method = get(O,'method_imput');
+meth = get(O,'method_imput');
+method = meth.name;
 Tab = get(O,'Table');
 Tab = Tab(:,2:end,:); % clear 0 first column
 npat = size(Tab,3);

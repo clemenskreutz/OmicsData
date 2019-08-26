@@ -24,7 +24,7 @@ end
 npat = get(O,'npat',true);
 if isempty(npat)
     npat = size(data,3);
-    fprintf(['"npat" is set to ' num2str(npat) '.']);
+    fprintf(['Number of pattern simulations is expected to be ' num2str(npat) '.\n']);
 end
 
 % initialize
@@ -35,6 +35,20 @@ time = nan(length(method),npat);
 for ii=1:npat
     dat = data(:,:,ii);
     
+    if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
+        lib = lib(~strcmp(lib,'pcaMethods') || ~strcmp(lib,'imputeLCMD') || ~strcmp(lib,'Hmisc') || ~strcmp(lib,'Amelia'));
+        method = method(~strcmp(lib,'pcaMethods') || ~strcmp(lib,'imputeLCMD') || ~strcmp(lib,'Hmisc') || ~strcmp(lib,'Amelia'));
+        warning('Impute.m: Amelia, imputeLCMD, Hmisc and pcaMethods packages are skipped because there are more than 50% MV. Try other methods.')
+
+    end
+    da = dat;
+    da(isnan(da))=0;
+    sv = abs(svd(da));
+    if min(sv) < max(sv)*1e-8
+        warning('Impute.m: Amelia and ri are skipped because the matrix is singular. Try other methods.')
+        lib = lib(~strcmp(method,'ri') || ~strcmp(method,'amelia'));
+        method = method(~strcmp(method,'ri') || ~strcmp(method,'amelia'));
+    end
     % rows with just NaNs?
 %     if get(O,'deleteemptyrows')
 %         idxnan = find(all(isnan(dat),2));
@@ -49,157 +63,22 @@ for ii=1:npat
 %% Loop over imputation algorithms    
     for i=1:length(method)    
         
+        %% Write in R
         putRdata('dat',dat);
         OPENR.libraries{end} = lib{i};
-        
-        % pcaMethods
-        if strcmp(lib(i),'pcaMethods')
-            if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
-                evalR('dat[is.na(dat)] <- NA') 
-                evalR('if (sum(rowSums(is.na(dat))>=ncol(dat))>0) { ImpR <- {} } else {')
-                evalR(['I <- pca(dat,method="' method{i} '")'])
-                evalR('ImpR <- completeObs(I) }')           
-            else
-                return
-            end
-
-        % missMDA
-        elseif strcmp(lib(i),'missMDA')
-            evalR('dat <- data.frame(dat)');  
-            if ~isempty(strfind(method{i},'MIPCA'))
-                evalR(['imp <- ' method{i} '(dat,nboot=1)']);    
-                evalR('ImpR <- imp$res.imputePCA');
-            else
-                evalR(['imp <- ' method{i} '(dat)']);  
-                evalR('ImpR <- imp$completeObs');
-            end              
-
-        % rrcovNA
-        elseif strcmp(lib(i),'rrcovNA')
-            if ~isempty(strfind(method{i},'SeqRob'))
-                evalR(['imp  <- imp' method{i} '(dat)'])
-                evalR('ImpR <- imp$x')
-            else
-                evalR(['ImpR <- imp' method{i} '(dat)'])
-            end
-
-        % VIM
-        elseif strcmp(lib(i),'VIM')
-            evalR('dat<-as.matrix(dat)');
-            evalR(['ImpR <- ' method{i} '(dat)']);
-
-
-        % softImpute
-        elseif strcmp(lib(i),'softImpute')
-            evalR('dat <- as.matrix(dat)') 
-            evalR('f <- softImpute(dat)');
-            evalR('ImpR <- complete(dat,f)');
-
-        % LCMD
-        elseif strcmp(lib(i),'imputeLCMD')
-            
-            if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))    
-                evalR('dat <- data.matrix(dat)')
-                if ~isempty(strfind(method{i},'KNN'))
-                    evalR('ImpR <- impute.wrapper.KNN(dat,K=10)')
-                elseif ~isempty(strfind(method{i},'MLE'))
-                    evalR('ImpR <- impute.wrapper.MLE(dat)')
-                elseif ~isempty(strfind(method{i},'QRILC'))
-                    evalR('ImpR <- impute.QRILC(dat)[[1]]')
-                else
-                    evalR(['ImpR <- impute.' method{i} '(dat)'])
-                end
-            else
-                return
-            end
-        % jeffwong
-        elseif strcmp(lib(i),'imputation')               
-            if ~isempty(strfind(method{i},'SVD'))
-                evalR(['ImpR <- ' method{i} '(dat, k=3)$x']);
-            elseif ~isempty(strfind(method{i},'kNN'))
-                evalR(['ImpR <- ' method{i} '(dat, k=3)$x']);
-            elseif ~isempty(strfind(method{i},'SVT'))
-                evalR(['ImpR <- ' method{i} '(dat,lambda=3)$x']);
-            else
-                evalR(['I' num2str(i) ' <- ' method{i} '(dat)']);
-                evalR(['ImpR <- I' num2str(i) '$x']);
-            end    
-
-        % MICE
-        elseif strcmp(lib(i),'mice')                
-            if strcmp(method,'ri')
-                da = dat;
-                da(isnan(da))=0;
-                sv = abs(svd(da));
-                if min(sv) < max(sv)*1e-8
-                    warning('ri in mice is skipped because the matrix is singular. Try another method.')
-                    continue
-                end
-            end
-            evalR(['I <- mice(dat, m=1, method = "' method{i} '")']);
-            evalR('ImpR <- complete(I)');
-            % if too many missing values, not all are capture due to multicollinearity, run a second time then
-            %evalR(['if (sum(is.na(ImpR))>0) { I' num2str(i) ' <- mice(ImpR, m=1, method = "' method{i} '")']);
-            %evalR(['ImpR <- complete(I' num2str(i) ')}']);
-            % if it still has missing values, ignore this method
-            evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }');
-
-        % Amelia (Expectation maximization with bootstrap)
-        elseif strcmp(lib(i),'Amelia')
-            if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
-                da = dat;
-                da(isnan(da))=0;
-                sv = abs(svd(da));
-                if min(sv) < max(sv)*1e-8
-                    warning('Amelia is skipped because the matrix is singular. Try another method.')
-                else
-                    evalR('f <- amelia(dat, m=1, ps2=0)');
-                    evalR('ImpR <- f$imputations[[1]]');
-                    evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }');
-                end
-            else
-                return
-            end
-
-        % missForest
-        elseif strcmp(lib(i),'missForest')
-            evalR('f <- missForest(dat)');
-            evalR('ImpR <- f$ximp');
-
-        % Hmisc
-        elseif strcmp(lib(i),'Hmisc')
-            if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
-                evalR('dat <- data.frame(dat)');
-                formula = '~ X1';
-                for j=2:size(dat,2)
-                    formula = [formula ' + X' num2str(j)];
-                end
-                evalR(['f' num2str(i) ' <- aregImpute(' formula ', data=dat, n.impute=1, type="' method{i} '")']);
-                evalR(['ImpR <- impute.transcan(f' num2str(i) ', imputation=TRUE, data=dat, list.out = TRUE)']);
-            else
-                return
-            end
-
-        % DMwR
-        elseif strcmp(lib(i),'DMwR')
-            evalR('ImpR <- knnImputation(dat)');
-
-        % other    
-        else
-            error(['Impute_R.m: library ' lib{i} ' is not recognized. Expand code here.'])
-        end
+        WriteinR(lib(i),method(i))
         
         %% Get imputation from R
         try
             tic
-            if strcmp(lib(i),'softImpute') || strcmp(lib(i),'rrcovNA') || strcmp(lib(i),'missMDA')
-                ImpM(:,:,ii,i) = getRdata('ImpR');
-            elseif strcmp(lib(i),'VIM')
-                Imptemp = struct2array(getRdata('ImpR'));
-                ImpM(:,:,ii,i) = Imptemp(:,1:size(ImpM,2));  % VIM outputs [imputed_double,imputed_boolean] so columns are doubled
-            else
-                ImpM(:,:,ii,i) = struct2array(getRdata('ImpR'));
+            Imptemp = getRdata('ImpR');
+            if isstruct(Imptemp)
+                Imptemp = struct2array(Imptemp);
             end
+            if size(Imptemp,2)>size(ImpM,2)
+                Imptemp = Imptemp(:,1:size(Imptemp,2)/2);  % VIM outputs [imputed_double,imputed_boolean] so columns are doubled
+            end
+            ImpM(:,:,ii,i) = Imptemp;
             time(i) = toc;            
         catch
             warning(['Imputation with ' method{i} ' in package ' lib{i} ' was not feasible.'])  
@@ -215,13 +94,29 @@ if any(all(all(all(isnan(ImpM)))))
     method(idx) = [];
 end
 
+% Are nans or infs in imputation?
+isna = zeros(length(method),1);
+isin = zeros(length(method),1);
+for i=1:length(method)
+    if any(any(isnan(ImpM(:,:,:,i))))
+        isna(i) = 1;
+    end
+    if any(any(isinf(ImpM(:,:,:,i))))
+        isin(i) = 1;
+    end
+end
+meth = struct;
+meth.name = method;
+meth.isna = isna;
+meth.isin = isin;
+
 %% Save result
 if exist('ImpM','var') && ~isempty(ImpM)
     if isfield(O,'data_imput') && ~isempty(O,'data_imput')
         Imp = get(O,'data_imput');
         Imp(:,:,1:size(ImpM,3),(size(Imp,4)+1):(size(Imp,4)+size(ImpM,4))) = ImpM;
-        method = [get(O,'method_imput'),method];
-        if size(Imp,4)~=size(method,2)
+        meth = [get(O,'method_imput'),meth];
+        if size(Imp,4)~=length(meth)
             error('ImputePattern.m: Dimensions of imputation matrix and imputation algorithms does not match. Check here!')
         end
         time = [get(O,'time_imput');nanmean(time,2)];
@@ -231,9 +126,9 @@ if exist('ImpM','var') && ~isempty(ImpM)
     
     % Save
     O = set(O,'data_imput',Imp,'Imputed with R packages');
-    O = set(O,'method_imput',method);
+    O = set(O,'method_imput',meth);
     O = set(O,'time_imput',time);
     
     O = GetTable(O);
-    O = GetRankTable(O);
+    %O = GetRankTable(O);
 end 

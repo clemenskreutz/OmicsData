@@ -17,8 +17,8 @@
 % hist([dat(:),dat2(:)],100)
 
 function dat = DrawMissingsLazar(dat,alpha,beta,sigT)
-if ~exist('sigT','var') || isempty(muT)
-    sigT = sqrt(0.01);  % in the paper sigT=0.01 which makes no sense, I guess sigT^2=0.01
+if ~exist('sigT','var') || isempty(sigT)
+    sigT = 1;%sqrt(0.01);  % in the paper sigT=0.01 which makes no sense, I guess sigT^2=0.01
 end
 if beta<0 || beta>1 
     error('beta<0 || beta>1 ');

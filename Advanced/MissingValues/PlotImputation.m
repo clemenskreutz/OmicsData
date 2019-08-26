@@ -13,7 +13,8 @@ if isempty(dat_mis)
 end
 dat_imp = get(O,'data_imput');               % Imputed data
 dat_original = get(O,'data_original');           % Original input data
-method = get(O,'method_imput');
+meth = get(O,'method_imput');
+method = meth.name;
 Tab = get(O,'Table');
 path = get(O,'path');
 [filepath,name] = fileparts(path);

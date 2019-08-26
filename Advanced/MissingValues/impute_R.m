@@ -20,14 +20,14 @@ if ~exist('data','var') || isempty(data)
     data = get(O,'data'); 
 end
 ImpM = nan(size(data,1),size(data,2),size(data,3),length(method));
-bootst = get(O,'boot');
-if isempty(bootst)
-    bootst = size(data,3);
-    warning(['"boot" is set to ' num2str(bootst) '.']);
+npatst = get(O,'npat');
+if isempty(npatst)
+    npatst = size(data,3);
+    warning(['"npat" is set to ' num2str(npatst) '.']);
 end
 
-for boot=1:bootst
-    dat = data(:,:,boot);
+for npat=1:npatst
+    dat = data(:,:,npat);
     % rows with just NaNs?
     if get(O,'deleteemptyrows')
         idxnan = find(all(isnan(dat),2));
@@ -61,7 +61,7 @@ for boot=1:bootst
             for i=1:length(method)
                 evalR('dat <- data.frame(dat)');  
                 if ~isempty(strfind(method{i},'MIPCA'))
-                    evalR(['imp <- ' method{i} '(dat,nboot=1)']);    
+                    evalR(['imp <- ' method{i} '(dat,nnpat=1)']);    
                     evalR(['ImpR' num2str(i) ' <- imp$res.imputePCA']);
                 else
                     evalR(['imp <- ' method{i} '(dat)']);  
@@ -151,7 +151,7 @@ for boot=1:bootst
                 %method{i} = [lib '_' method{i}];
             end
 
-    % Amelia (Expectation maximization with bootstrap)
+    % Amelia (Expectation maximization with npatstrap)
     elseif strcmp(lib,'Amelia')
         if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
                 da = dat;
@@ -222,7 +222,7 @@ for boot=1:bootst
                 %if ~exist('ImpM','var')
                 %    ImpM = ImpR;
                 %else
-                    ImpM(:,:,boot,i) = ImpR;
+                    ImpM(:,:,npat,i) = ImpR;
                 %end
             else
                 warning(['Imputation with ' method{i} ' in package ' lib ' is not saved because it still contained missing values (possibly due to a full row of missing values). Try another method or delete rows without a value.'])

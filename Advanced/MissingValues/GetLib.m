@@ -2,6 +2,12 @@ function lib = GetLib(algo)
 if strcmp(algo,'midastouch') || strcmp(algo,'rf') || strcmp(algo,'mean') || strcmp(algo,'norm') || strcmp(algo,'ri') || strcmp(algo,'pmm') || strcmp(algo,'sample') || strcmp(algo,'cart')
     lib= 'mice';
 end
+if strcmp(algo,'knn')
+    lib= 'impute';
+end
+if strcmp(algo,'impnorm')
+    lib= 'norm';
+end
 if strcmp(algo,'Amelia')
     lib = 'Amelia';
 end

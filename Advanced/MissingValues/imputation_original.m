@@ -16,7 +16,7 @@ function O = imputation_original(O)
 %% find lowest ranked algo
 [O,algos] = GetRankTable(O);
 algo = algos{1};
-lib = FindLib(algo);
+lib = GetLib(algo);
 
 %% Load O new 
 %because simulated pattern was much smaller, and also names etc. were shortened

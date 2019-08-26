@@ -9,7 +9,7 @@
 function out = LogisticNanModel(O)
 
 if ~exist('O','var')
-    error('MissingValues/LogisticNanModel.m requires class O as input argument.')
+    error('MissingValues/LogisticNanModel.m requires class O as global variable or input argument.')
 end
 
 isna = isnan(O);
@@ -46,14 +46,18 @@ m = m-mean(m);  % centered
 m = m./nanstd(m); % standardized
 
 % Linearize mean
-mis = sum(isna,2)./size(isna,2);
+ mis = sum(isna,2)./size(isna,2);
 
+%x0=[0.5;-1];
+%x0=[min(m)/max(m);-min(m)];
 x0=[-1;0];
 fun=@(x)(1./(1+exp(x(1)*m+x(2)))-mis);
+%fun=@(x)(exp(x(1)*m+x(2))./(1+exp(x(1)*m+x(2)))-mis);
 options = optimset('TolFun',1e-20,'TolX',1e-20);
+%options = optimset('MaxFunEval',10000,'MaxIter',5000);
 [x,~] = lsqnonlin(fun,x0,[],[],options);
-mean_trans_fun = @(m,x)(1./(1+exp(x(1)*m+x(2))));
-mexp = feval(mean_trans_fun,m,x); 
+%[x,~] = lsqnonlin(fun,x0);
+mexp = 1./(1+exp(x(1)*m+x(2))); 
 %mis = mis+rand(size(isna,1),1)*0.1;
 
 figure
@@ -61,12 +65,12 @@ subplot(1,2,1)
 plot(m,mis,'.')
 hold on; 
 plot(m,mexp,'.')
-xlabel('standardized mean protein intensity m_p')
-ylabel('missing values [%]')
+xlabel('mean protein intensity m_p')
+ylabel('Missing values [%]')
 ylim([0 1])
 legend('data','logistic fit')
 
-m = mexp;                   % linearized mean for logreg
+m = mexp;     % negative, so that coefficients are interpretable (same slope)
 
 lc = polyfit(m,mis,1);
 lf = polyval(lc,m);
@@ -76,16 +80,12 @@ plot(m,mis,'.') % linearized data
 hold on;
 plot(m,lf) % linear fit
 xlabel('$\frac{1}{1+e^{b* m_p +c}}$','Interpreter','latex')
-ylabel('missing values [%]')
+ylabel('Missing values [%]')
 ylim([0 1])
 legend('linearized data','linear fit')
 
 path = get(O,'path');
 [filepath,name] = fileparts(path);
-if isempty(filepath)
-    filepath = '.';
-end
-
 if exist([filepath '\' name '\' name '_SimulatedMissingPattern_1.png'],'file')
     delete([filepath '\' name '\' name '_IntensityShift.png']);
 else
@@ -129,32 +129,65 @@ if nfeat>1000
         out.current{i} = ind;
         out.timing(i) = toc;
         out.b(1:length(out_tmp.b),i) = out_tmp.b;
-        out.se(1:length(out_tmp.stats.se),i) = out_tmp.stats.se;
-        out.type(1:length(out_tmp.type),i) = out_tmp.type;
+        out.se(1:length(out_tmp.b),i) = out_tmp.stats.se;
+        out.type(1:length(out_tmp.b),i) = out_tmp.type;
+        
+%         if i==1
+%             out.out1 = out_tmp;
+%         end
     end
 else
     out = LogisticNanModel_core(isna, m);
 end
-out.mean_trans_fun = mean_trans_fun;
 out.type_names = {'mean intensity dependency','column-dependency','rows-dependency','peptide counts'};
 if exist('coef','var')
     out.c = coef;
 end
-%O = set(O,'out',out,'Logistic regression output.');
+O = set(O,'out',out,'Logistic regression output.');
 %save out out
 
 
 function out = LogisticNanModel_core(isna,m)
+row  = ((1:size(isna,1))') * ones(1,size(isna,2));
+row  = row(:);
+col  = ones(size(isna,1),1)*(1:size(isna,2));
+col  = col(:);
 m = m(:);
 y = isna(:);
-[X,bnames,type] = LogisticNanModel_X(size(isna,1),size(isna,2),m);
-% regularization: add a 0 and a 1 for each parameter (-> regularization towards estimate 0 == probability 0.5)
+
+% initialize
+rlev = levels(row);
+clev = levels(col);
+type = NaN(1+length(rlev)+length(clev),1);
+bnames = cell(length(rlev)+length(clev)+1,1);
+c = 1;
+
+% Mean to X
+X = m; %[ones(size(m)),m];
+bnames{c} = 'mean';
+type(c) = 1; % mean-dependency
+
+X = [X,zeros(size(X,1),length(rlev)+length(clev))];
+for i=1:length(clev)
+    c = c+1;
+    X(col==clev(i),c) = 1;
+    bnames{c} = ['Column',num2str(i)];
+    type(c) = 2; % column-dependency
+end
+for i=1:length(rlev)
+    c = c+1;
+    X(row==rlev(i),c) = 1;
+    bnames{c} = ['Row',num2str(i)];
+    type(c) = 3; % row-dependency
+end
+
+
+%% regularization: add a 0 and a 1 for each parameter (-> regularization towards estimate 0 == probability 0.5)
 ind = 1;
 yreg = zeros(2*size(X,2),1);
 xreg = zeros(2*size(X,2),size(X,2));
-xreg(:,1) = median(m)*ones(size(xreg,1),1);  % for regularization set first column to median(intensity)
-for i=2:size(X,2)
-    xreg(ind:(ind+1),i) = 1;
+for i=1:size(X,2)
+    xreg(ind:(ind+1),i) = median(m);
     yreg(ind+1) = 1;
     ind = ind+2;
 end
