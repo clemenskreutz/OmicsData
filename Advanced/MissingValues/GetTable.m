@@ -64,7 +64,7 @@ if ~isempty(dat_imp_ges)
             F(i) = nansum((X(:,i)-nanmean(X(:,i))).^2)/sum(~isnan(X(:,i)))/nansum((Y-nanmean(Y)).^2)*sum(~isnan(Y));
             Acc(i) = length(find(Diffrel(:,i)<0.05))/size(Y,1)*100;   % #values <5% deviation to original value
             T = [T table([nanmean(X(:,i)); nanstd(X(:,i)); nanmin(X(:,i)); nanmax(X(:,i)); Dev; RMSE(i); RSR(i); F(i); Acc(i); PCC(i+1,1); t(i)])];
-            T.Properties.VariableNames(i+1) = method(i);
+            T.Properties.VariableNames(i+1) = erase(method(i),'.');
         end
         Tsave(:,:,b) = T{:,:};
     end

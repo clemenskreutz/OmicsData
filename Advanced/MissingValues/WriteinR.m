@@ -109,6 +109,12 @@ elseif strcmp(lib,'Hmisc')
 % DMwR
 elseif strcmp(lib,'DMwR')
     evalR('ImpR <- knnImputation(dat)');
+    
+% mi
+elseif strcmp(lib,'mi')
+    evalR('dat <- data.frame(dat)')
+    evalR('I <- mi(dat, n.chains=1)');
+    evalR('ImpR <- complete(I)[1:length(dat)]');
 
 % other    
 else

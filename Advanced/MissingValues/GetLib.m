@@ -2,10 +2,10 @@ function lib = GetLib(algo)
 if strcmp(algo,'midastouch') || strcmp(algo,'rf') || strcmp(algo,'mean') || strcmp(algo,'norm') || strcmp(algo,'ri') || strcmp(algo,'pmm') || strcmp(algo,'sample') || strcmp(algo,'cart')
     lib= 'mice';
 end
-if strcmp(algo,'knn')
+if strcmp(algo,'knn') || strcmp(algo,'impute.knn')
     lib= 'impute';
 end
-if strcmp(algo,'impnorm')
+if strcmp(algo,'impnorm') || strcmp(algo,'imp.norm')
     lib= 'norm';
 end
 if strcmp(algo,'Amelia')
@@ -38,4 +38,10 @@ if strcmp(algo,'Norm') || strcmp(algo,'Seq') || strcmp(algo,'SeqRob')
 end
 if strcmp(algo,'MIPCA') || strcmp(algo,'imputePCA')
     lib= 'missMDA';
+end
+if strcmp(algo,'mi')
+    lib= 'mi';
+end
+if strcmp(algo,'knnImputation')
+    lib= 'DMwR';
 end

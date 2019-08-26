@@ -37,7 +37,7 @@ for ii=1:npat
     
     %% Remove not working algorithms
     rem = [];
-    if sum(sum(isnan(dat)))< sum(sum(~isnan(dat)))
+    if sum(sum(isnan(dat)))> sum(sum(~isnan(dat)))
         rem = find(ismember(lib,{'pcaMethods','imputeLCMD','Hmisc','Amelia'}));
         warning('Impute.m: Amelia, imputeLCMD, Hmisc and pcaMethods packages are skipped because there are more than 50% MV. Try other methods.')
     end
