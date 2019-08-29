@@ -1,4 +1,4 @@
-function WriteinR(lib,method)
+function WriteinR(lib,method,nsamples)
 
 if iscell(method)
     method = method{:};
@@ -99,13 +99,17 @@ elseif strcmp(lib,'missForest')
 
 % Hmisc
 elseif strcmp(lib,'Hmisc')
-    evalR('dat <- data.frame(dat)')
-    formula = '~ X1';
-    for j=2:size(dat,2)
-        formula = [formula ' + X' num2str(j)];
+    if exist('nsamples','var') && ~isempty(nsamples)
+        evalR('dat <- data.frame(dat)')
+        formula = '~ X1';
+        for j=2:nsamples
+            formula = [formula ' + X' num2str(j)];
+        end
+        evalR(['f <- aregImpute(' formula ', data=dat, n.impute=1, type="' method '")'])
+        evalR('ImpR <- impute.transcan(f, imputation=TRUE, data=dat, list.out = TRUE)')
+    else
+        warning('WriteinR.m: Imputation with package Hmisc could not be performed because input argument nsamples is not given. Try again by calling WriteinR(lib,method,nsamples).')
     end
-    evalR(['f <- aregImpute(' formula ', data=dat, n.impute=1, type="' method '")'])
-    evalR('ImpR <- impute.transcan(f, imputation=TRUE, data=dat, list.out = TRUE)')
 
 % DMwR
 elseif strcmp(lib,'DMwR')

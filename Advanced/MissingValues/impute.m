@@ -1,4 +1,4 @@
-function O = Impute(O,method,lib,clean)
+function O = impute(O,method,lib,clean)
 
 if ~exist('lib','var') || isempty(lib)
     lib = {};
@@ -66,7 +66,7 @@ for ii=1:npat
             %% Write in R
             putRdata('dat',dat);
             OPENR.libraries{end} = lib{i};
-            WriteinR(lib{i},method{i})
+            WriteinR(lib{i},method{i},size(dat,2))
 
             %% Get imputation from R
             try

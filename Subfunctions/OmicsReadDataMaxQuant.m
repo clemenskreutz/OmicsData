@@ -73,18 +73,10 @@ for i=1:size(raw,2)
     end
 end
 
-% dat = cell2mat(raw(isdat1,isdat2));
-% labels1 = raw(isdat1,istxt2);       % rownames
-% labels2 = raw(1,isdat2);            % colnames
-% txtlabels = raw(1,istxt2);
-% Changed above lines, because cell2mat does not like mixture of types
-% (Janine)
-% Clemens version:
 dat = cell2mat(raw(isdat1,isdat2));
 labels1 = raw(isdat1,istxt2);       % rownames
 labels2 = raw(1,isdat2);            % colnames
 txtlabels = raw(1,istxt2);
-
 
 data = struct;
 rownames = struct;

@@ -85,7 +85,7 @@ for i=1:length(snames)
         related{i} = setdiff(related{i},[related{1:(i-1)}]); % only chosing once, first match
     end
     relatedNames{i} = fndata_resort(related{i});
-%    relatedNames{i} = strrep(fndata_resort(related{i}),snames{i},'');  %
+    relatedNames{i} = strrep(fndata_resort(related{i}),snames{i},'');  %
 %    did not work when Intensity is numbered by letters: IntensityA,
 %    IntensityB, ... then I is replaced by: ntensityA
 end
