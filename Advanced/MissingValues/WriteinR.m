@@ -18,19 +18,20 @@ elseif strcmp(lib,'impute')
 
 % norm
 elseif strcmp(lib,'norm')
+    evalR(' dat <- t(dat)')
     evalR(' s <- prelim.norm(dat)')
     evalR(' thetahat <- em.norm(s)')
-    evalR(' ImpR <- imp.norm(s,thetahat,dat)')
+    evalR(' ImpR <- t(imp.norm(s,thetahat,dat))')
 
 % missMDA
 elseif strcmp(lib,'missMDA')
-    evalR('dat <- data.frame(dat)');  
+    evalR('dat <- data.frame(dat)') 
     if strcmp(method,'MIPCA')
-        evalR(['imp <- ' method '(dat,nboot=1)']);    
-        evalR('ImpR <- imp$res.imputePCA');
+        evalR(['imp <- ' method '(dat,nboot=1)']) 
+        evalR('ImpR <- imp$res.imputePCA')
     else
-        evalR(['imp <- ' method '(dat)']);  
-        evalR('ImpR <- imp$completeObs');
+        evalR(['imp <- ' method '(dat)']) 
+        evalR('ImpR <- imp$completeObs')
     end              
 
 % rrcovNA
@@ -44,14 +45,14 @@ elseif strcmp(lib,'rrcovNA')
 
 % VIM
 elseif strcmp(lib,'VIM')
-    evalR('dat<-as.matrix(dat)');
-    evalR(['ImpR <- ' method '(dat)']);
+    evalR('dat<-as.matrix(dat)')
+    evalR(['ImpR <- ' method '(dat)'])
 
 % softImpute
 elseif strcmp(lib,'softImpute')
     evalR('dat <- as.matrix(dat)') 
-    evalR('f <- softImpute(dat)');
-    evalR('ImpR <- complete(dat,f)');
+    evalR('f <- softImpute(dat)')
+    evalR('ImpR <- complete(dat,f)')
 
 % LCMD
 elseif strcmp(lib,'imputeLCMD')   
@@ -65,56 +66,56 @@ elseif strcmp(lib,'imputeLCMD')
 % jeffwong
 elseif strcmp(lib,'imputation')               
     if strcmp(method,'SVD')
-        evalR(['ImpR <- ' method '(dat, k=3)$x']);
+        evalR(['ImpR <- ' method '(dat, k=3)$x'])
     elseif strcmp(method,'kNN')
-        evalR(['ImpR <- ' method '(dat, k=3)$x']);
+        evalR(['ImpR <- ' method '(dat, k=3)$x'])
     elseif strcmp(method,'SVT')
-        evalR(['ImpR <- ' method '(dat,lambda=3)$x']);
+        evalR(['ImpR <- ' method '(dat,lambda=3)$x'])
     else
-        evalR(['I <- ' method '(dat)']);
-        evalR('ImpR <- I$x');
-    end    
+        evalR(['I <- ' method '(dat)'])
+        evalR('ImpR <- I$x')
+    end   
 
 % MICE
 elseif strcmp(lib,'mice')                
-    evalR(['I <- mice(dat, m=1, method = "' method '")']);
-    evalR('ImpR <- complete(I)');
+    evalR(['I <- mice(dat, m=1, method = "' method '")'])
+    evalR('ImpR <- complete(I)')
     % if too many missing values, not all are capture due to multicollinearity, run a second time then
     %evalR(['if (sum(is.na(ImpR))>0) { I' num2str(i) ' <- mice(ImpR, m=1, method = "' method '")']);
     %evalR(['ImpR <- complete(I' num2str(i) ')}']);
     % if it still has missing values, ignore this method
-    evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }');
+    evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }')
 
 % Amelia (Expectation maximization with bootstrap)
 elseif strcmp(lib,'Amelia')
-    evalR('f <- amelia(dat, m=1, ps2=0)');
-    evalR('ImpR <- f$imputations[[1]]');
-    evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }');
+    evalR('f <- amelia(dat, m=1, ps2=0)')
+    evalR('ImpR <- f$imputations[[1]]')
+    evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }')
 
 % missForest
 elseif strcmp(lib,'missForest')
-    evalR('f <- missForest(dat)');
-    evalR('ImpR <- f$ximp');
+    evalR('f <- missForest(dat)')
+    evalR('ImpR <- f$ximp')
 
 % Hmisc
 elseif strcmp(lib,'Hmisc')
-    evalR('dat <- data.frame(dat)');
+    evalR('dat <- data.frame(dat)')
     formula = '~ X1';
     for j=2:size(dat,2)
         formula = [formula ' + X' num2str(j)];
     end
-    evalR(['f <- aregImpute(' formula ', data=dat, n.impute=1, type="' method '")']);
-    evalR('ImpR <- impute.transcan(f, imputation=TRUE, data=dat, list.out = TRUE)');
+    evalR(['f <- aregImpute(' formula ', data=dat, n.impute=1, type="' method '")'])
+    evalR('ImpR <- impute.transcan(f, imputation=TRUE, data=dat, list.out = TRUE)')
 
 % DMwR
 elseif strcmp(lib,'DMwR')
-    evalR('ImpR <- knnImputation(dat)');
+    evalR('ImpR <- knnImputation(dat)')
     
 % mi
 elseif strcmp(lib,'mi')
     evalR('dat <- data.frame(dat)')
-    evalR('I <- mi(dat, n.chains=1)');
-    evalR('ImpR <- complete(I)[1:length(dat)]');
+    evalR('I <- mi(dat, n.chains=1)')
+    evalR('ImpR <- complete(I)[1:length(dat)]')
 
 % other    
 else
