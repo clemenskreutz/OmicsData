@@ -37,7 +37,7 @@ if isfield(OPENR,'cmd')
     fprintf(fid,'rm(i)\n');
     fprintf(fid,'rm(j)\n');
     
-    fprintf(fid,'%s\n','load("evalR.rData")');
+    %fprintf(fid,'%s\n','load("evalR.rData")');
     
     fprintf(fid,'\n\n#####  cmds  #####\n');
     for i=1:length(OPENR.cmd)        
