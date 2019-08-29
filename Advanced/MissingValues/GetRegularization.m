@@ -19,20 +19,20 @@
 % [X,y] = GetRegularization(X,m,y);
 
 
-function [X,y] = GetRegularization(X,m,y)
+function [X,y] = GetRegularization(X,y)
 
 %% regularization: add a 0 and a 1 for each parameter (-> regularization towards estimate 0 == probability 0.5)
 ind = 1;
 yreg = zeros(2*(size(X,2)-1),1);
 xreg = zeros(2*(size(X,2)-1),size(X,2));
-if exist('m','var') && ~isempty(m)
-    xreg(:,1) = median(m)*ones(size(xreg,1),1);  % for regularization set first column to median(intensity)
-else
-    xreg(ind:(ind+1),1) = 1;
-    ind = ind+2;
+idx = find(sum(X==0)<size(X,1)/2);
+idx2 = setdiff(1:size(X,2),idx);
+for i=1:length(idx)
+    xreg(:,idx(i)) = median(X(:,idx(i)))*ones(size(xreg,1),1);  % for regularization set first column to median(intensity)
 end
-for i=2:size(X,2)
-    xreg(ind:(ind+1),i) = 1;
+for i=1:length(idx2)
+    j = idx2(i);
+    xreg(ind:(ind+1),j) = 1;
     yreg(ind+1) = 1;
     ind = ind+2;
 end
@@ -40,4 +40,6 @@ X = [X;xreg];
 
 if exist('y','var') && ~isempty(y)
     y = [y;yreg];
+else
+    y = [];
 end

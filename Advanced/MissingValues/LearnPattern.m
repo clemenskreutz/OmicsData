@@ -1,35 +1,32 @@
 %   A logistic regression model for the occurence of missing values
 %
-%       O       @OmicsData object
+%   O         @OmicsData object
+%   constant  LogReg with constant offset
 
-function out = LearnPattern(O)
+function out = LearnPattern(O,constant)
 
 if ~exist('O','var')
     error('MissingValues/LearnPattern.m requires class O as input argument.')
 end
+if ~exist('constant','var') || isempty(constant)
+    constant = true;
+end
 
-% Delete empty proteins for logreg
-drin = 1:size(O,1); % sum(isnan(O),2)<size(O,2);
+drin = sum(isnan(O),2)<size(O,2);
 O = O(drin,:);
 
-% Get data
-isna = isnan(O);
+% Coefficients for linearizing mean
 m = nanmean(O,2);
-m = m-nanmean(m);  % centered
-m = m./nanstd(m); % standardized
-
-mNotNan = m(~isnan(m));
-
-% Linearize mean
+m = (m-nanmean(m))./nanstd(m);
+isna = isnan(O);
 mis = sum(isna,2)./size(isna,2);    
-mean_trans_fun = @(mNotNan,x)(1./(1+exp(x(1)*mNotNan+x(2))));
-x0=[-1;0];
 
-fun=@(x)(1./(1+exp(x(1)*mNotNan+x(2)))-mis(~isnan(m)));
+x0=[-1;0];
+fun=@(x)(1./(1+exp(x(1)*m+x(2)))-mis);
 options = optimset('TolFun',1e-20,'TolX',1e-20);%,'Display','iter');
 [lincoef,~] = lsqnonlin(fun,x0,[],[],options);
-
-m = feval(mean_trans_fun,m,lincoef); 
+out.mean_trans_fun = @(m,x)(1./(1+exp(x(1)*m+x(2))));
+out.lincoef = lincoef;
 
 % Subsample indices
 nfeat = size(O,1);
@@ -44,7 +41,7 @@ end
 % Initialize
 dim = ceil(nfeat/nboot)+size(O,2)+2;
 b = nan(dim,nboot);
-dev = nan(dim,nboot);
+dev = nan(nboot);
 type = nan(dim,nboot);
 
 for i=1:nboot
@@ -58,14 +55,18 @@ for i=1:nboot
         ind = indrand( nperboot*(i-1)+1 : nperboot*i );
     end
     
-    [X,y,type,typenames] = GetDesign(isna(ind,:),m(ind));
-    [X,y] = GetRegularization(X,m,y);
+    [X,y,type,typenames] = GetDesign(O(ind,:),out);
+    [X,y] = GetRegularization(X,y);
     
     % Log Reg
-    [bfit,devfit,statsfit] = glmfit(X,y,'binomial','link','logit');
-
+    if constant
+        [bfit,devfit,statsfit] = glmfit(X,y,'binomial','link','logit');
+    else
+        [bfit,devfit,statsfit] = glmfit(X,y,'binomial','link','logit','constant','off'); 
+    end
+    
     b(1:length(bfit),i) = bfit;
-    dev(1:length(devfit),i) = devfit;
+    dev(i) = devfit;
     stats(i) = statsfit;    
 end
 
@@ -73,8 +74,21 @@ end
 out.b = nanmean(b,2);  % mean because not all are necessary
 out.dev = dev;         % not used, but saved for one pattern to check
 out.stats = stats;
-out.type = [0; type]; % offset gets type=0
-out.typenames = ['offset'; typenames];
+out.X = X;
+if constant
+    out.type = [0; type]; % offset gets type=0
+    out.typenames = ['offset'; typenames];
+    out.constant = 1;
+else
+    out.type = type;
+    out.typenames = typenames;
+    out.constant = 0;
+end
 
-out.lincoef = lincoef;
-out.mean_trans_fun = mean_trans_fun;
+% To check significance
+PlotDesign(out,isnan(O(ind,:)))
+path = get(O,'path');
+[filepath,name] = fileparts(path);
+print([filepath filesep name filesep name '_Design'],'-dpng','-r100');
+[sig,rem] = GetSignificance(out);
+'end'
