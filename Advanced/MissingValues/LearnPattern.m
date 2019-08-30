@@ -42,6 +42,7 @@ end
 dim = ceil(nfeat/nboot)+size(O,2)+2;
 b = nan(dim,nboot);
 dev = nan(nboot);
+X = nan(dim,size(O,2),nboot);
 type = nan(dim,nboot);
 
 for i=1:nboot
@@ -67,11 +68,11 @@ for i=1:nboot
     
     b(1:length(bfit),i) = bfit;
     dev(i) = devfit;
-    stats(i) = statsfit;    
+    stats(i) = statsfit;        
 end
 
 % Generate output struct
-out.b = nanmean(b,2);  % mean because not all are necessary
+out.b = b(:);  % mean because not all are necessary
 out.dev = dev;         % not used, but saved for one pattern to check
 out.stats = stats;
 out.X = X;
