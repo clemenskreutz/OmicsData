@@ -18,7 +18,7 @@ idx = ones(npat,size(Tab,2))*size(Tab,2);
 idboot = zeros(npat,size(Tab,2));
 for b=1:npat
     [~,idx(b,:)] = sort(Tab(n,:,b),'MissingPlacement','last'); 
-    idx(b,end-sum(isnan(Tab(n,:,b)))+1:end) = size(Tab,2);
+  %  idx(b,end-sum(isnan(Tab(n,:,b)))+1:end) = size(Tab,2);
     idboot(b,idx(b,:)) = 1:size(Tab,2);
 end
 idboot(idboot==0) = size(Tab,2);

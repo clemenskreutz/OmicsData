@@ -2,6 +2,9 @@ function O = impute(O,method,lib,clean)
 
 if ~exist('lib','var') || isempty(lib)
     lib = {};
+    if ~iscell(method)
+        method  = {method};
+    end
     for i=1:length(method)    
         lib{i} = GetLib(method(i));
     end

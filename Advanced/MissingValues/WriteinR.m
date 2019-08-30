@@ -18,10 +18,11 @@ elseif strcmp(lib,'impute')
 
 % norm
 elseif strcmp(lib,'norm')
-    evalR(' dat <- t(dat)')
     evalR(' s <- prelim.norm(dat)')
     evalR(' thetahat <- em.norm(s)')
-    evalR(' ImpR <- t(imp.norm(s,thetahat,dat))')
+    evalR('  rngseed(1)')
+    evalR(' ImpR <- imp.norm(s,thetahat,dat)')
+    %evalR(' ImpR <- t(ImpR)')
 
 % missMDA
 elseif strcmp(lib,'missMDA')
@@ -84,13 +85,13 @@ elseif strcmp(lib,'mice')
     %evalR(['if (sum(is.na(ImpR))>0) { I' num2str(i) ' <- mice(ImpR, m=1, method = "' method '")']);
     %evalR(['ImpR <- complete(I' num2str(i) ')}']);
     % if it still has missing values, ignore this method
-    evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }')
+%    evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }')
 
 % Amelia (Expectation maximization with bootstrap)
 elseif strcmp(lib,'Amelia')
     evalR('f <- amelia(dat, m=1, ps2=0)')
     evalR('ImpR <- f$imputations[[1]]')
-    evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }')
+ %s   evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }')
 
 % missForest
 elseif strcmp(lib,'missForest')
