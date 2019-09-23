@@ -1,5 +1,5 @@
 
-function PlotDesign(out,isna)
+function PlotDesign(out,isna,path)
 
 
 y = repmat(sum(isna,2)./size(isna,2),size(isna,2),1);   
@@ -25,3 +25,10 @@ for i=1:npred
         xlim([0 100])
     end
 end
+
+[filepath,name] = fileparts(path);
+if ~exist([filepath filesep name],'dir')
+    mkdir([filepath filesep name])
+end
+delete([filepath filesep name filesep name '_Design']);
+print([filepath filesep name filesep name '_Design'],'-dpng','-r100');
