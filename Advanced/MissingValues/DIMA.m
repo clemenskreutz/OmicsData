@@ -1,4 +1,4 @@
-function O = DIMA(O)
+function [O,out] = DIMA(O)
 
 out = LearnPattern(O);
 

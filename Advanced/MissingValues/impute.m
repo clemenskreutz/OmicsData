@@ -138,5 +138,7 @@ if exist('ImpM','var') && ~isempty(ImpM)
     O = set(O,'time_imput',time);
     
     O = GetTable(O);
-    %O = GetRankTable(O);
+    O = GetRankTable(O);
 end 
+
+saveO(O)

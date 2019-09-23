@@ -43,6 +43,9 @@ if scale
 end
 dat = get(O,'data');
 
+% remember complete dataset
+O = set(O,'data_complete',[]);          % Put in container so it stays same 
+O = set(O,'data_complete',dat,'Complete dataset');
 
 % Design matrix
 X = GetDesign2(O,out);
@@ -81,10 +84,11 @@ end
 
 %% Save
 O = set(O,'data',dat_patterns,'assign NA');
-O = set(O,'data_mis',dat_patterns);
 if scale
     O = scaleO(O,'original');
+    dat_patterns = get(O,'data');
 end
+O = set(O,'data_mis',dat_patterns);
 
 %% Plot
 PlotSimulatedPattern(O);

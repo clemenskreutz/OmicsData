@@ -19,15 +19,24 @@ O = set(O,'data_original',dat,'Original dataset');
 if sum(~any(isnan(O),2))>50
     O = O(~any(isnan(O),2),:);
     fprintf('All lines with missing values deleted.\n')  
-elseif sum(sum(isnan(O),2)<2)>50
-    O = O(sum(isnan(O),2)<2,:);
-    fprintf('All lines with more than one missing values deleted.\n') 
 else
-    O = O(sum(isnan(O),2)<3,:);
-    fprintf('All lines with more than two missing values deleted.\n')        
+    for i=2:50
+        if sum(sum(isnan(O),i)<i)>50
+            O = O(sum(isnan(O),i)<i,:);
+            fprintf(['All lines with <' num2str(i-1) ' MV deleted.\n']) 
+        end
+    end
+end
+if size(O,1)==size(dat,1)
+    for i=2:50
+        if sum(sum(isnan(O),i)<i)>30
+            O = O(sum(isnan(O),i)<i,:);
+            fprintf(['All lines with <' num2str(i-1) ' MV deleted.\n']) 
+        end
+    end
+    warning('Too many MVs. Does imputation make sense here?')
+end
+if size(O,1)==size(dat,1)
+    warning('Too many MVs. Does imputation make sense here?')
 end
 
-%% Remember complete dataset
-O = set(O,'data_complete',[]);          % Put in container so it stays same 
-dat = get(O,'data');
-O = set(O,'data_complete',dat,'Complete dataset');
