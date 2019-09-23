@@ -21,17 +21,19 @@ if sum(~any(isnan(O),2))>50
     fprintf('All lines with missing values deleted.\n')  
 else
     for i=2:50
-        if sum(sum(isnan(O),i)<i)>50
-            O = O(sum(isnan(O),i)<i,:);
+        if sum(sum(isnan(O),2)<i)>50
+            O = O(sum(isnan(O),2)<i,:);
             fprintf(['All lines with <' num2str(i-1) ' MV deleted.\n']) 
+            break
         end
     end
 end
 if size(O,1)==size(dat,1)
     for i=2:50
-        if sum(sum(isnan(O),i)<i)>30
-            O = O(sum(isnan(O),i)<i,:);
+        if sum(sum(isnan(O),2)<i)>30
+            O = O(sum(isnan(O),2)<i,:);
             fprintf(['All lines with <' num2str(i-1) ' MV deleted.\n']) 
+            break
         end
     end
     warning('Too many MVs. Does imputation make sense here?')
