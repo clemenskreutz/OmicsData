@@ -12,7 +12,7 @@
 % O = AssignPattern(O,out);
 
 
-function O = AssignPattern(O,out,npat)
+function O = AssignPattern(O,out,npat,scale)
 
 if ~exist('O','var')
     error('MissingValues/AssignPattern.m requires class O as input argument.\n')
@@ -30,12 +30,22 @@ end
 if ~isfield(out,'lincoef')
     error('MissingValues/AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
 end
+if ~isfield(out,'lincoef')
+    error('MissingValues/AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
+end
+if ~exist('scale','var') || isempty(scale)
+    scale = true;
+end
 
 % Get data
+if scale
+    O = scaleO(O,'original');
+end
 dat = get(O,'data');
 
+
 % Design matrix
-X = GetDesign(O,out);
+X = GetDesign2(O,out);
 %X = GetRegularization(X);
 
 % Initialize
@@ -50,11 +60,7 @@ for i=1:npat
     if length(b)+length(brow) ~= size(X,2)+1
         warning('Mismatch between size of logreg coefficients and design matrix. Check it.')
     end
-    if out.constant == 0
-        yhat = glmval( [b;brow], X, 'logit','constant','off');
-    elseif out.constant == 1
-        yhat = glmval( [b;brow], X, 'logit');
-    end
+    yhat = glmval( [b;brow], X, 'logit');
 
     % assign nans
     p = reshape(yhat(1:size(dat,1)*size(dat,2)),size(dat,1),size(dat,2)); % here yhat from regularization is cut off
@@ -76,6 +82,9 @@ end
 %% Save
 O = set(O,'data',dat_patterns,'assign NA');
 O = set(O,'data_mis',dat_patterns);
+if scale
+    O = scaleO(O,'original');
+end
 
 %% Plot
 PlotSimulatedPattern(O);
