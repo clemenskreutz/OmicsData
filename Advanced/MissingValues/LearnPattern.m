@@ -1,15 +1,11 @@
 %   A logistic regression model for the occurence of missing values
 %
 %   O         @OmicsData object
-%   constant  LogReg with constant offset
 
-function out = LearnPattern(O,constant)
+function out = LearnPattern(O)
 
 if ~exist('O','var')
     error('MissingValues/LearnPattern.m requires class O as input argument.')
-end
-if ~exist('constant','var') || isempty(constant)
-    constant = true;
 end
 
 drin = sum(isnan(O),2)<size(O,2);
@@ -37,16 +33,16 @@ if nfeat>1000
 else
     nboot = 1;
 end
-
+    
 % Initialize
 dim = ceil(nfeat/nboot)+size(O,2)+2;
-b = nan(dim,nboot);
-dev = nan(nboot);
 X = nan(dim,size(O,2),nboot);
-type = nan(dim,nboot);
+b = nan(ceil(nfeat/nboot),nboot);
+out.b = [];
+out.type = [];
+out.typenames = [];
 
-for i=1:nboot
-    
+for i=1:nboot  % subsample proteins
     fprintf('%i out of %i ...\n',i,nboot);
     if nboot == 1
         ind = 1:nfeat;                              % if nfeat <1000, no subsample
@@ -57,39 +53,46 @@ for i=1:nboot
     end
     
     [X,y,type,typenames] = GetDesign(O(ind,:),out);
+        out.type = [0; type]; % offset gets type=0
+        out.typenames = ['offset'; typenames];
+    
+    out.stats(i) = LogReg(X,y);
+    
+    % if X is ill-conditioned or overparametrized
+    if all(out.stats(i).beta==0) || isfield(out,'significant')                        
+        out.significant = 1;
+        out = GetSignificance(out);                      % get not-significant predictors       
+        [X,y,type,typenames] = GetDesign2(O(ind,:),out); % LogReg without not-significant predictors
+        out.type = [0; type]; % offset gets type=0
+        out.typenames = ['offset'; typenames];
+        out.stats(i) = LogReg(X,y);
+    end
+    b(1:length(out.stats(i).beta),i) = out.stats(i).beta;
+end
+
+% output
+out.X = X;
+out.b = nanmean(b,2);
+
+
+% Plot
+PlotDesign(out,isnan(O(ind,:)),get(O,'path'))
+
+end
+
+
+function stats = LogReg(X,y)
+
     [X,y] = GetRegularization(X,y);
     
-    % Log Reg
-    if constant
-        [bfit,devfit,statsfit] = glmfit(X,y,'binomial','link','logit');
-    else
-        [bfit,devfit,statsfit] = glmfit(X,y,'binomial','link','logit','constant','off'); 
-    end
+%     lastwarn('');
+    [~,~,stats] = glmfit(X,y,'binomial','link','logit');
     
-    b(1:length(bfit),i) = bfit;
-    dev(i) = devfit;
-    stats(i) = statsfit;        
+%     if strcmp(lastwarn,'Iteration limit reached.')
+%         opts = statset('glmfit');
+%         opts.MaxIter = 1000; 
+%         [~,~,stats] = glmfit(X,y,'binomial','link','logit','options',opts);
+%     end
+    
 end
-
-% Generate output struct
-out.b = b(:);  % mean because not all are necessary
-out.dev = dev;         % not used, but saved for one pattern to check
-out.stats = stats;
-out.X = X;
-if constant
-    out.type = [0; type]; % offset gets type=0
-    out.typenames = ['offset'; typenames];
-    out.constant = 1;
-else
-    out.type = type;
-    out.typenames = typenames;
-    out.constant = 0;
-end
-
-% To check significance
-PlotDesign(out,isnan(O(ind,:)))
-path = get(O,'path');
-[filepath,name] = fileparts(path);
-print([filepath filesep name filesep name '_Design'],'-dpng','-r100');
-[sig,rem] = GetSignificance(out);
-'end'
+            

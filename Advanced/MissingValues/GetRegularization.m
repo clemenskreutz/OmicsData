@@ -28,7 +28,7 @@ xreg = zeros(2*(size(X,2)-1),size(X,2));
 idx = find(sum(X==0)<size(X,1)/2);
 idx2 = setdiff(1:size(X,2),idx);
 for i=1:length(idx)
-    xreg(:,idx(i)) = median(X(:,idx(i)))*ones(size(xreg,1),1);  % for regularization set first column to median(intensity)
+    xreg(:,idx(i)) = nanmedian(X(:,idx(i)))*ones(size(xreg,1),1);  % for regularization set first column to median(intensity)
 end
 for i=1:length(idx2)
     j = idx2(i);

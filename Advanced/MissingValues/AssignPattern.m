@@ -48,8 +48,7 @@ O = set(O,'data_complete',[]);          % Put in container so it stays same
 O = set(O,'data_complete',dat,'Complete dataset');
 
 % Design matrix
-X = GetDesign2(O,out);
-%X = GetRegularization(X);
+X = GetDesign(O,out);
 
 % Initialize
 dat_patterns = nan(size(dat,1),size(dat,2),npat);
