@@ -11,10 +11,10 @@ end
 if strcmp(algo,'Amelia')
     lib = 'Amelia';
 end
-if strcmp(algo,'pmm') || strcmp(algo,'regression')
+if strcmp(algo,'regression') || strcmp(algo,'aregImpute')
     lib= 'Hmisc';
 end
-if strcmp(algo,'ppca') || strcmp(algo,'bpca') || strcmp(algo,'nipals') || strcmp(algo,'svd') || strcmp(algo,'svdImpute')
+if strcmp(algo,'ppca') || strcmp(algo,'bpca') || strcmp(algo,'nipals') || strcmp(algo,'nlpca') || strcmp(algo,'svd') || strcmp(algo,'svdImpute')
     lib= 'pcaMethods';
 end
 if strcmp(algo,'MinDet') || strcmp(algo,'KNN') || strcmp(algo,'MinProb') || strcmp(algo,'QRILC')
@@ -33,7 +33,7 @@ end
 if strcmp(algo,'irmi')
     lib= 'VIM';
 end
-if strcmp(algo,'Norm') || strcmp(algo,'Seq') || strcmp(algo,'SeqRob')
+if strcmp(algo,'Norm') || strcmp(algo,'Seq') || strcmp(algo,'SeqRob') || strcmp(algo,'impNorm') || strcmp(algo,'impSeq') || strcmp(algo,'impSeqRob')
     lib= 'rrcovNA';
 end
 if strcmp(algo,'MIPCA') || strcmp(algo,'imputePCA')

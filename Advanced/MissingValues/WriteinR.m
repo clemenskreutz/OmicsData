@@ -37,11 +37,13 @@ elseif strcmp(lib,'missMDA')
 
 % rrcovNA
 elseif strcmp(lib,'rrcovNA')
-    if strcmp(method,'SeqRob')
-        evalR(['imp  <- imp' method '(dat)'])
-        evalR('ImpR <- imp$x')
+    if contains(method,'imp')
+        evalR(['ImpR <- ' method '(dat)'])
     else
         evalR(['ImpR <- imp' method '(dat)'])
+    end
+    if strcmp(method,'SeqRob')
+        evalR('ImpR <- ImpR$x')
     end
 
 % VIM
@@ -89,7 +91,7 @@ elseif strcmp(lib,'mice')
 
 % Amelia (Expectation maximization with bootstrap)
 elseif strcmp(lib,'Amelia')
-    evalR('f <- amelia(dat, m=1, ps2=0)')
+    evalR('f <- amelia(dat, m=1)')
     evalR('ImpR <- f$imputations[[1]]')
  %s   evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }')
 
@@ -106,7 +108,11 @@ elseif strcmp(lib,'Hmisc')
         for j=2:nsamples
             formula = [formula ' + X' num2str(j)];
         end
-        evalR(['f <- aregImpute(' formula ', data=dat, n.impute=1, type="' method '")'])
+        if strcmp(method,'aregImpute')
+            evalR(['f <- aregImpute(' formula ', data=dat, n.impute=1, type="pmm")'])
+        else
+            evalR(['f <- aregImpute(' formula ', data=dat, n.impute=1, type="' method '")'])
+        end
         evalR('ImpR <- impute.transcan(f, imputation=TRUE, data=dat, list.out = TRUE)')
     else
         warning('WriteinR.m: Imputation with package Hmisc could not be performed because input argument nsamples is not given. Try again by calling WriteinR(lib,method,nsamples).')
