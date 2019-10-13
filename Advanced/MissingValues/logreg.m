@@ -142,9 +142,9 @@ for i=1:size(dat,2)
         if size(X,2)==1
             Xtmp = ones(size(dat,1),1);
             if isempty(varargin)
-                [~,dev0(i,j)] = glmfit(Xtmp,dat(:,i),'binomial','link','logit','constant','off');
+                [~,dev0(i,1)] = glmfit(Xtmp,dat(:,i),'binomial','link','logit','constant','off');
             else
-                [~,dev0(i,j)] = glmfit(Xtmp,dat(:,i),varargin,'constant','off');
+                [~,dev0(i,1)] = glmfit(Xtmp,dat(:,i),varargin,'constant','off');
             end
             pv(i) = 1-chi2cdf(abs(dev(i)-dev0(i,j)),1);
             if pv(i)<alpha
