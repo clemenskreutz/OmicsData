@@ -4,7 +4,10 @@
 %
 %   map         Die Colormap, default: map = redgreencmap.
 
-function image(O,map)
+function image(O,map,resizeFig)
+if ~exist('resizeFig','var') || isempty(resizeFig)
+    resizeFig = true;
+end
 
 if(~exist('map','var') | isempty(map))
     rgmap = redgreencmap;
@@ -42,13 +45,14 @@ end
 dat(find(dat==Min)) = Min+10*eps; % Damit das runden nicht falsche Farbe macht
 
 imagesc(dat,clim);
-colormap(cmap);
+colormap(gca,cmap);
 colorbar
 ylabel('features')
 xlabel('samples')
 
-nf = get(O,'nf');
-set(gcf,'Position',[500  100  700  750])
+if resizeFig
+    set(gcf,'Position',[500  100  700  700])
+end
 
 title(str2label(get(O,'default_data')));
 

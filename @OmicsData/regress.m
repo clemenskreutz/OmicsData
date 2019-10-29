@@ -94,6 +94,7 @@ end
 stats.foldSE = foldSE;
 stats.F = F;
 stats.P_ftest = P_ftest;
+stats.residuals = Res';
 
 
 
