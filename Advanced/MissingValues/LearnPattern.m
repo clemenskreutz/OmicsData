@@ -59,14 +59,23 @@ for i=1:nboot  % subsample proteins
     out.stats(i) = LogReg(X,y);
     
     % if X is ill-conditioned or overparametrized
-    if all(out.stats(i).beta==0) || isfield(out,'significant')                        
+    if any(out.stats(i).beta==0) %|| isfield(out,'significant')  
+        %out.idxrem = find(out.stats(i).beta==0)-1;
         out.significant = 1;
-        out = GetSignificance(out);                      % get not-significant predictors       
-        [X,y,type,typenames] = GetDesign2(O(ind,:),out); % LogReg without not-significant predictors
-        out.type = [0; type]; % offset gets type=0
+        out = GetSignificance(out);  
+        [X,y,type,typenames] = GetDesign(O(ind,:),out); % LogReg without not-significant predictors
+        out.type = [0; type];
         out.typenames = ['offset'; typenames];
         out.stats(i) = LogReg(X,y);
     end
+%     if all(out.stats(i).beta==0) || isfield(out,'significant')                        
+%         out.significant = 1;
+%         out = GetSignificance(out);                      % get not-significant predictors       
+%         [X,y,type,typenames] = GetDesign(O(ind,:),out); % LogReg without not-significant predictors
+%         out.type = [0; type]; % offset gets type=0
+%         out.typenames = ['offset'; typenames];
+%         out.stats(i) = LogReg(X,y);
+%     end
     b(1:length(out.stats(i).beta),i) = out.stats(i).beta;
 end
 

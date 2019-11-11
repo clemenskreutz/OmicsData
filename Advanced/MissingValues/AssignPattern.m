@@ -83,10 +83,10 @@ end
 
 %% Save
 O = set(O,'data',dat_patterns,'assign NA');
-if scale
-    O = scaleO(O,'original');
-    dat_patterns = get(O,'data');
-end
+% if scale
+%     O = scaleO(O,'original');
+%     dat_patterns = get(O,'data');
+% end
 O = set(O,'data_mis',dat_patterns);
 
 %% Plot

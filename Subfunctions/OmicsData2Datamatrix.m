@@ -32,6 +32,10 @@ if isempty(ind)
     pattern = 'Intensity';
     ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
 end
+if isempty(ind)
+    pattern = 'Abundance';
+    ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
+end
 while isempty(ind)
     warning('Cannot determine sample names be replacing pattern ''%s''. The data might be SILAC. Alter code be introducing a new pattern.',pattern);
     fprintf('Column names in the file:\n');

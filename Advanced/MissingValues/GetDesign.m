@@ -41,13 +41,15 @@ type(c) = 100; % mean-dependency
 pred = fieldnames(get(O,'cols'));
 for i=1:length(pred)
     predvec = get(O,pred{i},true);
-    if isnumeric(predvec) && ~length(unique(predvec))==1
+    if isnumeric(predvec) && ~(length(unique(predvec))==1) && ~all(isnan(predvec))
         predvec = (predvec-nanmean(predvec))/nanstd(predvec);
         predvec = predvec*ones(1,size(isna,2));
-        X = [X, predvec(:)];
-        c=c+1;
-        bnames{c} = pred{i};
-        type(c) = 4;
+        if ~isequal(predvec(:),X(:,end)) 
+            X = [X, predvec(:)];
+            c=c+1;
+            bnames{c} = pred{i};
+            type(c) = 4;
+        end
     end
 end
 
@@ -55,7 +57,7 @@ end
 pred = fieldnames(getfield(O,'data'));  % get(O,'data') is the default data matrix
 for i=1:length(pred)
     predmat = get(O,pred{i},true);
-    if isnumeric(predmat) && size(predmat,1)+size(predmat,2)==size(X,1)
+    if isnumeric(predmat) && size(predmat,1)*size(predmat,2)==size(X,1) && ~all(all(isnan(predmat)))
         predmat = (predmat-nanmean(predmat(:)))./nanstd(predmat(:));
         X = [X, predmat(:)];
         c=c+1;

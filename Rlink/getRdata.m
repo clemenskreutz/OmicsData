@@ -28,7 +28,7 @@ fprintf(fid,'require(R.matlab)\n');
 fprintf(fid,'rm(list=ls())\n');
 fprintf(fid,'\n');
 
-fprintf(fid,'%s\n','load("evalR.rData")');
+fprintf(fid,'%s\n','load("evalR.RData")');
 fprintf(fid,'%s\n',sprintf('writeMat("getRdata.mat",%s=%s)',varname,varname));
 fclose(fid);
 

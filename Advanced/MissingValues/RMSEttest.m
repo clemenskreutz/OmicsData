@@ -1,27 +1,45 @@
-function O = RMSEttest(O,indg1,indg2)
+function O = RMSEttest(O,varargin)
 
-if ~exist('indg1','var') || isempty(indg1)
-    warning('RMSEttest: No grouping indeces given. Separating data into 2 blocks by default. If you want to specify blocks, call RMSEttest(indg1,indg2) or imputation([],true,indg1,indg2).')
-    s = size(O);
-    indg1 = 1:round(s(2)/2);
-end
-if ~exist('indg2','var') || isempty(indg2)
-    warning('RMSEttest: Grouping index indg2 of second group not given. Specify by RMSEttest(indg1,indg2).')
-    s = size(O);
-    indg2 = round(s(2)/2)+1:s(2);
+if size(O,2)<4
+    warning(['ttest was not performed due to lack of samples. Matrix just has ' num2str(size(O,2)) ' columns.']);
+    return
 end
 
+if exist('varargin','var') && ~isempty(varargin)
+    if length(varargin)==1
+        k = varargin{1};
+    else
+        indg1 = varargin{1,:};
+        if size(varargin,1)>1
+            indg2 = varargin{2,:};
+        end
+    end
+else
+    warning('No grouping indeces given for ttest. Separating data into 2 blocks by kmeans clustering. If you want to specify blocks or number of clusters, call RMSEttest(O,k) or RMSEttest(O,indg1,indg2) in GetPerformance(O).')
+    k=2;
+end
+
+if exist('k','var')
+    idx = kmeans(get(O,'data_complete')',k);
+    indg1 = idx==1;
+    indg2 = idx==2;
+end
+%% instead of indg1, indg2, use idx(1,:) idx(2,:)
+    
 % Get data
-dat1 = get(O,'data_full');
+dat1 = get(O,'data_complete');
 dat1_mis = get(O,'data_mis');
 dat1_imp = get(O,'data_imput');
+if ~isfield(O,'Table',true)
+    O = GetTable(O);
+end
 T = get(O,'Table');
 
 RMSEt = nan(size(dat1_imp,4),size(dat1_imp,3));
 for b=1:size(dat1_imp,3)
     for m=1:size(dat1_imp,4)
         %  Set 2D matrices of method and bootstrap
-        dat = dat1(:,:,b);
+        dat = dat1;
         dat_mis = dat1_mis(:,:,b);
         dat_imp = dat1_imp(:,:,b,m);
 

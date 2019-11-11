@@ -1,4 +1,4 @@
-function full = SimuDataLazar(npep,rep,mu,sigP,sigG,sige)
+function full = SimuData(npep,rep,mu,sigP,sigG,sige)
 
 %% Simulate peptides
 P = [normrnd(mu,sigP,npep,1)*ones(1,rep/2), normrnd(mu,sigP,npep,1)*ones(1,rep/2)]; % two groups of proteins

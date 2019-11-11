@@ -2,21 +2,25 @@ function O = imputation_original(O)
 
 %% save copy 
 %to remember imputation from simulated pattern
-% path = get(O,'path');
-% [filepath,name] = fileparts(path);
-% if ~exist([filepath filesep name],'dir')
-%     mkdir(filepath, name)
-% end
-% if isempty(filepath)
-%     save([name filesep 'O_sim.mat'],'O');
-% else
-%     save([filepath filesep name filesep 'O_sim.mat'],'O');
-% end
+ path = get(O,'path');
+[filepath,name] = fileparts(path);
+if ~exist([filepath filesep name],'dir')
+    mkdir(filepath, name)
+end
+if isempty(filepath)
+    save([name filesep 'O_sim.mat'],'O');
+else
+    save([filepath filesep name filesep 'O_sim.mat'],'O');
+end
 
 %% find lowest ranked algo
-[O,algos] = GetRankTable(O);
+if ~isfield(O,'Table',true)
+    [~,algos] = GetRankTable(O);
+else
+    algos = get(O,'RankMethod');
+end
 algo = algos{1};
-lib = GetLib(algo);
+
 
 %% Load O new 
 %because simulated pattern was much smaller, and also names etc. were shortened
@@ -40,28 +44,18 @@ O = set(O,'data_original',dat_original,'Save original');
 
 
 %% Impute original dataset
-O = set(O,'deleteemptyrows',true);
-O = impute_R(O,lib,algo);
+O = impute(O,algo);
 
-% % did it work? else try delete empty rows
-% if ~isfield(O,'data_imput')
-%     O = set(O,'deleteemptyrows',true);
-%     O = imputation_clear(O);  % clear previous imputations in O
-%     O = impute_R(O,lib,algo);
-% end
-% no nans in imputed ? else try second algo
 if ~isfield(O,'data_imput')
     algo = algos{2};
-    O = imputation_clear(O);  % clear previous imputations in O
-    O = impute_R(O,lib,algo,[]);
+    O = impute(O,algo,[],true);
     if ~isfield(O,'data_imput')
-        O = set(O,'deleteemptyrows',true);
-        O = imputation_clear(O);  % clear previous imputations in O
-        O = impute_R(O,lib,algo);
+        algo = algos{3};
+        O = impute(O,algo,[],true);
     end
 end
 if ~isfield(O,'data_imput')
-    error('Imputation was not feasible. There are still nans in dataset.')
+    error('Imputation was not feasible.')
 end
 
 %% SAVE
@@ -99,7 +93,7 @@ caxis manual
 caxis([bottom top]);
 c=colorbar;
 c.Label.String = 'Log2(LFQ Intensity)';
-print([filepath '/' name '/' name '_Imputed'],'-dpng','-r200');
+print([filepath '/' name '/' name '_Imputed'],'-dpng','-r50');
 
 %% Sort/plot (for #nans)
 [~,idx] = sort(sum(isnan(dat_original),2));
@@ -127,5 +121,5 @@ caxis manual
 caxis([bottom top]);
 %c=colorbar;
 c.Label.String = 'Log2(LFQ Intensity)';
-print([filepath '/' name '/' name '_Imputed_Sorted'],'-dpng','-r200');
+print([filepath '/' name '/' name '_Imputed_Sorted'],'-dpng','-r50');
 

@@ -2,18 +2,22 @@
 function O = GetTable(O)
 
 if ~exist('O','var')
-    error('OmicsData object has to be passed in to function imputation_boxplot.m.')
+    error('OmicsData object has to be passed in to function GetTable.m.')
 end
 
 % Get variables from class
-dat = get(O,'data_complete');                % Complete dataset without missing values, to compare "right" solution
+dat = get(O,'data_complete',true);                % Complete dataset without missing values, to compare "right" solution
+if isempty(dat)
+    dat = get(O,'data_full');
+    dat = dat(:,:,1);
+end
 dat_mis = get(O,'data_mis',true);        % simulated missing values       
 if isempty(dat_mis)
     dat_mis = get(O,'data');
 end
 dat_imp = get(O,'data_imput');           % Imputed data
-meth = get(O,'method_imput');
-method = meth.name;
+method = get(O,'method_imput');
+%method = meth.name;
 t = get(O,'time_imput'); 
 
 if ~isempty(dat_imp)

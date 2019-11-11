@@ -16,7 +16,7 @@ hold on
 datsimrow = sort(sum(isnan(pat),2)/size(pat,2));
 plot(datsimrow,'LineWidth',1.5)
 xlabel('proteins')
-ylabel('patsing values')
+ylabel('missing values')
 legend('Original','Simulated','Location','northwest');
 hold off
 
@@ -33,4 +33,5 @@ legend('Original','Simulated','Location','northwest');
 if isempty(path)
     path = pwd;
 end
-saveas(gcf,[path filesep name filesep 'MissingRowCol.tif'])
+delete([path filesep name filesep 'MissingRowCol_AllX.tif'])
+saveas(gcf,[path filesep name filesep 'MissingRowCol_AllX.tif'])

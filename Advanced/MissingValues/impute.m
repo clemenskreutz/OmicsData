@@ -1,7 +1,21 @@
+% O = impute(O,method,[lib,clean])
+%
+% imputes missing data of class O (if exist data_mis else data)
+% O - OmicsData class object
+% method - cell array of imputation algorithms to run
+% lib - Rpackage of method (should have same length as method)
+% clean - boolean if previous imputations should be cleared beforehand
+%
+% Example:
+% methods = {'impnorm','knn','Seq'};
+% O = impute(O,methods,[],true,false);
+%
+% See also: WriteinR to see implemented methods and libraries
+
 function O = impute(O,method,lib,clean)
 
 if ~exist('lib','var') || isempty(lib)
-    lib = {};
+    lib = cell(length(method),0);
     if ~iscell(method)
         method  = {method};
     end
@@ -40,10 +54,10 @@ for ii=1:npat
     
     %% Remove not working algorithms
     rem = [];
-    if sum(sum(isnan(dat)))> sum(sum(~isnan(dat)))
-        rem = find(ismember(lib,{'pcaMethods','imputeLCMD','Hmisc','Amelia'}));
-        warning('Impute.m: Amelia, imputeLCMD, Hmisc and pcaMethods packages are skipped because there are more than 50% MV. Try other methods.')
-    end
+%     if sum(sum(isnan(dat)))> sum(sum(~isnan(dat)))
+%         rem = find(ismember(lib,{'Hmisc','impute'}));
+%         warning('Impute.m: Hmisc and impute packages are skipped because there are more than 50% MV. Try other methods.')
+%     end
     da = dat;
     da(isnan(da))=0;
     sv = abs(svd(da));
@@ -82,10 +96,11 @@ for ii=1:npat
                     Imptemp = Imptemp(:,1:size(Imptemp,2)/2);  % VIM outputs [imputed_double,imputed_boolean] so columns are doubled
                 end
                 ImpM(:,:,ii,i) = Imptemp;
-                time(i) = toc;            
+                time(i,npat) = toc;      
             catch
                 warning(['Imputation with ' method{i} ' in package ' lib{i} ' was not feasible.'])  
-            end    
+            end   
+            deleteR;
         end
     end
 end
@@ -100,31 +115,32 @@ if any(any(all(all(isnan(ImpM)))))
     end
     ImpM(:,:,:,idx) = [];
     method(idx) = [];
+    time(idx,:) = [];
 end
 
-% Are nans or infs in imputation?
-isna = zeros(length(method),1);
-isin = zeros(length(method),1);
-for i=1:length(method)
-    if any(any(isnan(ImpM(:,:,:,i))))
-        isna(i) = 1;
-    end
-    if any(any(isinf(ImpM(:,:,:,i))))
-        isin(i) = 1;
-    end
-end
-meth = struct;
-meth.name = method;
-meth.isna = isna;
-meth.isin = isin;
+% % Are nans or infs in imputation?
+% isna = zeros(length(method),1);
+% isin = zeros(length(method),1);
+% for i=1:length(method)
+%     if any(any(isnan(ImpM(:,:,:,i))))
+%         isna(i) = 1;
+%     end
+%     if any(any(isinf(ImpM(:,:,:,i))))
+%         isin(i) = 1;
+%     end
+% end
+% method = struct;
+% method.name = method;
+% method.isna = isna;
+% method.isin = isin;
 
 %% Save result
 if exist('ImpM','var') && ~isempty(ImpM)
     if isfield(O,'data_imput') && ~isempty(O,'data_imput')
         Imp = get(O,'data_imput');
         Imp(:,:,1:size(ImpM,3),(size(Imp,4)+1):(size(Imp,4)+size(ImpM,4))) = ImpM;
-        meth = [get(O,'method_imput'),meth];
-        if size(Imp,4)~=length(meth)
+        method = [get(O,'method_imput'),method];
+        if size(Imp,4)~=length(method)
             error('ImputePattern.m: Dimensions of imputation matrix and imputation algorithms does not match. Check here!')
         end
         time = [get(O,'time_imput');nanmean(time,2)];
@@ -134,11 +150,7 @@ if exist('ImpM','var') && ~isempty(ImpM)
     
     % Save
     O = set(O,'data_imput',Imp,'Imputed with R packages');
-    O = set(O,'method_imput',meth);
-    O = set(O,'time_imput',time);
-    
-    O = GetTable(O);
-    O = GetRankTable(O);
+    O = set(O,'method_imput',method);
+    O = set(O,'time_imput',nanmean(time,2));
 end 
-
 saveO(O)

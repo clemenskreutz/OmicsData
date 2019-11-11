@@ -68,11 +68,11 @@ elseif strcmp(lib,'imputeLCMD')
 
 % jeffwong
 elseif strcmp(lib,'imputation')               
-    if strcmp(method,'SVD')
+    if contains(method,'SVD')
         evalR(['ImpR <- ' method '(dat, k=3)$x'])
-    elseif strcmp(method,'kNN')
+    elseif contains(method,'kNN')
         evalR(['ImpR <- ' method '(dat, k=3)$x'])
-    elseif strcmp(method,'SVT')
+    elseif contains(method,'SVT')
         evalR(['ImpR <- ' method '(dat,lambda=3)$x'])
     else
         evalR(['I <- ' method '(dat)'])
