@@ -58,9 +58,9 @@ switch prop
             if isnumeric(val) && dims(1)==nf && dims(2)==ns
                 O.data.(prop) = val;
             elseif dims(1)==nf && dims(2)==1
-                O.rows.(prop) = val;
-            elseif dims(1)==1 && dims(2)==ns
                 O.cols.(prop) = val;
+            elseif dims(1)==1 && dims(2)==ns
+                O.rows.(prop) = val;
             else
                 O.container.(prop) = val;  % unknown properties are put in the container
             end
