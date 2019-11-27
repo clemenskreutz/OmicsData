@@ -24,6 +24,9 @@
 % 
 %   status      the output of the fclose function. A value zero indicates
 %               normal exit status.
+% 
+% Examples:
+% WriteWithColnames(OmicsFilterColsSTY(O(1:100,:)),'Data.txt',get(O,'data'),get(O,'SampleNames'))
 
 function status = WriteWithColnames(O, file, data, colnames, sortcolumn, celldata, decsep)
 if(~exist('celldata','var') || isempty(celldata))
@@ -36,16 +39,16 @@ end
 if(~exist('data','var'))
     data = [];
     colnames = [];
-elseif(length(colnames) ~= size(data,2)+size(celldata,2))
-    size(colnames)
-    size(data)
-    size(celldata)
-    error('colnames has wrong length.')   
 end
 if(~exist('colnames','var') || isempty(colnames))
     for i=1:size(data,2)
         colnames{i} = '';
     end
+elseif(length(colnames) ~= size(data,2)+size(celldata,2))
+    size(colnames)
+    size(data)
+    size(celldata)
+    error('colnames has wrong length.')   
 end
 if(exist('sortcolumn','var') && ~isempty(sortcolumn))
     [~,rf] = sort(sortcolumn);
