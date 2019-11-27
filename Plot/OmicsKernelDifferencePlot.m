@@ -61,9 +61,10 @@ nx = ceil(sqrt(size(f,2)));
 ny = ceil(size(f,2)/nx);
 yls = NaN(size(f,2),2);
 
-figure
+% figure
 for i=1:size(f,2)
     subplot(nx,ny,i)
+    hold on
     plot(pts,fplot(:,i));
     grid on
     yls(i,:) = ylim;
@@ -77,5 +78,6 @@ for i=1:size(f,2)
     ylim(yl);
 end
 % suptitle(['ksdensity, sample - all (',option,')']);
-suptitle(get(O,'name'));
+
+% suptitle(get(O,'name'));
 
