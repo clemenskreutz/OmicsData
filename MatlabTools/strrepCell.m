@@ -41,7 +41,7 @@ if(~iscell(repl))
     for i=1:length(repl)
         repl{i}=Rep;
     end
-elseif(length(pat) ~= length(repl))
+elseif(length(pat) ~= length(repl)) && (length(s) ~= length(repl))
     if length(pat)==1
         for i=2:length(repl)
             pat{i} = pat{1};
@@ -53,12 +53,13 @@ end
 
 if(exact==0)
     for is = 1:length(scell)
-        for i=1:length(pat)
-%             if(is==1)
-%                 [pat{i},'_',repl{i}]
-%             end
-            if(~isempty(scell{is}))
-                scell{is} = strrep(scell{is},pat{i},repl{i});
+        if length(pat)==1
+            scell{is} = strrep(scell{is},pat,repl{is});
+        else
+            for i=1:length(pat)
+                if(~isempty(scell{is}))
+                    scell{is} = strrep(scell{is},pat{i},repl{i});
+                end
             end
         end
     end
