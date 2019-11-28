@@ -54,7 +54,7 @@ end
 if(exact==0)
     for is = 1:length(scell)
         if length(pat)==1
-            scell{is} = strrep(scell{is},pat,repl{is});
+            scell{is} = strrep(scell{is},pat{1},repl{is});
         else
             for i=1:length(pat)
                 if(~isempty(scell{is}))
