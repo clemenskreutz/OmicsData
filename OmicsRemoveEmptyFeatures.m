@@ -12,7 +12,7 @@
 function [O,drin] = OmicsRemoveEmptyFeatures(O,minN)
 if ~exist('minN','var') || isempty(minN)
     minN = 1;
-elseif minN<1
+elseif minN<1 % interpreted as a fraction
     minN = ceil(minN*size(O,2));
 end
 

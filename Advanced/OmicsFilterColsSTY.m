@@ -53,7 +53,8 @@ drin = {'Proteins'
 'BestPEPEvidenceID'
 'BestPEPMS_MSID'
 'BestPEPScanNumber'
-'ProteinIDs'};
+'ProteinIDs'
+'IDs'};
 
 cols = get(O,'cols');
 fn = intersect(fieldnames(cols),drin,'stable');
