@@ -44,10 +44,11 @@
 
 function res = Ana2Out(res)
 
-
 res.out = struct;
 res.out.IDs = get(res.O,'IDs');
-
+if isempty(res.out.IDs)
+    error('isempty(res.out.IDs): Load the data properly, get(O,''IDs'') should be non-empty.')
+end
 
 fn = fieldnames(res.opts.out);
 for f=1:length(fn)
@@ -57,15 +58,27 @@ for f=1:length(fn)
     end
     for ix=1:length(xnames)
         res.out.(fn{f}).label = cell(0);
-        res.out.(fn{f}).(xnames{ix}) = NaN(length(res.out.IDs),0);
+        count = 0;
+        for d=1:length(res.data)
+            for a=1:length(res.data{d}.ana.(fn{f}))
+                ind = strmatch(xnames{ix},res.data{d}.ana.xnames{a},'exact');
+                if ~isempty(ind)
+                    count = count+1;
+                end
+            end
+        end
+        res.out.(fn{f}).(xnames{ix}) = NaN(length(res.out.IDs),count);
+        
+        count = 0;
         for d=1:length(res.data)
             [~,ia,ib] = intersect(res.out.IDs,get(res.data{d}.O,'IDs'),'stable');
             for a=1:length(res.data{d}.ana.(fn{f}))
                 ind = strmatch(xnames{ix},res.data{d}.ana.xnames{a},'exact');
                 if ~isempty(ind)
+                    count = count+1;
                     res.out.(fn{f}).label{end+1} = res.data{d}.ana.label{a};
-                    res.out.(fn{f}).(xnames{ix})(:,end+1) = NaN;
-                    res.out.(fn{f}).(xnames{ix})(ia,end) = res.data{d}.ana.(fn{f}){a}(ib,ind);
+%                     res.out.(fn{f}).(xnames{ix})(:,count) = NaN;
+                    res.out.(fn{f}).(xnames{ix})(ia,count) = res.data{d}.ana.(fn{f}){a}(ib,ind);
                 end
             end
         end

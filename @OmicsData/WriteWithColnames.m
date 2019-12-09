@@ -1,6 +1,6 @@
-% status = WriteWithColnames(O, file, data, colnames, sortcolumn, celldata, decsep)
+% status = WriteWithColnames(O, file, data, colnames, sortcolumn, appenddata, decsep)
 % 
-% Writing any kind of results (in array/matrix "data" and "celldata") into
+% Writing any kind of results (in array/matrix "data" and "appenddata") into
 % a file including the annotating columns
 % 
 %   O   	@OmicsData
@@ -16,7 +16,7 @@
 %               the written rows. A frequent choice is using the (negative)
 %               absolute fold-change or the p-value.
 % 
-%   celldata 	data to be written in the cell format (e.g. for strings)
+%   appenddata 	data to be written as last column(s), eg cell format for strings
 % 
 %   decsep      character used as seperator of decimal digits
 %                   Default: ',' [using '' would be slightly faster]
@@ -24,10 +24,13 @@
 % 
 %   status      the output of the fclose function. A value zero indicates
 %               normal exit status.
+% 
+% Examples:
+% WriteWithColnames(OmicsFilterColsSTY(O(1:100,:)),'Data.txt',get(O,'data'),get(O,'SampleNames'))
 
-function status = WriteWithColnames(O, file, data, colnames, sortcolumn, celldata, decsep)
-if(~exist('celldata','var') || isempty(celldata))
-    celldata = cell(0);
+function status = WriteWithColnames(O, file, data, colnames, sortcolumn, appenddata, decsep)
+if(~exist('appenddata','var') || isempty(appenddata))
+    appenddata = cell(0);
 end
 if(~exist('decsep','var') || isempty(decsep))
     decsep = ',';
@@ -36,18 +39,26 @@ end
 if(~exist('data','var'))
     data = [];
     colnames = [];
-elseif(length(colnames) ~= size(data,2)+size(celldata,2))
-    size(colnames)
-    size(data)
-    size(celldata)
-    error('colnames has wrong length.')   
 end
 if(~exist('colnames','var') || isempty(colnames))
     for i=1:size(data,2)
         colnames{i} = '';
     end
+elseif(length(colnames) ~= size(data,2)+size(appenddata,2))
+    size(colnames)
+    size(data)
+    size(appenddata)
+    error('colnames has wrong length.')   
 end
 if(exist('sortcolumn','var') && ~isempty(sortcolumn))
+    if ~isnumeric(sortcolumn)
+        idx = strcmp('p',colnames);
+        if idx>size(data,2)
+            sortcolumn = appenddata(:,idx-size(data,2));
+        else
+            sortcolumn = data(:,idx);
+        end
+    end
     [~,rf] = sort(sortcolumn);
     s = struct;
     s.type = '()';
@@ -55,10 +66,10 @@ if(exist('sortcolumn','var') && ~isempty(sortcolumn))
     O = subsref(O,s);
     
     data = data(rf,:);        
-    if(size(celldata,1)==length(rf))
-        celldata = celldata(rf,:);
+    if(size(appenddata,1)==length(rf))
+        appenddata = appenddata(rf,:);
     else
-        celldata = cell(0);
+        appenddata = cell(0);
     end
 end
 
@@ -111,14 +122,16 @@ for ig=1:size(colval,1)
             fprintf(fid,'\t%s',data(ig,ih));
         end        
     end
-    for ih = 1:size(celldata,2)
-        if(isempty(celldata{ig,ih}))
+    for ih = 1:size(appenddata,2)
+        if ~iscell(appenddata)
+            fprintf(fid,'\t%f',appenddata(ig,ih));
+        elseif(isempty(appenddata{ig,ih}))
             fprintf(fid,'\t%s','');            
-        elseif(iscell(celldata{ig,ih}))
-            tmp = strcat(celldata{ig,ih}{:},';');
+        elseif(iscell(appenddata{ig,ih}))
+            tmp = strcat(appenddata{ig,ih}{:},';');
             fprintf(fid,'\t%s',tmp);            
         else
-            fprintf(fid,'\t%s',celldata{ig,ih});
+            fprintf(fid,'\t%s',appenddata{ig,ih});
         end
     end        
     fprintf(fid,'\n');

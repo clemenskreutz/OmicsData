@@ -17,6 +17,9 @@ else
         warning('off','stats:regress:RankDefDesignMat');
         
         [res.X{i},res.xnames{i},res.grouplevels{i}] = DefineX(O,design);
+        if sum(strcmp(res.xnames{i},str2fieldname(res.xnames{i}))==0)>0
+            error('Define xnames that the can serve as fieldnames of a struct!')
+        end
         [res.p{i},~,res.fold{i},res.varest{i},res.foldSE{i}] = regress(O,res.X{i});
         
         res.mean{i} = nanmean(O,2);

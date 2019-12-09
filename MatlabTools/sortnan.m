@@ -1,4 +1,4 @@
-function O = sortnan(O,dim,which)
+function [O,idx] = sortnan(O,dim,which)
 
 % %   B = SORTNAN(A) sorts in ascending order.
 %   The sorted output B has the same type and size as A:

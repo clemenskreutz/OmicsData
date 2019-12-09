@@ -47,7 +47,12 @@ switch prop
     case fninfo  % if it match to an existing field in O.info
         O.info.(prop) = val;
         
-        
+    case 'ids'
+        if size(val,1)==size(O,1) && size(val,2)==1
+            O.cols.IDs = val;
+        else
+            error('size(val) does not fit.');
+        end
         
     otherwise
         dims = size(val);
@@ -58,9 +63,9 @@ switch prop
             if isnumeric(val) && dims(1)==nf && dims(2)==ns
                 O.data.(prop) = val;
             elseif dims(1)==nf && dims(2)==1
-                O.rows.(prop) = val;
-            elseif dims(1)==1 && dims(2)==ns
                 O.cols.(prop) = val;
+            elseif dims(1)==1 && dims(2)==ns
+                O.rows.(prop) = val;
             else
                 O.container.(prop) = val;  % unknown properties are put in the container
             end

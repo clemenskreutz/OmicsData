@@ -33,7 +33,7 @@ colnames{end+1} = ['Frac NaN in data'];
 out(:, end+1) = nanmean(res.O,2);
 colnames{end+1} = ['mean data'];
 
-xnames = setdiff(fieldnames(res.out.pr),'label');
+xnames = setdiff(fieldnames(res.out.pr),'label','stable');
 
 for ix=1:length(xnames)
     out(:, end+1) = log2fold( res.out.fold.(xnames{ix})(:,d));

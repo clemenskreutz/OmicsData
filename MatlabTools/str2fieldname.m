@@ -25,6 +25,7 @@ for i=1:length(str)
     str{i} = strrep(str{i},'|',rep);
     str{i} = strrep(str{i},'&',rep);
     str{i} = strrep(str{i},',',rep);
+    str{i} = strrep(str{i},';',rep);
     str{i} = strrep(str{i},'#',rep);
     str{i} = strrep(str{i},'.',rep);
     str{i} = strrep(str{i},' ',rep);

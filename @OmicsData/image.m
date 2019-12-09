@@ -3,10 +3,29 @@
 %   Plottet eine Heatmap in der ArrayView von einer Eigenschaft
 %
 %   map         Die Colormap, default: map = redgreencmap.
+% 
+%   resizeFig   [true]
+%               If true, then     set(gcf,'Position',[500  100  700  700])
+% 
+%   omitOutlierQuantile     [0]
+%               The fraction of outliers (quantiles) that are set to
+%               the Quantile in order to not impact the colorbar
+%               Example: If omitOutlierQuantile=0.01, then the smalles 1%
+%               and the largest 1% (>99%) are set to the 0.01 and 0.99
+%               quantiles
+%               
+% Examples:
+% image(Osim2,[],[],0.02)  % set smallest 2% and largest 2% to resp. quantiles
+% 
 
-function image(O,map,resizeFig)
+function image(O,map,resizeFig,omitOutlierQuantile)
 if ~exist('resizeFig','var') || isempty(resizeFig)
     resizeFig = true;
+end
+if ~exist('omitOutlierQuantile','var') || isempty(omitOutlierQuantile)
+    omitOutlierQuantile = 0;
+elseif omitOutlierQuantile>=0.5 || omitOutlierQuantile<0
+    error('omitOutlierQuantile has to be in the range [0,0.5)')
 end
 
 if(~exist('map','var') | isempty(map))
@@ -16,6 +35,11 @@ else
 end
 
 dat = get(O,'data');
+q1 = quantile(dat(:),omitOutlierQuantile);
+q2 = quantile(dat(:),1-omitOutlierQuantile);
+dat(dat>q2) = q2;
+dat(dat<q1) = q1;
+
 
 Min = nanmin(dat(:));
 Max = nanmax(dat(:));

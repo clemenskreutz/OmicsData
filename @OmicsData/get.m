@@ -57,7 +57,11 @@ else
             end
             
         case 'ids'
-            varargout = get(O,'MajorityproteinIDs');
+            if isfield(O.cols,'IDs')
+                varargout = O.cols.IDs;
+            else
+                varargout = get(O,'MajorityproteinIDs');
+            end
             
         case {'featurenames','fnames'}
             try
