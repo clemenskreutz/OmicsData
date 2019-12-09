@@ -65,16 +65,6 @@ for ii=1:npat
         warning('Impute.m: Amelia and ri are skipped because the matrix is singular. Try other methods.')
         rem = [rem find(ismember(method,{'ri','Amelia'}))];
     end
-    % rows with just NaNs?
-%     if get(O,'deleteemptyrows')
-%         idxnan = find(all(isnan(dat),2));
-%         if ~isempty(idxnan) && length(idxnan)<size(dat,1)
-%             warning([num2str(length(idxnan)) ' rows containing all NaNs ignored for imputation. If you dont want this, set(O,"deleteemptyrows",false).'])
-%             dat(idxnan,:) = [];
-%         end
-%     else
-%         warning('Empty rows are not deleted. Consider deleting because empty rows can cause failure in imputation. You can delete empty rows by O = set(O,"deleteemptyrows",true).')
-%     end
 
 %% Loop over imputation algorithms    
     for i=1:length(method)    
@@ -107,32 +97,16 @@ end
 closeR;
 
 % Delte not working methods
-if any(any(all(all(isnan(ImpM)))))
+if any(isnan(ImpM(:)))
     if size(ImpM,3)>1
-        idx = squeeze(all(all(all(isnan(ImpM)))));
+        idx = squeeze(any(any(any(isnan(ImpM)))));
     else
-        idx = squeeze(all(all(isnan(ImpM))));
+        idx = squeeze(any(any(isnan(ImpM))));
     end
     ImpM(:,:,:,idx) = [];
     method(idx) = [];
     time(idx,:) = [];
 end
-
-% % Are nans or infs in imputation?
-% isna = zeros(length(method),1);
-% isin = zeros(length(method),1);
-% for i=1:length(method)
-%     if any(any(isnan(ImpM(:,:,:,i))))
-%         isna(i) = 1;
-%     end
-%     if any(any(isinf(ImpM(:,:,:,i))))
-%         isin(i) = 1;
-%     end
-% end
-% method = struct;
-% method.name = method;
-% method.isna = isna;
-% method.isin = isin;
 
 %% Save result
 if exist('ImpM','var') && ~isempty(ImpM)

@@ -10,8 +10,8 @@ e = normrnd(0,sige,npep,rep);
 pep = P+G+e;
 
 %% Simulate proteins
-npro = npep/2;
-m = randi(npro,npep,1); % for each peptide assign protein ID
+npro = ceil(npep/2);
+m = randi(npro,1,npep); % for each peptide assign protein ID
 u=unique(m);
 n=histc(m,u);
 s = u(n ==1);               % get indices for single peptide

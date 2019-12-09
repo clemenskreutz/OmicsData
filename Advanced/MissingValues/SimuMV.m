@@ -37,7 +37,7 @@ m = size(full,1);
 n = size(full,2);
 
 %% Simulate MNAR
-T = normrnd(quantile(full(:),a),0.01,m,n); % threshold matrix
+T = normrnd(quantile(full(:),a),0.1,m,n); % threshold matrix
 mask1 = full<T;
 mask2 = boolean(binornd(1,b,m,n)); % binomial draw
 MNAR = mask1 & mask2;
@@ -46,9 +46,16 @@ if isempty(MNAR)
 end
 
 %% MCAR
-r = randsample(m*n-sum(sum(MNAR)),int32(n*m*(1-b)*a)); % randomly sample MCAR 
+v=find(~MNAR);
+idx = randsample(length(v),int32(m*n*(1-b)*a));
 MCAR = false(m,n);
-MCAR(sub2ind([m n],r)) = true;
+MCAR(sub2ind([m n],v(idx))) = true;
+% idx = find(MNAR);
+% MCAR = rand(m,n)>1-(1-b)*a;
+% r = randsample(m*n,int32(m*n*(1-b)*a));
+% c = setdiff(r,idx);
+%r(r==idx) = [];
+
 
 %% Total
 mask = MNAR | MCAR;
@@ -78,14 +85,14 @@ if exist('file','var')
    
     %% Sort for plotting
     [~,idx] = sort(sum(isnan(data),2));
-    data = data(idx,:);
-    data = data(~all(isnan(data),2),:);
+    dataplt = data(idx,:);
+    dataplt = dataplt(~all(isnan(dataplt),2),:);
     full = full(idx,:);
     
     figure
-    bottom = nanmin(nanmin(data)); %min([min(nanmin(yn)),min(nanmin(yc)),min(nanmin(data))]);
-    %top  = max([max(nanmax(yn)),max(nanmax(yc)),max(nanmax(data))]);
-    top  = nanmax(nanmax(data));
+    bottom = nanmin(nanmin(dataplt)); %min([min(nanmin(yn)),min(nanmin(yc)),min(nanmin(dataplt))]);
+    %top  = max([max(nanmax(yn)),max(nanmax(yc)),max(nanmax(dataplt))]);
+    top  = nanmax(nanmax(dataplt));
     
     subplot(1,3,1)
     datamnar = full;
@@ -104,9 +111,9 @@ if exist('file','var')
     caxis manual
     caxis([bottom top]);
     subplot(1,3,3)
-    b = imagesc(data);
-    set(b,'AlphaData',~isnan(data))
-    title({'Total';[num2str(round(sum(sum(isnan(data)))/m/n*100)) '% na']})
+    b = imagesc(dataplt);
+    set(b,'AlphaData',~isnan(dataplt))
+    title({'Total';[num2str(round(sum(sum(isnan(dataplt)))/m/n*100)) '% na']})
     caxis manual
     caxis([bottom top]);
     c=colorbar;
@@ -122,12 +129,12 @@ if exist('file','var')
     xlabel('samples')
     title({'Simulated data'})
     subplot(1,2,2)
-    nr = size(data,1);
-    nc = size(data,2);
-    pcolor([data nan(nr,1); nan(1,nc+1)]);
+    nr = size(dataplt,1);
+    nc = size(dataplt,2);
+    pcolor([dataplt nan(nr,1); nan(1,nc+1)]);
     shading flat;
     set(gca, 'ydir', 'reverse');
-%    imagesc(data)
+%    imagesc(dataplt)
     caxis manual
     caxis([bottom top]);
     xlabel('samples')

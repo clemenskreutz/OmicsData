@@ -2,6 +2,7 @@
 function PlotSimulatedPattern(O)
 
 dat = get(O,'data_original');
+comp = get(O,'data_complete');
 dat_mis = get(O,'data_mis');
 
 % Save directory
@@ -24,14 +25,12 @@ dat = dat(idx,:);
 [~,idx2] = sort(sum(isnan(dat),2));
 dat = dat(idx2,:);
 dat = dat(~all(isnan(dat),2),:);
-comp = dat(~any(isnan(dat),2),:);
-% comp = get(O,'data_complete');  % Complete matrix is used for pattern simu
-% if isempty(comp)
-%     comp = get(O,'data_full');
-%     comp = comp(:,:,1);
-% end
-% [~,idx] = sort(sum(comp,2),'descend','MissingPlacement','last');
-% comp = comp(idx,:);
+[~,idx] = sort(sum(comp,2),'descend','MissingPlacement','last');
+comp = comp(idx,:);
+[~,idx2] = sort(sum(isnan(comp),2));
+comp = comp(idx2,:);
+comp = comp(~all(isnan(comp),2),:);
+
 fileID = fopen([filepath filesep name filesep '%Mis.txt'],'w');
 fprintf(fileID,'%s\t%s\n','MV in original','MV in pattern');
 

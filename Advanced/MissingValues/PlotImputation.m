@@ -21,7 +21,7 @@ dat_imp = get(O,'data_imput');               % Imputed data
 
 dat_mis(isnan(dat_mis)) = 1;
 dat_mis(dat_mis ~= 1) = NaN;
-dat_imp = dat_imp .* dat_mis;                % JUST imputed data
+dat_just_imp = dat_imp .* dat_mis;                % JUST imputed data
 
 % Get path
 path = get(O,'path');
@@ -46,7 +46,7 @@ Rankmethod = GetNames(Rankmethod);
 RMSE = nanmean(Tab(6,idxmethod,:),3);    % if GetRankTable was not ranked by mean RMSE
 
 % Mean Error
-Diff = abs(dat_complete-dat_imp);               % |Imp-Original| 
+Diff = abs(dat_complete-dat_just_imp);               % |Imp-Original| 
 s = size(Diff);
 Diff = reshape(Diff,[s(1)*s(2)*s(3),s(4)]);    % row,col,pattern do not matter -> squeeze
 Diff = Diff(:,idxmethod);                   % sort method by rank

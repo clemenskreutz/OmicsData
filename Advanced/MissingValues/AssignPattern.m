@@ -18,7 +18,10 @@ if ~exist('O','var')
     error('MissingValues/AssignPattern.m requires class O as input argument.\n')
 end
 if ~exist('out','var') || isempty(out)
-    error('MissingValues/AssignPattern.m requires coefficients from logistic regression as input. Do LearnPattern before AssignPattern.\n')
+    out = get(O,'out');
+    if ~exist('out','var') || isempty(out)
+        error('MissingValues/AssignPattern.m requires coefficients from logistic regression as input. Do LearnPattern before AssignPattern.\n')
+    end
 end
 if ~exist('npat','var') || isempty(npat)
     npat = 5;
@@ -80,7 +83,7 @@ for i=1:npat
     end
     dat_patterns(:,:,i) = dat_mis;
 end
-
+    
 %% Save
 O = set(O,'data',dat_patterns,'assign NA');
 % if scale
@@ -91,4 +94,4 @@ O = set(O,'data_mis',dat_patterns);
 
 %% Plot
 PlotSimulatedPattern(O);
-PatternPerRowCol(O);
+% PatternPerRowCol(O);

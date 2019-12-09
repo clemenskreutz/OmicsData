@@ -10,7 +10,7 @@ if ~exist('ttest','var') || isempty(ttest)
     ttest = false;
 end
 if ~exist('rankRMSE','var') || isempty(rankRMSE)
-    rankRMSE = true;
+    rankRMSE = false;
 end
 
 %% Get
@@ -18,6 +18,10 @@ if ~isfield('O','Table') % if GetTable hasn't been performed before
     O = GetTable(O);
     if ttest
         O = RMSEttest(O);  
+    end
+    if ~isfield('O','Table')
+        warning('Imputations failed or are not findable in O.')
+        return
     end
 end
 

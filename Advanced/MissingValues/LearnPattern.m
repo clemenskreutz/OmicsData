@@ -41,6 +41,7 @@ b = nan(ceil(nfeat/nboot),nboot);
 out.b = [];
 out.type = [];
 out.typenames = [];
+out.typesig = 'nan';
 
 for i=1:nboot  % subsample proteins
     fprintf('%i out of %i ...\n',i,nboot);
@@ -53,29 +54,20 @@ for i=1:nboot  % subsample proteins
     end
     
     [X,y,type,typenames] = GetDesign(O(ind,:),out);
-        out.type = [0; type]; % offset gets type=0
-        out.typenames = ['offset'; typenames];
+    out.type = [0; type]; % offset gets type=0
+    out.typenames = ['offset'; typenames];
     
     out.stats(i) = LogReg(X,y);
     
     % if X is ill-conditioned or overparametrized
-    if any(out.stats(i).beta==0) %|| isfield(out,'significant')  
-        %out.idxrem = find(out.stats(i).beta==0)-1;
+    if i==1 && any(out.stats(i).beta==0)
         out.significant = 1;
-        out = GetSignificance(out);  
+        out = GetSignificance(out);    
         [X,y,type,typenames] = GetDesign(O(ind,:),out); % LogReg without not-significant predictors
         out.type = [0; type];
         out.typenames = ['offset'; typenames];
         out.stats(i) = LogReg(X,y);
     end
-%     if all(out.stats(i).beta==0) || isfield(out,'significant')                        
-%         out.significant = 1;
-%         out = GetSignificance(out);                      % get not-significant predictors       
-%         [X,y,type,typenames] = GetDesign(O(ind,:),out); % LogReg without not-significant predictors
-%         out.type = [0; type]; % offset gets type=0
-%         out.typenames = ['offset'; typenames];
-%         out.stats(i) = LogReg(X,y);
-%     end
     b(1:length(out.stats(i).beta),i) = out.stats(i).beta;
 end
 
@@ -83,10 +75,7 @@ end
 out.X = X;
 out.b = nanmean(b,2);
 
-
-% Plot
-PlotDesign(out,isnan(O(ind,:)),get(O,'path'))
-
+%PlotDesign(out,isnan(O(ind,:)),get(O,'path'))
 end
 
 
