@@ -32,7 +32,7 @@ c = 0;
 m = nanmean(O,2);
 m = (m-nanmean(m))./nanstd(m);
 m = m*ones(1,size(isna,2)); 
-if contains('nan',out.typesig) || contains('mean',out.typesig)
+if any( strcmp('nan',out.typesig) | strcmp('mean',out.typesig))
     X = m(:);
     c=c+1;
     bnames{c} = 'mean';
@@ -40,8 +40,8 @@ if contains('nan',out.typesig) || contains('mean',out.typesig)
 end
 
 % mean linearized to X
-if contains('nan',out.typesig) || contains('linmean',out.typesig)
-    mlin = feval(out.mean_trans_fun,m(:,1),out.lincoef); 
+if any( strcmp('nan',out.typesig) | strcmp('linmean',out.typesig))
+    mlin = feval(out.trans_fun_lin,m(:,1),out.linmean); 
     mlin = mlin*ones(1,size(isna,2)); 
     if exist('X','var')
         X = [X, mlin(:)];
@@ -53,83 +53,105 @@ if contains('nan',out.typesig) || contains('linmean',out.typesig)
     type(c) = 100; % mean-dependency
 end
 
-% % varianz to X
-if contains('nan',out.typesig) || contains('median',out.typesig)
-    v = nanmedian(dat,2);
+% min
+if any( strcmp('nan',out.typesig) | strcmp('min',out.typesig))
+    v = nanmin(dat,2);
     v = (v-nanmean(v))./nanstd(v);
     v = v*ones(1,size(isna,2)); 
     X = [X, v(:)];
     c=c+1;
-    bnames{c} = 'median';
-    type(c) = 99;
+    bnames{c} = 'min';
+    type(c) = 6;
 end
 
-% % varianz to X
-if contains('nan',out.typesig) || contains('var',out.typesig)
-    v = var(dat,0,2,'omitnan');
+% max
+if any( strcmp('nan',out.typesig) | strcmp('max',out.typesig))
+    v = nanmax(dat,2);
     v = (v-nanmean(v))./nanstd(v);
     v = v*ones(1,size(isna,2)); 
     X = [X, v(:)];
     c=c+1;
-    bnames{c} = 'var';
-    type(c) = 101;
+    bnames{c} = 'max';
+    type(c) = 7;
 end
 
-% % varianz to X
-if contains('nan',out.typesig) || contains('range',out.typesig)
-    v = range(dat,2);
-    v = (v-nanmean(v))./nanstd(v);
-    v = v*ones(1,size(isna,2)); 
-    X = [X, v(:)];
-    c=c+1;
-    bnames{c} = 'range';
-    type(c) = 102;
-end
-
-% % varianz to X
-if contains('nan',out.typesig) || contains('iqr',out.typesig)
-    r = iqr(dat,2);
-    r = (r-nanmean(r))./nanstd(r);
-    r = r*ones(1,size(isna,2)); 
-    X = [X, r(:)];
-    c=c+1;
-    bnames{c} = 'iqr';
-    type(c) = 103;
-end
-
-
-if contains('nan',out.typesig) || contains('skew',out.typesig)
-    r = skewness(dat,1,2);
-    r = (r-nanmean(r))./nanstd(r);
-    r = r*ones(1,size(isna,2)); 
-    X = [X, r(:)];
-    c=c+1;
-    bnames{c} = 'skew';
-    type(c) = 104;
-end
-
-if contains('nan',out.typesig) || contains('z',out.typesig)
-    r = (dat - nanmean(dat,2)) ./ nanstd(dat,[],2);
-    r(isnan(r)) = 0;
-    X = [X, r(:)];
-    c=c+1;
-    bnames{c} = 'z';
-    type(c) = 105;
-end
-
-if contains('nan',out.typesig) || contains('z2',out.typesig)
-    r = (dat - nanmean(dat(:))) ./ nanstd(dat(:));
-    r(isnan(r)) = 0;
-    X = [X, r(:)];
-    c=c+1;
-    bnames{c} = 'z2';
-    type(c) = 106;
-end
+% % % varianz to X
+% if any( strcmp('nan',out.typesig) | strcmp('median',out.typesig))
+%     v = nanmedian(dat,2);
+%     v = (v-nanmean(v))./nanstd(v);
+%     v = v*ones(1,size(isna,2)); 
+%     X = [X, v(:)];
+%     c=c+1;
+%     bnames{c} = 'median';
+%     type(c) = 99;
+% end
+% 
+% % % varianz to X
+% if any( strcmp('nan',out.typesig) | strcmp('var',out.typesig))
+%     v = var(dat,0,2,'omitnan');
+%     v = (v-nanmean(v))./nanstd(v);
+%     v = v*ones(1,size(isna,2)); 
+%     X = [X, v(:)];
+%     c=c+1;
+%     bnames{c} = 'var';
+%     type(c) = 101;
+% end
+% 
+% % % varianz to X
+% if any( strcmp('nan',out.typesig) | strcmp('range',out.typesig))
+%     v = range(dat,2);
+%     v = (v-nanmean(v))./nanstd(v);
+%     v = v*ones(1,size(isna,2)); 
+%     X = [X, v(:)];
+%     c=c+1;
+%     bnames{c} = 'range';
+%     type(c) = 102;
+% end
+% 
+% % % varianz to X
+% if any( strcmp('nan',out.typesig) | strcmp('iqr',out.typesig))
+%     r = iqr(dat,2);
+%     r = (r-nanmean(r))./nanstd(r);
+%     r = r*ones(1,size(isna,2)); 
+%     X = [X, r(:)];
+%     c=c+1;
+%     bnames{c} = 'iqr';
+%     type(c) = 103;
+% end
+% 
+% 
+% if any( strcmp('nan',out.typesig) | strcmp('skew',out.typesig))
+%     r = skewness(dat,1,2);
+%     r = (r-nanmean(r))./nanstd(r);
+%     r = r*ones(1,size(isna,2)); 
+%     X = [X, r(:)];
+%     c=c+1;
+%     bnames{c} = 'skew';
+%     type(c) = 104;
+% end
+% 
+% if any( strcmp('nan',out.typesig) | strcmp('z',out.typesig))
+%     r = (dat - nanmean(dat,2)) ./ nanstd(dat,[],2);
+%     r(isnan(r)) = 0;
+%     X = [X, r(:)];
+%     c=c+1;
+%     bnames{c} = 'z';
+%     type(c) = 105;
+% end
+% 
+% if any( strcmp('nan',out.typesig) | strcmp('z2',out.typesig))
+%     r = (dat - nanmean(dat(:))) ./ nanstd(dat(:));
+%     r(isnan(r)) = 0;
+%     X = [X, r(:)];
+%     c=c+1;
+%     bnames{c} = 'z2';
+%     type(c) = 106;
+% end
 
 % Predictors from O.cols
 pred = fieldnames(get(O,'cols'));
 for i=1:length(pred)
-    if contains('nan',out.typesig) || contains(pred{i},out.typesig)
+    if any( strcmp('nan',out.typesig) | strcmp(pred{i},out.typesig))
         predvec = get(O,pred{i},true);
         if isnumeric(predvec) && ~strcmp(pred{i},get(O,'default_data'))
             predvec = (predvec-nanmean(predvec))/nanstd(predvec);
@@ -152,7 +174,7 @@ end
 % Predictors from O.data Important! Counts and Sequences
 pred = fieldnames(getfield(O,'data'));  % get(O,'data') is the default data matrix
 for i=1:length(pred)
-    if contains('nan',out.typesig) || contains(pred{i},out.typesig)
+    if any( strcmp('nan',out.typesig) | strcmp(pred{i},out.typesig))
         predmat = get(O,pred{i},true);
         if isnumeric(predmat) && size(predmat,1)*size(predmat,2)==size(X,1) && ~strcmp(pred{i},get(O,'default_data'))
             predmat = (predmat-nanmean(predmat(:)))./nanstd(predmat(:));

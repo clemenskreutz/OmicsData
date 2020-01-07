@@ -10,14 +10,14 @@ out.pmax = nanmax(p,[],2);
 out.pmin = nanmin(p,[],2);
 out.ptype = out.typenames(out.type~=2 & out.type~=3);
 
-pmax = out.pmax(4:end); % offset/mean/linmean stay predictor independent of significance
-pmin = out.pmin(4:end);
+% pmax = out.pmax(4:end); % offset/mean/linmean stay predictor independent of significance
+% pmin = out.pmin(4:end);
 
-idxrem = [find(isnan(pmin)); find(pmin>0.1)]+3;     % indices of not significant
-if p(1)<p(2)                  
-    idxrem = [3; idxrem];      % take mean
-else
-    idxrem = [2; idxrem];  % or keep linearized mean
-end
+idxrem = [find(isnan(out.pmin))];     % indices of not significant  ; find(pmin>0.1)
+% if p(1)<p(2)                  
+%     idxrem = [3; idxrem];      % take mean
+% else
+%     idxrem = [2; idxrem];  % or keep linearized mean
+% end
 out.idxrem = idxrem;
 out.typesig = out.typenames(setdiff(1:length(out.type),idxrem));

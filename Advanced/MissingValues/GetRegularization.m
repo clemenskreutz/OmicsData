@@ -25,13 +25,21 @@ function [X,y] = GetRegularization(X,y)
 ind = 1;
 yreg = zeros(2*(size(X,2)-1),1);
 xreg = zeros(2*(size(X,2)-1),size(X,2));
-idx = find(sum(X==0)<size(X,1)/2);
-idx2 = setdiff(1:size(X,2),idx);
-for i=1:length(idx)
-    xreg(:,idx(i)) = nanmedian(X(:,idx(i)))*ones(size(xreg,1),1);  % for regularization set first column to median(intensity)
+
+nrowcol = size(X,1)/sum(X(:,end))+sum(X(:,end));
+idx = size(X,2)-nrowcol+1 : size(X,2);
+for i=1:size(X,2)-nrowcol % row/col anyway
+    N = histcounts(X(:,i),20);
+    if any(N>size(X,1)/2)
+        idx = [idx i];
+    end
 end
+idx2 = setdiff(1:size(X,2),idx);
 for i=1:length(idx2)
-    j = idx2(i);
+    xreg(:,idx2(i)) = nanmedian(X(:,idx2(i)))*ones(size(xreg,1),1);  % for regularization set first column to median(intensity)
+end
+for i=1:length(idx)
+    j = idx(i);
     xreg(ind:(ind+1),j) = 1;
     yreg(ind+1) = 1;
     ind = ind+2;

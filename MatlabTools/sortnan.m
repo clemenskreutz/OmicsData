@@ -36,7 +36,7 @@ if dim==1
     end
     [~,idx] = sortrows(dat,size(dat,2));
     O = O(idx,:);    
-    fprintf('sortnan.m: Rows are sorted by number of missing values.\n');
+    %fprintf('sortnan.m: Rows are sorted by number of missing values.\n');
 elseif dim ==2
     if exist('which','var') && ~isempty(which)
         dat(end+1,:) = which;
@@ -45,7 +45,7 @@ elseif dim ==2
     end
     [~,idx] = sortrows(dat',size(dat,1));
     O = O(:,idx);
-    fprintf('sortnan.m: Columns are sorted by number of missing values.\n');
+    %fprintf('sortnan.m: Columns are sorted by number of missing values.\n');
 else
     error('sortnan.m: Function does not work if dim~=[1,2]')
 end

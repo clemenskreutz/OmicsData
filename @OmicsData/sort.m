@@ -23,27 +23,29 @@ function [O,idx] = sort(O,dim,direction)
 % O = sort(O);
 
 if nargin<1
-    error('sort.m requires class O as input argument.')
+    error('sortnan.m requires class O as input argument.')
 end
 if ~exist('dim','var') || isempty(dim)
     dim = 1;
-end
-if ~isnumeric(dim)
-    direction = dim;
 end
 if ~exist('direction','var') || isempty(direction)
     direction = 'ascend';
 end
 
+% get data
 dat = get(O,'data');
-[~,idx] = sort(dat,dim,direction);
 
 if dim==1
-    O = O(idx,:);    
-    fprintf('sort.m: Rows are sorted by intensity.\n');
+    [~,idx] = sortrows(dat,direction);
+      s = struct('type','()');
+  s.subs = {idx,':'};
+  subsref(O,s); 
+    %fprintf('sortnan.m: Rows are sorted by number of missing values.\n');
 elseif dim ==2
+    [~,idx] = sortrows(dat',direction);
     O = O(:,idx);
-    fprintf('sort.m: Columns are sorted by intensity.\n');
+    %fprintf('sortnan.m: Columns are sorted by number of missing values.\n');
+else
+    error('sort.m: Function does not work if dim~=[1,2]')
 end
 
- 

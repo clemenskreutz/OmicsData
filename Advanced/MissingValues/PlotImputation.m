@@ -28,7 +28,7 @@ path = get(O,'path');
 [filepath,name] = fileparts(path);
 
 % Get method & RMSE
-Tab = get(O,'Table');
+Tab = get(O,'Table',true);
 if isempty(Tab)
     Tab = GetTable(O);
 end

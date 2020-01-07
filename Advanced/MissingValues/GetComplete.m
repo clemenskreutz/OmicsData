@@ -16,12 +16,12 @@ dat = get(O,'data');
 O = set(O,'data_original',dat,'Original dataset');
 
 %% Delete all nan elements
-if sum(~any(isnan(O),2))>100
+if sum(~any(isnan(O),2))>50
     O = O(~any(isnan(O),2),:);
     fprintf('All lines with missing values deleted.\n')  
 else
     for i=2:size(O,2)
-        if sum(sum(isnan(O),2)<i)>100
+        if sum(sum(isnan(O),2)<i)>50
             O = O(sum(isnan(O),2)<i,:);
             fprintf(['All lines with <' num2str(i-1) ' MV deleted.\n']) 
             break

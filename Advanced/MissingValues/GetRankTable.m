@@ -14,12 +14,12 @@ if ~exist('rankRMSE','var') || isempty(rankRMSE)
 end
 
 %% Get
-if ~isfield('O','Table') % if GetTable hasn't been performed before
+if ~isfield(O,'Table') % if GetTable hasn't been performed before
     O = GetTable(O);
     if ttest
         O = RMSEttest(O);  
     end
-    if ~isfield('O','Table')
+    if ~isfield(O,'Table')
         warning('Imputations failed or are not findable in O.')
         return
     end

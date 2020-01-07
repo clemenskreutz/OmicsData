@@ -24,13 +24,14 @@ if ~isempty(dat_imp)
     Tsave = nan(11,size(dat_imp,4)+1,size(dat_mis,3));
     for b=1:size(dat_mis,3)
         % Columns of just imputed data
-        Y = dat(isnan(dat_mis(:,:,b)));                         % for complete data
+        Y = dat(isnan(dat_mis(:,:,b)));                         % for complete data     
         X = nan(size(Y,1),size(dat_imp,4));
         for i=1:size(dat_imp,4)
             im = dat_imp(:,:,b,i);
             X(:,i) = im(isnan(dat_mis(:,:,b)));                 % for imputed data
         end
-        if length(Y)<20                                  % if too less data
+        if sum(~isnan(Y))<20                                  % if too less data
+            warning('Less than 20 MV imputed. Table not calculated.')
             continue
         end
         
