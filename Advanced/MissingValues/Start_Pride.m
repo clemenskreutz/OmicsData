@@ -1,19 +1,17 @@
 clear all
 close all
+set(0,'DefaultFigureVisible','off')  
 
 files = dir('PrideData_new/**/*proteinGroups*.txt');         % Load proteinGroups.txt
-set(0,'DefaultFigureVisible','off')                 % dont show figures (saved anyway)
-t=[];
+methods = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','impSeqRob','knn','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','norm','cart','softImpute','MinDet','amelia','regression','midastouch','mean','aregImpute','nlpca'};
 
-methods = {'impnorm','knn','mean','norm','ri','pmm','sample','cart','midastouch','rf','Amelia','aregImpute','regression','ppca','bpca','nipals','nlpca','svdImpute', ...
-    'MinDet','MinProb','QRILC','SVTImpute','SVDImpute','kNNImpute','missForest','softImpute','irmi','Norm','Seq','SeqRob','MIPCA','imputePCA'};
-
-for i=169%1:70%:length(files)      % 70-77 % 78 Beispiel datensatz % 96/152/153/169 funzt nicht % 189:190 fehlt noch
-    tic
-    if i==96 || i==152 || i==153 || 169
+for i=[7:7:21]%:length(files)      % 70-77 % 78 Beispiel datensatz % 96/152/153/169 funzt nicht % 189:190 fehlt noch
+    
+    if i==96 || i==152 || i==153 || i==169
         continue
     end
     i
+    tic
     O = OmicsData([files(i).folder '\' files(i).name]); % Write in class O    
     if size(O,2)>100
         continue
@@ -29,17 +27,11 @@ for i=169%1:70%:length(files)      % 70-77 % 78 Beispiel datensatz % 96/152/153/
         O = set(O,'data',dat,'Replaced 0 by nan.');
     end
     O = O(:,~all(isnan(O)));                      % delete columns/experiments with all nan
-    O = O(:,sum(isnan(O))/size(O,1)<=0.9);
-    if get(O,'nsamples')>1
-        
-        [O,out] = DIMA(O);
-        O = impute(O,methods);
-        O = GetPerformance(O,true,false);
 
-    else
-        delete([files(i).folder filesep files(i).name(1:end-4) '.mat']);
-    end
-    t(i) = toc
+    O = DIMA(O);
+    %O = impute(O,methods);
+    %O = GetPerformance(O,true,false);
+    O = set(O,'time',toc);
+    saveO(O,[],'ODima')
+        
 end
-t
-%1.0e+03 *[ 0.5463    0.6262   0.5675    1.4647 ] 239.8
