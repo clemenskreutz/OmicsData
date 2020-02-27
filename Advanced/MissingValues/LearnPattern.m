@@ -70,11 +70,18 @@ end
 
 function stats = LogReg(X,y)
 
-    [X,y] = GetRegularization(X,y);
+[X,y] = GetRegularization(X,y);
     
 %     lastwarn('');
-    [~,~,stats] = glmfit(X,y,'binomial','link','logit');
-    
+if size(X,1)<50000
+    [~,~,stats] = glmfit(X,y,'binomial','link','logit');          % faster
+else
+     mdl = fitglm(X,y,'Distribution','binomial','link','logit');  % works for tall matrices
+     stats = struct;
+     stats.beta = mdl.Coefficients.Estimate;
+     stats.p = mdl.Coefficients.pValue;
+end
+
 %     if strcmp(lastwarn,'Iteration limit reached.')
 %         opts = statset('glmfit');
 %         opts.MaxIter = 1000; 

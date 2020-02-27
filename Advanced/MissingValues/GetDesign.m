@@ -1,15 +1,8 @@
 
-function [X,y,type,bnames] = GetDesign(O,out,sprs)
+function [X,y,type,bnames] = GetDesign(O,out)
 
 if ~exist('out','var')
     out = [];
-end
-if ~exist('sprs','var') || isempty(sprs)
-    if size(O,2)>50
-        sprs = true;
-    else
-        sprs = false;
-    end
 end
 
 % response vector
@@ -157,11 +150,7 @@ end
 
 X = (X-nanmean(X))./nanstd(X);
 
-if sprs
-    X2 = sparse(size(X,1),length(rlev)+length(clev));
-else
-    X2 = zeros(size(X,1),length(rlev)+length(clev));
-end
+X2 = zeros(size(X,1),length(rlev)+length(clev));
 
 % Col to X
 for i=1:length(clev)
