@@ -28,22 +28,16 @@ path = get(O,'path');
 [filepath,name] = fileparts(path);
 
 % Get method & RMSE
-Tab = get(O,'Table',true);
+Tab = get(O,'RankTable',true);
 if isempty(Tab)
-    Tab = GetTable(O);
+    O = GetRankTable(O);
+    Tab = get(O,'RankTable');
 end
-Tab = Tab(:,2:end,:);
+Tab = Tab(2,:);
 method = get(O,'method_imput');
-%method = meth.name;
 Rankmethod = get(O,'RankMethod');
-if isempty(Rankmethod)
-    O = GetRankTable(O); 
-    Rankmethod = get(O,'RankMethod');
-end
 [~,idxmethod] = ismember(Rankmethod,method);
 Rankmethod = GetNames(Rankmethod);
-
-RMSE = nanmean(Tab(6,idxmethod,:),3);    % if GetRankTable was not ranked by mean RMSE
 
 % Mean Error
 Diff = abs(dat_complete-dat_just_imp);               % |Imp-Original| 
@@ -56,7 +50,7 @@ Diff(Diff==0) = NaN;                            % if not imputed, ignore for box
 figure; set(gcf,'outerposition',[0 0 800 600]) 
 boxplot(Diff,'PlotStyle','compact','Symbol','.','DataLim',[0 6])
 hold on;
-p2 = plot(RMSE,'rd','MarkerFaceColor','r','LineWidth',1);
+p2 = plot(Tab,'rd','MarkerFaceColor','r','LineWidth',1);
 set(gca,'XTick',1:size(dat_imp,4)+1);
 set(gca,'XTickLabel',Rankmethod,'XTickLabelRotation',45, 'FontSize',14);  
 ylabel('|Imputed - Original|', 'FontSize',14)

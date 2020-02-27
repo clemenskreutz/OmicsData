@@ -34,7 +34,7 @@ for i=1:nprot
     pep(i,npep(i)+1:end) = NaN;
 end
 %5
-prot = nanmean(pep,2)+randn(200,ceil(nsam/2))*sig;
+prot = nanmean(pep,2)+randn(nprot,ceil(nsam/2))*sig;
 prot(:,end+1:end*2) = prot+FC;
 
 % Norm Janine

@@ -13,7 +13,7 @@ O = O(drin,:);
 
 % Coefficients for linearizing mean
 m = nanmean(O,2);
-m = (m-nanmean(m))./nanstd(m);
+%m = (m-nanmean(m))./nanstd(m);
 isna = isnan(O);
 mis = sum(isna,2)./size(isna,2);    
 
@@ -38,13 +38,11 @@ end
 dim = ceil(nfeat/nboot)+size(O,2)+2;
 X = nan(dim,size(O,2),nboot);
 b = nan(ceil(nfeat/nboot),nboot);
-out.b = [];
-out.type = [];
-out.typenames = [];
-out.typesig = 'nan';
 
 for i=1:nboot  % subsample proteins
-    fprintf('%i out of %i ...\n',i,nboot);
+    if nboot>1
+        fprintf('%i out of %i ...\n',i,nboot);
+    end
     if nboot == 1
         ind = 1:nfeat;                              % if nfeat <1000, no subsample
     elseif  i==nboot
@@ -56,18 +54,9 @@ for i=1:nboot  % subsample proteins
     [X,y,type,typenames] = GetDesign(O(ind,:),out);
     out.type = [0; type]; % offset gets type=0
     out.typenames = ['offset'; typenames];
-    
+
     out.stats(i) = LogReg(X,y);
     
-    % if X is ill-conditioned or overparametrized
-    if i==1 && any(out.stats(i).beta==0)
-        out.significant = 1;
-        out = GetSignificance(out);    
-        [X,y,type,typenames] = GetDesign(O(ind,:),out); % LogReg without not-significant predictors
-        out.type = [0; type];
-        out.typenames = ['offset'; typenames];
-        out.stats(i) = LogReg(X,y);
-    end
     b(1:length(out.stats(i).beta),i) = out.stats(i).beta;
 end
 

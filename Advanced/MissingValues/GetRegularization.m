@@ -1,3 +1,4 @@
+
 % GetRegularization(X,m,y)
 %
 % Expand the design matrix X so each predictor has at least one positive
@@ -26,21 +27,11 @@ ind = 1;
 yreg = zeros(2*(size(X,2)-1),1);
 xreg = zeros(2*(size(X,2)-1),size(X,2));
 
-nrowcol = size(X,1)/sum(X(:,end))+sum(X(:,end));
-idx = size(X,2)-nrowcol+1 : size(X,2);
-for i=1:size(X,2)-nrowcol % row/col anyway
-    N = histcounts(X(:,i),20);
-    if any(N>size(X,1)/2)
-        idx = [idx i];
-    end
-end
-idx2 = setdiff(1:size(X,2),idx);
-for i=1:length(idx2)
-    xreg(:,idx2(i)) = nanmedian(X(:,idx2(i)))*ones(size(xreg,1),1);  % for regularization set first column to median(intensity)
-end
-for i=1:length(idx)
-    j = idx(i);
-    xreg(ind:(ind+1),j) = 1;
+til = size(X,2)-sum(X(:,end)==1)-size(X,1)/sum(X(:,end)==1);  % predictors which are no ID
+xreg(:,1:til) = nanmedian(X(:,1:til)).*ones(size(xreg,1),1);  % set column to median
+
+for i=til+1:size(X,2)
+    xreg(ind:(ind+1),i) = 1;
     yreg(ind+1) = 1;
     ind = ind+2;
 end

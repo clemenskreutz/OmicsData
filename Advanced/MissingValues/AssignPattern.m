@@ -15,26 +15,26 @@
 function O = AssignPattern(O,out,npat,scale)
 
 if ~exist('O','var')
-    error('MissingValues/AssignPattern.m requires class O as input argument.\n')
+    error('AssignPattern.m requires class O as input argument.\n')
 end
 if ~exist('out','var') || isempty(out)
     out = get(O,'out');
     if ~exist('out','var') || isempty(out)
-        error('MissingValues/AssignPattern.m requires coefficients from logistic regression as input. Do LearnPattern before AssignPattern.\n')
+        error('AssignPattern.m requires coefficients from logistic regression as input. Do LearnPattern before AssignPattern.\n')
     end
 end
 if ~exist('npat','var') || isempty(npat)
     npat = 5;
-    fprintf('MissingValues/AssignPattern.m: 5 patterns of MV are simulated.\n')
+    fprintf('AssignPattern.m: 5 patterns of MV are simulated.\n')
 end
 if ~isfield(out,'b')
-    error('MissingValues/AssignPattern.m requires coefficients from logistic regression as input. Do LearnPattern before AssignPattern. Input struct did not include coefficients.\n')
+    error('AssignPattern.m requires coefficients from logistic regression as input. Do LearnPattern before AssignPattern. Input struct did not include coefficients.\n')
 end
 if ~isfield(out,'lincoef')
-    error('MissingValues/AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
+    error('AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
 end
 if ~isfield(out,'lincoef')
-    error('MissingValues/AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
+    error('AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
 end
 if ~exist('scale','var') || isempty(scale)
     scale = true;
@@ -43,6 +43,7 @@ end
 % Get data
 if scale
     O = scaleO(O,'original');
+    % O = QuantileRescaling(O,get(O,'data_original'))
 end
 dat = get(O,'data');
 
@@ -86,12 +87,9 @@ end
     
 %% Save
 O = set(O,'data',dat_patterns,'assign NA');
-% if scale
-%     O = scaleO(O,'original');
-%     dat_patterns = get(O,'data');
-% end
 O = set(O,'data_mis',dat_patterns);
+CheckPattern(O);
 
 %% Plot
-PlotSimulatedPattern(O);
+% PlotSimulatedPattern(O);
 % PatternPerRowCol(O);

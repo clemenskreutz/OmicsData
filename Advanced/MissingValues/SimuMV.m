@@ -37,7 +37,7 @@ m = size(full,1);
 n = size(full,2);
 
 %% Simulate MNAR
-T = normrnd(quantile(full(:),a),0.1,m,n); % threshold matrix
+T = normrnd(quantile(full(:),a),0.01,m,n); % threshold matrix
 mask1 = full<T;
 mask2 = boolean(binornd(1,b,m,n)); % binomial draw
 MNAR = mask1 & mask2;
@@ -61,6 +61,15 @@ MCAR(sub2ind([m n],v(idx))) = true;
 mask = MNAR | MCAR;
 data = full;
 data(mask) = NaN;
+
+% Replace complete missingness
+drin = find(all(isnan(data),2));
+if sum(drin)>0
+    r = ceil(rand(sum(drin),1)*size(data,2));
+    for d = 1:length(drin)
+        data(drin(d),r(d)) = full(drin(d),r(d));
+    end
+end
                 
 
 

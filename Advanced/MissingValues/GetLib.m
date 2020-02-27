@@ -8,7 +8,7 @@ end
 if strcmp(algo,'impnorm') || strcmp(algo,'imp.norm')
     lib= 'norm';
 end
-if strcmp(algo,'Amelia')
+if strcmpi(algo,'Amelia')
     lib = 'Amelia';
 end
 if strcmp(algo,'regression') || strcmp(algo,'aregImpute')
@@ -33,7 +33,7 @@ end
 if strcmp(algo,'irmi')
     lib= 'VIM';
 end
-if strcmp(algo,'Norm') || strcmp(algo,'Seq') || strcmp(algo,'SeqRob') || strcmp(algo,'impNorm') || strcmp(algo,'impSeq') || strcmp(algo,'impSeqRob')
+if strcmp(algo,'Seq') || strcmp(algo,'SeqRob') || strcmp(algo,'impSeq') || strcmp(algo,'impSeqRob')
     lib= 'rrcovNA';
 end
 if strcmp(algo,'MIPCA') || strcmp(algo,'imputePCA')
@@ -44,4 +44,10 @@ if strcmp(algo,'mi')
 end
 if strcmp(algo,'knnImputation')
     lib= 'DMwR';
+end
+if strcmp(algo,'GMSimpute') || strcmp(algo,'GMSLasso')
+    lib= 'GMSimpute';
+end
+if ~exist('lib','var')
+    warning(['GetLib.m: ' algo{:} ' is not implemented in DIMA and ignored for imputation. Check your spelling, or add respective Rcode to WriteinR.m and its library to GetLib.m.'])
 end

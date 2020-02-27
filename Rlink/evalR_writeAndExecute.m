@@ -42,7 +42,7 @@ if isfield(OPENR,'cmd')
     fprintf(fid,'\n\n#####  cmds  #####\n');
     for i=1:length(OPENR.cmd)        
         fprintf(fid,'%s\n',OPENR.cmd{i});
-        disp(['R >   ',OPENR.cmd{i}])
+        %disp(['R >   ',OPENR.cmd{i}])
     end
     fprintf(fid,'#####  cmd  #####\n\n\n');
     
@@ -52,11 +52,11 @@ if isfield(OPENR,'cmd')
     
     fclose(fid);
     
-    fprintf('Starting execution now ... ')
+    %fprintf('Starting execution now ... ')
     cmd = sprintf('%s CMD BATCH --vanilla --slave "%s%sevalR.R"',OPENR.Rexe,pwd,filesep);
     status = system(cmd);
 
-    fprintf(' finished.\n');    
+    %fprintf(' finished.\n');    
     OPENR = rmfield(OPENR,'cmd');
 end
 

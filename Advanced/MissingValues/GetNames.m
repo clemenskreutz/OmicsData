@@ -47,7 +47,7 @@ for i=1:length(algo)
         names{i}= 'classification/regression trees';
     
     elseif strcmp(algo(i),'knn') || strcmp(algo(i),'impute.knn')
-        names{i}= 'knn';
+        names{i}= 'k-nearest neighbor';
     
     elseif strcmp(algo(i),'Amelia')
         names{i} = 'Expectation maximization';
@@ -62,19 +62,16 @@ for i=1:length(algo)
         names{i}= 'bayesian pca';
     
     elseif strcmp(algo(i),'nipals')
-        names{i}= 'nonlinear iterative partial LS';
+        names{i}= 'nonlinear partial LS';
     
     elseif strcmp(algo(i),'nlpca')
         names{i}= 'nonlinear pca (neural net)';
     
     elseif strcmp(algo(i),'svd') || strcmp(algo(i),'svdImpute')
-        names{i}= 'svd';
+        names{i}= 'singular value decomp.';
     
     elseif strcmp(algo(i),'MinDet') 
         names{i}= 'minimal value';
-    
-    elseif strcmp(algo(i),'KNN')
-        names{i}= 'knn';
     
     elseif strcmp(algo(i),'MinProb')
         names{i}= 'probabilistic minimal value';
@@ -83,13 +80,13 @@ for i=1:length(algo)
         names{i}= 'quantile regression';
     
     elseif strcmp(algo(i),'SVTApproxImpute') || strcmp(algo(i),'SVTImpute')
-        names{i}= 'singular value thresholding';
+        names{i}= 'singular value threshold';
     
     elseif strcmp(algo(i),'SVDImpute')
-        names{i}= 'svd';
+        names{i}= 'singular value decomp.';
     
     elseif strcmp(algo(i),'kNNImpute')
-        names{i}= 'knn';
+        names{i}= 'k-nearest neighbor';
     
     elseif strcmp(algo(i),'lmImpute')
         names{i}= 'locally weighted LS';
@@ -115,7 +112,5 @@ for i=1:length(algo)
     elseif strcmp(algo(i),'mi')
         names{i}= 'multiple iterative regression';
     
-    elseif strcmp(algo(i),'knnImputation')
-        names{i}= 'knn';
     end
 end

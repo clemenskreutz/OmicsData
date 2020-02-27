@@ -8,7 +8,11 @@ end
 if strcmp(lib,'pcaMethods')
     evalR('dat[is.na(dat)] <- NA') 
     evalR('if (sum(rowSums(is.na(dat))>=ncol(dat))>0) { ImpR <- {} } else {')
-    evalR(['I <- pca(dat,method="' method '")'])
+    if strcmp(method,'nlpca')
+        evalR(['I <- pca(dat,method="' method '",maxSteps=prod(dim(dat))/10)'])
+    else
+        evalR(['I <- pca(dat,method="' method '")'])
+    end
     evalR('ImpR <- completeObs(I) }')           
 
 % knn
@@ -42,7 +46,7 @@ elseif strcmp(lib,'rrcovNA')
     else
         evalR(['ImpR <- imp' method '(dat)'])
     end
-    if strcmp(method,'SeqRob')
+    if contains(method,'SeqRob')
         evalR('ImpR <- ImpR$x')
     end
 
@@ -127,6 +131,10 @@ elseif strcmp(lib,'mi')
     evalR('dat <- data.frame(dat)')
     evalR('I <- mi(dat, n.chains=1)')
     evalR('ImpR <- complete(I)[1:length(dat)]')
+    
+% GMSimpute
+elseif strcmp(lib,'GMSimpute')
+    evalR(' ImpR <- GMS.Lasso(dat,log.scale=T,TS.Lasso=T)')
 
 % other    
 else

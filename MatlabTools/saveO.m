@@ -2,7 +2,7 @@ function saveO(O,file,matname)
 
 if ~exist('file','var') || isempty(file)
     file = get(O,'path');
-    file = [file get(O,'name')];
+    %file = [file get(O,'name')];
 end
 if ~exist('matname','var') || isempty(matname)
     matname = 'O';
@@ -14,8 +14,12 @@ if ~exist([path filesep folder],'dir') % Create folder for data
     mkdir(path, folder)
 end
 
-set(O,'name',matname);
-save([path filesep folder filesep matname '.mat'],'O');                    % Save OmicsData class
+O = set(O,'name',matname);
+if isempty(path)
+    save([folder filesep matname '.mat'],'O');
+else
+    save([path filesep folder filesep matname '.mat'],'O');                    % Save OmicsData class
+end
 fprintf('%s%s%s%s%s%s%s\n','O saved in ', path, filesep, folder, filesep, matname, '.mat')
 
 

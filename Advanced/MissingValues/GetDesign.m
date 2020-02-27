@@ -1,8 +1,8 @@
 
 function [X,y,type,bnames] = GetDesign(O,out,sprs)
 
-if ~exist('out','var') || isempty(out)
-    error('GetDesign: Perform LearnPattern before GetDesign(O,out) to get out.')
+if ~exist('out','var')
+    out = [];
 end
 if ~exist('sprs','var') || isempty(sprs)
     if size(O,2)>50
@@ -15,7 +15,6 @@ end
 % response vector
 isna = isnan(O);
 y = isna(:);
-dat = get(O,'data');
 
 % Shape & initialize
 row  = ((1:size(isna,1))') * ones(1,size(isna,2));
@@ -30,9 +29,9 @@ c = 0;
 
 % % mean to X
 m = nanmean(O,2);
-m = (m-nanmean(m))./nanstd(m);
+%m = (m-nanmean(m))./nanstd(m);
 m = m*ones(1,size(isna,2)); 
-if any( strcmp('nan',out.typesig) | strcmp('mean',out.typesig))
+if ~isfield(out,'typenames') || any(strcmp(out.typenames,'mean'))
     X = m(:);
     c=c+1;
     bnames{c} = 'mean';
@@ -40,65 +39,58 @@ if any( strcmp('nan',out.typesig) | strcmp('mean',out.typesig))
 end
 
 % mean linearized to X
-if any( strcmp('nan',out.typesig) | strcmp('linmean',out.typesig))
-    mlin = feval(out.trans_fun_lin,m(:,1),out.linmean); 
-    mlin = mlin*ones(1,size(isna,2)); 
-    if exist('X','var')
-        X = [X, mlin(:)];
-    else
-        X = mlin(:);
-    end
-    c=c+1;
-    bnames{c} = 'linmean';
-    type(c) = 100; % mean-dependency
-end
-
-% min
-if any( strcmp('nan',out.typesig) | strcmp('min',out.typesig))
-    v = nanmin(dat,2);
-    v = (v-nanmean(v))./nanstd(v);
-    v = v*ones(1,size(isna,2)); 
-    X = [X, v(:)];
-    c=c+1;
-    bnames{c} = 'min';
-    type(c) = 6;
-end
-
-% max
-if any( strcmp('nan',out.typesig) | strcmp('max',out.typesig))
-    v = nanmax(dat,2);
-    v = (v-nanmean(v))./nanstd(v);
-    v = v*ones(1,size(isna,2)); 
-    X = [X, v(:)];
-    c=c+1;
-    bnames{c} = 'max';
-    type(c) = 7;
-end
-
-% % % varianz to X
-% if any( strcmp('nan',out.typesig) | strcmp('median',out.typesig))
-%     v = nanmedian(dat,2);
-%     v = (v-nanmean(v))./nanstd(v);
+% if ~isfield(out,'typenames') || any(strcmp(out.typenames,'linmean'))
+%     mlin = feval(out.mean_trans_fun,m(:,1),out.lincoef); 
+%     mlin = mlin*ones(1,size(isna,2)); 
+%     if exist('X','var')
+%         X = [X, mlin(:)];
+%     else
+%         X = mlin(:);
+%     end
+%     c=c+1;
+%     bnames{c} = 'linmean';
+%     type(c) = 100; % mean-dependency
+% end
+% 
+% dat = get(O,'data');
+% 
+% % quantile
+% a = [0.1];
+% if ~isfield(out,'typenames') || any(strcmp(out.typenames,'quantile'))
+%     q = quantile(dat,a,2);
+%     for i=1:size(q,2)
+%         v = q(:,i)*ones(1,size(isna,2));
+%         X = [X, v(:)];
+%         c=c+1;
+%         bnames{c} = 'quantile';
+%         type(c) = 5;
+%     end
+% end
+% 
+% % var
+% dat = get(O,'data');
+% if ~isfield(out,'typenames') || any(strcmp(out.typenames,'min'))
+%     v = nanvar(dat,[],2);
+%     v = abs(v-nanmean(v))./nanstd(v);
 %     v = v*ones(1,size(isna,2)); 
 %     X = [X, v(:)];
 %     c=c+1;
-%     bnames{c} = 'median';
-%     type(c) = 99;
+%     bnames{c} = 'min';
+%     type(c) = 6;
 % end
-% 
-% % % varianz to X
-% if any( strcmp('nan',out.typesig) | strcmp('var',out.typesig))
-%     v = var(dat,0,2,'omitnan');
-%     v = (v-nanmean(v))./nanstd(v);
+%
+% % min
+% if ~isfield(out,'typenames') || any(strcmp(out.typenames,'var'))
+%     v = nanmin(dat,[],2);
+%     v = abs(v-nanmean(v))./nanstd(v);
 %     v = v*ones(1,size(isna,2)); 
 %     X = [X, v(:)];
 %     c=c+1;
 %     bnames{c} = 'var';
-%     type(c) = 101;
+%     type(c) = 6;
 % end
 % 
-% % % varianz to X
-% if any( strcmp('nan',out.typesig) | strcmp('range',out.typesig))
+% if ~isfield(out,'typenames') || any(strcmp(out.typenames,'range'))
 %     v = range(dat,2);
 %     v = (v-nanmean(v))./nanstd(v);
 %     v = v*ones(1,size(isna,2)); 
@@ -108,8 +100,7 @@ end
 %     type(c) = 102;
 % end
 % 
-% % % varianz to X
-% if any( strcmp('nan',out.typesig) | strcmp('iqr',out.typesig))
+% if ~isfield(out,'typenames') || any(strcmp(out.typenames,'iqr'))
 %     r = iqr(dat,2);
 %     r = (r-nanmean(r))./nanstd(r);
 %     r = r*ones(1,size(isna,2)); 
@@ -119,8 +110,7 @@ end
 %     type(c) = 103;
 % end
 % 
-% 
-% if any( strcmp('nan',out.typesig) | strcmp('skew',out.typesig))
+% if ~isfield(out,'typenames') || any(strcmp(out.typenames,'skew'))
 %     r = skewness(dat,1,2);
 %     r = (r-nanmean(r))./nanstd(r);
 %     r = r*ones(1,size(isna,2)); 
@@ -129,39 +119,17 @@ end
 %     bnames{c} = 'skew';
 %     type(c) = 104;
 % end
-% 
-% if any( strcmp('nan',out.typesig) | strcmp('z',out.typesig))
-%     r = (dat - nanmean(dat,2)) ./ nanstd(dat,[],2);
-%     r(isnan(r)) = 0;
-%     X = [X, r(:)];
-%     c=c+1;
-%     bnames{c} = 'z';
-%     type(c) = 105;
-% end
-% 
-% if any( strcmp('nan',out.typesig) | strcmp('z2',out.typesig))
-%     r = (dat - nanmean(dat(:))) ./ nanstd(dat(:));
-%     r(isnan(r)) = 0;
-%     X = [X, r(:)];
-%     c=c+1;
-%     bnames{c} = 'z2';
-%     type(c) = 106;
-% end
 
 % Predictors from O.cols
 pred = fieldnames(get(O,'cols'));
 for i=1:length(pred)
-    if any( strcmp('nan',out.typesig) | strcmp(pred{i},out.typesig))
+    if  ~isfield(out,'typenames') || any(strcmp(out.typenames(out.type==4),pred{i}))
         predvec = get(O,pred{i},true);
-        if isnumeric(predvec) && ~strcmp(pred{i},get(O,'default_data'))
-            predvec = (predvec-nanmean(predvec))/nanstd(predvec);
-            predvec = predvec*ones(1,size(isna,2));
-            if ~exist('X','var')
-                X = predvec(:);
-                c=c+1;
-                bnames{c} = pred{i};
-                type(c) = 4;
-            elseif ~isequal(predvec(:),X(:,end)) 
+        % if not 'data', not 'id'=1:n, <0.01nan, <0.01(diff==0), <0.01(diffmitprevious)
+        if isfield(out,'typenames') || (isnumeric(predvec) && ~strcmp(pred{i},get(O,'default_data')) && sum(diff(predvec)==0)<0.01*size(predvec,1) && sum(isnan(predvec))<0.01*size(predvec,1) && ~contains(pred{i},'id') )
+            %predvec = (predvec-nanmean(predvec))/nanstd(predvec);
+            if sum(predvec-X(1:size(predvec,1),end)==0)<0.01*size(predvec,1) 
+                predvec = predvec*ones(1,size(isna,2));
                 X = [X, predvec(:)];
                 c=c+1;
                 bnames{c} = pred{i};
@@ -171,13 +139,14 @@ for i=1:length(pred)
     end
 end
 
-% Predictors from O.data Important! Counts and Sequences
+% % Predictors from O.data 
 pred = fieldnames(getfield(O,'data'));  % get(O,'data') is the default data matrix
 for i=1:length(pred)
-    if any( strcmp('nan',out.typesig) | strcmp(pred{i},out.typesig))
+    if ~isfield(out,'typenames') || any(strcmp(out.typenames(out.type==5),pred{i}))
         predmat = get(O,pred{i},true);
-        if isnumeric(predmat) && size(predmat,1)*size(predmat,2)==size(X,1) && ~strcmp(pred{i},get(O,'default_data'))
-            predmat = (predmat-nanmean(predmat(:)))./nanstd(predmat(:));
+        % if not 'data', not 'id'=1:n, <0.01nan, >0.01diff, >0.01diffbycol
+        if isfield(out,'typenames') || (isnumeric(predmat) && size(predmat,1)*size(predmat,2)==size(X,1) && ~strcmp(pred{i},get(O,'default_data'))  && all(sum(diff(predmat)==0))<0.01*size(predmat,1) && all(sum(diff(predmat,[],2)==0)<0.01*size(predmat,1)) && all(sum(isnan(predmat))<0.01*size(predmat,1)) )
+            %predmat = (predmat-nanmean(predmat(:)))./nanstd(predmat(:));
             X = [X, predmat(:)];
             c=c+1;
             bnames{c} = pred{i};
@@ -185,6 +154,8 @@ for i=1:length(pred)
         end
     end
 end
+
+X = (X-nanmean(X))./nanstd(X);
 
 if sprs
     X2 = sparse(size(X,1),length(rlev)+length(clev));
@@ -208,18 +179,3 @@ for i=1:length(rlev)
 end
 
 X = [X X2];
-
-
-%bnames = erase(bnames,'_');
-
-% If significance too low, remove columns
-% was used in test cases, but not used anymore
-% if isfield(out,'idxrem')
-%     if length(clev)+length(rlev)+max(out.idxrem)<=size(X,2)
-%         X(:,out.idxrem) = []; % offset is ignored, so idxrem=1 means mean
-%         bnames(out.idxrem) = [];
-%         type(out.idxrem) = [];
-%     else
-%         warning('Design matrix consists of all predictors found in the xls. No removing due to significance performed. \n Check size of X at the end of GetDesign.m to change this.')
-%     end    
-% end

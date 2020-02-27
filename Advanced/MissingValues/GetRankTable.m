@@ -37,7 +37,8 @@ npat = size(Tab,3);
 if ttest
     n=11; % Sort by RMSEttest instead of RMSE
 else
-    n=6;
+    n=6;    % RMSE
+    %n=7; %RSR
 end
 
 %% Rank
@@ -71,8 +72,8 @@ path = get(O,'path');
 [path,filename,~] = fileparts(path);
 save([path filesep filename filesep 'RankTable.mat'],'T','algo')
 
-RowName = {'MeanError';'RMSE';'F';'Acc';'PCC';'time'};
-if size(T,1)>6
+RowName = {'MeanError';'RMSE';'RSR';'F';'Acc';'PCC';'time'};
+if size(T,1)>7
     RowName = {RowName{:} 'RMSEt'};
 end
 

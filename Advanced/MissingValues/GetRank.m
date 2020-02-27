@@ -1,18 +1,20 @@
 
-file = dir('Data/SimuPep1000MV*');
+file = dir('Data/PaperSome1000*');
 file = natsort({file.name});
+% file(contains(file,'MNAR70') | contains(file,'MNAR80') | contains(file,'MNAR90')) = [];
+% file = file(7:end);
 
-MV = 2:5:52;
+MV = 5:5:50;
 MNAR = 100:-10:0;
 
 idx = nan(length(MV)*length(MNAR),1);
 idx2 = idx; R = idx; R2 = idx;
-mr = cell(length(MV)*length(MNAR),1); mf = cell(length(MV)*length(MNAR),1);
+mr = cell(length(file),1); mf = cell(length(file),1);
 for i=1:length(file)
      folder = file{i};
     % Get order of direct fullutation
-    if exist(['Data/' filesep 'SimuPep1000' folder(13:end) '/O_full_1.mat'],'file')
-        load(['Data/' filesep 'SimuPep1000' folder(13:end) '/O_full_1.mat']); 
+    if exist(['Data' filesep folder filesep 'O_full_1.mat'],'file')
+        load(['Data' filesep folder filesep 'O_full_1.mat']); 
         if ~isfield(O,'RankTable',true)
             if ~isfield(O,'Table')
                 O = GetTable(O);
@@ -29,8 +31,8 @@ for i=1:length(file)
     end
 
     % Get simu RMSE
-    if exist(['Data/' filesep folder '/O_1.mat'],'file')
-        load(['Data/' filesep folder '/O_1.mat']); 
+    if exist(['Data' filesep folder filesep 'O_1.mat'],'file')
+        load(['Data' filesep folder filesep 'O_1.mat']); 
         if ~isfield(O,'RankTable',true)
             O = GetTable(O);
             O = GetRankTable(O);
@@ -43,7 +45,6 @@ for i=1:length(file)
         T = nan;
     end
       
-    
     try     
         idx(i) = find(strcmp(mfull,m(1)));
         R(i) =  (Tfull(2,idx(i)) - Tfull(2,1)) ./ Tfull(2,1)*100;
@@ -53,48 +54,43 @@ for i=1:length(file)
         mr(i) = {'not working'};
         mf(i) = {'not working'};
     end
-    try    
-        idx2(i) = find(strcmp(m,mfull(1)));
-        R2(i) =  (nanmean(T(2,idx2(i)+1,:),3) - nanmean(T(2,1,:),3)) ./ nanmean(T(2,1,:),3)*100;
-    end
 end
 
 idxs = flipud(reshape(idx,length(MNAR),length(MV)));
-idx2s = flipud(reshape(idx2,length(MNAR),length(MV)));
 RMSE = flipud(round(reshape(R,length(MNAR),length(MV))));
-RMSE2 = flipud(round(reshape(R2,length(MNAR),length(MV))));
 [mrc,mrg] = grp2idx(mr);
 [mfc,mfg] = grp2idx(mf);
 mrs = flipud(reshape(mrc,length(MNAR),length(MV)));
 mfs = flipud(reshape(mfc,length(MNAR),length(MV)));
 
 % Change order so pcas are blue
-mfscopy = mfs; 
-mfs(mfscopy==7) = 1;
-mfs(mfscopy==8) = 2;
-mfs(mfscopy==9) = 3;
-mfs(mfscopy==1) = 4;
-mfs(mfscopy==3) = 5;
+% mfscopy = mfs; 
+% mfs(mfscopy==7) = 1;
+% mfs(mfscopy==8) = 2;
+% mfs(mfscopy==9) = 3;
+% mfs(mfscopy==1) = 4;
+% mfs(mfscopy==3) = 5;
+% 
+% mfs(mfscopy==6) = 10;
+% mfs(mfscopy==5) = 9;
+% mfs(mfscopy==10) = 8;
+% mfs(mfscopy==2) = 7;
+% mfs(mfscopy==4) = 6;
+% 
+% mfgcopy = mfg;
+% mfg(1) = mfgcopy(7);
+% mfg(2) = mfgcopy(8);
+% mfg(3) = mfgcopy(9);
+% mfg(4) = mfgcopy(1);
+% mfg(5) = mfgcopy(3);
+% 
+% mfg(10) = mfgcopy(6);
+% mfg(9) = mfgcopy(5);
+% mfg(8) = mfgcopy(10);
+% mfg(7) = mfgcopy(2);
+% mfg(6) = mfgcopy(4);
 
-mfs(mfscopy==6) = 10;
-mfs(mfscopy==5) = 9;
-mfs(mfscopy==10) = 8;
-mfs(mfscopy==2) = 7;
-mfs(mfscopy==4) = 6;
-
-mfgcopy = mfg;
-mfg(1) = mfgcopy(7);
-mfg(2) = mfgcopy(8);
-mfg(3) = mfgcopy(9);
-mfg(4) = mfgcopy(1);
-mfg(5) = mfgcopy(3);
-
-mfg(10) = mfgcopy(6);
-mfg(9) = mfgcopy(5);
-mfg(8) = mfgcopy(10);
-mfg(7) = mfgcopy(2);
-mfg(6) = mfgcopy(4);
- 
+set(0,'DefaultFigureVisible','on')
 figure; set(gcf,'units','points','position',[0,0,800,430])
 imagesc(mfs);
 scale = 0.88;
@@ -108,16 +104,13 @@ for r1=1:length(MNAR)
     for r2 = 1:length(MV)
         if ~(isnan(RMSE(r1,r2)) && idxs(r1,r2) ==1)
            if isnan(RMSE(r1,r2))
-           %elseif RMSE(r1,r2)<=10 %&& idxs(r1,r2)<=5
-           %     text(r2,r1+0.2,[num2str(RMSE(r1,r2)) '%'],'Color','k','HorizontalAlignment','center','FontWeight','bold','FontSize',12); % grün [0 0.55 0]
-           %     text(r2,r1-0.2,num2str(idxs(r1,r2)),'Color','k','HorizontalAlignment','center','FontSize',12,'FontWeight','bold');     
            elseif RMSE(r1,r2)>=10 %&& idxs(r1,r2)>=5
                 text(r2,r1+0.2,[num2str(RMSE(r1,r2)) '%'],'Color','r','HorizontalAlignment','center','FontWeight','bold','FontSize',12);
                 text(r2,r1-0.2,num2str(idxs(r1,r2)),'Color','r','HorizontalAlignment','center','FontWeight','bold','FontSize',12);     
            else
                 text(r2,r1+0.2,[num2str(RMSE(r1,r2)) '%'],'Color','k','HorizontalAlignment','center','FontWeight','bold','FontSize',12);
                 text(r2,r1-0.2,num2str(idxs(r1,r2)),'HorizontalAlignment','center','FontSize',12,'FontWeight','bold');     
-            end
+           end
         end
     end
 end
@@ -136,8 +129,7 @@ xlabel('MV [%]')
 xticks(1:length(MV))
 xticklabels(MV)
 set(gca,'FontSize',12)
-print(['AlgoOne_' folder(1:11)],'-dpng','-r1000');
-
+print(['Simu_' folder(1:13)],'-dpng','-r1000');
 
 figure
 subplot(1,2,1)

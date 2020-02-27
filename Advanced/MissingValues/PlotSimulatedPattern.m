@@ -11,6 +11,10 @@ path = get(O,'path');
 if isempty(filepath)
     filepath = '.';
 end
+% if contains(name,'.')
+%     name = strrep(name,'.','');
+% end
+    
 if ~exist([filepath filesep name],'dir')
     mkdir(filepath,name)
 end
@@ -85,7 +89,7 @@ for b=1:size(dat_mis,3)
     %yticks([0,round(size(A,1)/4,1,'significant'),round(size(A,1)/2,1,'significant'),round(size(A,1)*0.9,2,'significant')])
     %yticklabels([0,round(size(A,1)/4,1,'significant'),round(size(A,1)/2,1,'significant'),round(size(A,1)*0.9,2,'significant')])
     set(gca,'FontSize', 20)
-    print(gcf,[filepath '/' name '/' name '_SimulatedMissingPattern_AllX_' num2str(b)],'-dpng');%,'-r1000')
+    print(gcf,[filepath filesep name filesep strrep(name,'.','') '_SimulatedMissingPattern_AllX_' num2str(b)],'-dpng');%,'-r1000')
 
     misori = sum(sum(isnan(dat)))/size(dat,1)/size(dat,2)
     mispat = sum(sum(isnan(A)))/size(A,1)/size(A,2)
