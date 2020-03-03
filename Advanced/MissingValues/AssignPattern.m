@@ -30,20 +30,17 @@ end
 if ~isfield(out,'b')
     error('AssignPattern.m requires coefficients from logistic regression as input. Do LearnPattern before AssignPattern. Input struct did not include coefficients.\n')
 end
-if ~isfield(out,'lincoef')
-    error('AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
-end
-if ~isfield(out,'lincoef')
-    error('AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
-end
+% if ~isfield(out,'lincoef')
+%     error('AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
+% end
 if ~exist('scale','var') || isempty(scale)
     scale = true;
 end
 
 % Get data
 if scale
-    O = scaleO(O,'original');
-    % O = QuantileRescaling(O,get(O,'data_original'))
+    %O = scaleO(O,'original');
+    % O = QuantileRescaling(O,get(O,'data_original'));
 end
 dat = get(O,'data');
 
@@ -53,26 +50,31 @@ O = set(O,'data_complete',dat,'Complete dataset');
 
 % Design matrix
 X = GetDesign(O,out);
+X = QuantileRescalingX(X,out);
 
 % Initialize
-dat_patterns = nan(size(dat,1),size(dat,2),npat);
+dat_patterns = nan(size(O,1),size(O,2),npat);
 
 for i=1:npat
     
     % Log Reg
     b = out.b(out.type~=3); % get offset, intensity and column coefficients
     brow = out.b(out.type==3);
-    brow = brow(ceil(rand(size(dat,1),1)*length(brow)));         % get random row coefficients to match size of Complete matrix
+    brow = brow(ceil(rand(size(O,1),1)*length(brow)));         % get random row coefficients to match size of Complete matrix
     if length(b)+length(brow) ~= size(X,2)+1
         warning('Mismatch between size of logreg coefficients and design matrix. Check it.')
     end
     yhat = glmval( [b;brow], X, 'logit');
 
     % assign nans
-    p = reshape(yhat(1:size(dat,1)*size(dat,2)),size(dat,1),size(dat,2)); % here yhat from regularization is cut off
+    p = reshape(yhat(1:size(O,1)*size(O,2)),size(O,1),size(O,2)); % here yhat from regularization is cut off
     r = rand(size(p,1),size(p,2));
+    % if (complete/known) data has missing values, binomial draw so total %MV matches 
+    b = boolean(binornd(1,sum(sum(isnan(O)))/size(O,1)/size(O,2),size(O,1),size(O,2))); % binomial draw
+    r2 = (r<=p) & ~b;
+    
     dat_mis = dat;
-    dat_mis(r<=p) = NaN;
+    dat_mis(r2) = NaN;
 
     % Replace complete missingness
     drin = find(all(isnan(dat_mis),2));
@@ -88,7 +90,7 @@ end
 %% Save
 O = set(O,'data',dat_patterns,'assign NA');
 O = set(O,'data_mis',dat_patterns);
-CheckPattern(O);
+CheckPattern(O)
 
 %% Plot
 % PlotSimulatedPattern(O);

@@ -72,7 +72,7 @@ if ~issymmetric(data)
     if any(strcmpi(method,'amelia'))
         lib(strcmpi(method,'amelia')) = [];
         method(strcmpi(method,'amelia')) = [];
-        warning('Imputation with amelia is not performed because data is not symmetric.')
+        fprintf('Imputation with amelia is not performed because data is not symmetric.')
     end
 end
 
@@ -122,7 +122,7 @@ for ii=1:npat
                 time(i,npat) = cputime-t; 
                 fprintf(['Finished ''' method{i} '''.. '])
             catch
-                warning(['Imputation with ' method{i} ' in package ' lib{i} ' was not feasible.'])  
+                fprintf(['Imputation with ' method{i} ' in package ' lib{i} ' was not feasible.'])  
             end   
             deleteR;
         end

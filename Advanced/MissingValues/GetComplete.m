@@ -27,15 +27,11 @@ else
             break
         end
     end
+    if i>size(O,2)/2
+        warning('Too many MVs. Does imputation make sense here?')
+    end
 end
 if size(O,1)==size(dat,1)
-    for i=2:size(O,2)
-        if sum(sum(isnan(O),2)<i)>50
-            O = O(sum(isnan(O),2)<i,:);
-            fprintf(['All lines with <' num2str(i-1) ' MV deleted.\n']) 
-            break
-        end
-    end
-    warning('Too many MVs. Does imputation make sense here?')
+    warning('Complete/Known matrix not feasible. Kept original matrix as data default.')
 end
 
