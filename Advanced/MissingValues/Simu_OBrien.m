@@ -1,4 +1,23 @@
-function [prot,data] = Simu_OBrien(a,b,nprot,nsam,file)
+% [full,data] = Simu_OBrien(mv,nr,nprot,nsam,file)
+% Simulates data matrix for protein intensities with missing values
+%
+% nprot - number of peptides/rows
+% nsam - number of replicates/cols
+% mv - percentage of missing values
+% nr - percentage of Missing Not At Random
+% file - if true, plots/saves data matrix         [false]
+% 
+% Output:
+% full - matrix without missing values
+% data - matrix with assigned missing values
+% 
+% Example:
+% [full, data] = Simu_OBrien(mv,nr,nprot,nsam,file)
+% [full, data] = Simu_OBrien(0.3,0.8,4000,20)
+
+
+
+function [full,data] = Simu_OBrien(mv,nr,nprot,nsam,file)
 
 if ~exist('nprot','var') || isempty(nprot)
     nprot = 200;
@@ -6,17 +25,17 @@ end
 if ~exist('nsam','var') || isempty(nsam)
     nsam = 2;
 end
-if ~exist('a','var') || isempty(a)
-    a = 0.5;
+if ~exist('mv','var') || isempty(mv)
+    mv = 0.5;
 end
-if ~exist('b','var') || isempty(b)
-    b = 1;
+if ~exist('nr','var') || isempty(nr)
+    nr = 1;
 end
-if a>1
-    a = a/100;
+if mv>1
+    mv = mv/100;
 end
-if b>1
-    b = b/100;
+if nr>1
+    nr = nr/100;
 end
 
 %1
@@ -34,26 +53,27 @@ for i=1:nprot
     pep(i,npep(i)+1:end) = NaN;
 end
 %5
-prot = nanmean(pep,2)+randn(nprot,ceil(nsam/2))*sig;
-prot(:,end+1:end*2) = prot+FC;
+full = nanmean(pep,2)+randn(nprot,ceil(nsam/2))*sig;
+full(:,end+1:end*2) = full+FC;
 
 % Norm Janine
-protMNAR = (prot - quantile(prot(:),a*b)) ./ nanstd(prot(:));
+protMNAR = (full - quantile(full(:),mv*nr)) ./ nanstd(full(:));
 
+%% MNAR
 MNAR = cdf('Normal',protMNAR,0,1);
 MNAR = ~boolean(binornd(1,MNAR));
 
 %% MCAR
 MCAR = false(nprot,nsam);
-%if 0<b
+%if 0<nr
     v=find(~MNAR);
-    idx = randsample(length(v),int32(nprot*nsam*(1-b)*a));
+    idx = randsample(length(v),int32(nprot*nsam*(1-nr)*mv));
     MCAR(sub2ind([nprot nsam],v(idx))) = true;
 %end
 
 %% Total
 mask = MNAR | MCAR;
-data = prot;
+data = full;
 data(mask) = NaN;
 
 % nMCAR = sum(sum(MCAR)) / size(data,1) / size(data,2)
@@ -64,7 +84,7 @@ if exist('file','var') && ~isempty(file)
     [~,idx] = sort(sum(isnan(data),2));
     dataplt = data(idx,:);
     dataplt = dataplt(~all(isnan(dataplt),2),:);
-    prot = prot(idx,:);
+    full = full(idx,:);
     
     figure
     bottom = nanmin(nanmin(dataplt)); %min([min(nanmin(yn)),min(nanmin(yc)),min(nanmin(dataplt))]);
@@ -72,34 +92,34 @@ if exist('file','var') && ~isempty(file)
     top  = nanmax(nanmax(dataplt));
     
     subplot(1,3,1)
-    datamnar = prot;
+    datamnar = full;
     datamnar(MNAR) = NaN;
-    b = imagesc(datamnar);
-    set(b,'AlphaData',~isnan(datamnar))
+    nr = imagesc(datamnar);
+    set(nr,'AlphaData',~isnan(datamnar))
     title({'MNAR';[num2str(round(sum(sum(MNAR))/nprot/nsam*100)) '% na']})
     caxis manual
     caxis([bottom top]);
     subplot(1,3,2)
-    datamcar = prot;
+    datamcar = full;
     datamcar(MCAR) = NaN;
-    b = imagesc(datamcar);
-    set(b,'AlphaData',~isnan(datamcar))
+    nr = imagesc(datamcar);
+    set(nr,'AlphaData',~isnan(datamcar))
     title({'MCAR';[num2str(round(sum(sum(MCAR))/nprot/nsam*100)) '% na']})
     caxis manual
     caxis([bottom top]);
     subplot(1,3,3)
-    b = imagesc(dataplt);
-    set(b,'AlphaData',~isnan(dataplt))
+    nr = imagesc(dataplt);
+    set(nr,'AlphaData',~isnan(dataplt))
     title({'Total';[num2str(round(sum(sum(isnan(dataplt)))/nprot/nsam*100)) '% na']})
     caxis manual
     caxis([bottom top]);
     c=colorbar;
     c.Label.String = 'Difference in magnitude';
-%    print([pwd '\Data\' file '\' file '_MNARMCAR'],'-dpng','-r200');
+    print([pwd '\Data\' file '\' file '_MNARMCAR'],'-dpng','-r200');
     
     figure
     subplot(1,2,1)
-    imagesc(prot)
+    imagesc(full)
     caxis manual
     caxis([bottom top]);
     ylabel('proteins (sorted)')
@@ -118,5 +138,5 @@ if exist('file','var') && ~isempty(file)
     title('Simulated MNAR/MCAR')
     c = colorbar('Units','normalized','Position',[0.93 0.11 0.02 0.815]);
     c.Label.String = 'log_2(Intensity)';
-    %print([pwd '\Data\' file '\' file '_SimuDataMAR'],'-dpng','-r100');
+    print([pwd '\Data\' file '\' file '_SimuData'],'-dpng','-r100');
 end
