@@ -144,7 +144,7 @@ for i=1:length(pred)
         predmat = get(O,pred{i},true);
         % if size matches X
         if isfield(out,'typenames') || (isnumeric(predmat) && size(predmat,1)*size(predmat,2)==size(X,1) && ~strcmp(pred{i},get(O,'default_data')))
-            if any(any(predmat>10^5)) || any(any(predvec<10^(-5) & predvec>0))
+            if any(any(predmat>10^5)) || any(any(predmat<10^(-5) & predmat>0))
                 predmat = log2(predmat);
                 predmat(isinf(predmat)) = nan;
             end
