@@ -5,7 +5,7 @@
 %   MaxQuant)
 
 function O = OmicsIDsSTY(O)
-IDs = get(O,'IDs');
+IDs = get(O,'IDs',true);
 
 if ~isempty(IDs)
     warning('IDs are already available and now overwritten ...')
