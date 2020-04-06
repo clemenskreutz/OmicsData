@@ -9,11 +9,12 @@ if strcmp(lib,'pcaMethods')
     evalR('dat[is.na(dat)] <- NA') 
     evalR('if (sum(rowSums(is.na(dat))>=ncol(dat))>0) { ImpR <- {} } else {')
     if strcmp(method,'nlpca')
-        evalR(['I <- pca(dat,method="' method '",maxSteps=prod(dim(dat))/10)'])
+        evalR(['I <- pca(t(dat),method="' method '",maxSteps=max(dim(dat)))']) % transpose
+        evalR('ImpR <- t(completeObs(I)) }') 
     else
         evalR(['I <- pca(dat,method="' method '")'])
-    end
-    evalR('ImpR <- completeObs(I) }')           
+        evalR('ImpR <- completeObs(I) }')  
+    end       
 
 % knn
 elseif strcmp(lib,'impute')
