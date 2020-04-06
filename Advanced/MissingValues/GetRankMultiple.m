@@ -4,21 +4,12 @@ name = 'OBrien500*';
 
 file = dir(['Data' filesep name]);
 file = natsort({file.name});
-file(contains(file,'MNAR0')) = [];
 
 MV = 5:5:50;
-MNAR = 100:-10:70;
-
-% if contains(name,'OBrien')
-%     algo = {'missForest','irmi','impnorm','SVTImpute','pmm','MinDet'}; 
-% else
-%     algo = {'MinDet','QRILC','imputePCA','missForest','bpca','softImpute'};   
-% end
+MNAR = 100:-10:00;
     
 idx = nan(length(MV)*length(MNAR),1);
-R = idx; R2 = idx; NR = idx;
-Ra = nan(length(MV)*length(MNAR),length(algo));
-idxa = Ra;
+R = idx; R2 = idx; NR = idx; r = idx;
 mr = cell(length(file),1); mf = cell(length(file),1);
 mfulln = cell(1,30); mn = cell(1,30);
 for i=1:length(file)
@@ -59,9 +50,9 @@ for i=1:length(file)
             mn(ii,1:size(mn,2)) = {'NaN'};
         end       
      end
-    % Rank repetitions
+    % Rank repetitions % Mean of direct imputation
     unimfull = unique(mfulln);
-    T = nan(length(unimfull),1); rank = nan(length(unimfull),1); Tget = nan(size(mfulln,1),1);
+    T = nan(length(unimfull),1); ranking = nan(length(unimfull),1); Tget = nan(size(mfulln,1),1);
     for r=1:length(unimfull)
         if ~strcmp(unimfull{r},'NaN')
             [row,rankn] = find(strcmp(mfulln,unimfull{r})); % get ranks of each method to get RMSE
@@ -69,32 +60,33 @@ for i=1:length(file)
                 rankn = [rankn; 30*ones(size(mfulln,1)-length(rankn),1)];   % if method failed for a replicate, add rank 30
                 row = [row; setdiff(1:size(mfulln,1),row)'];
             end
-            rank(r) = sum(rankn); % sum of rank, for sort methods and T later
+            ranking(r) = nanmean(rankn); % sum of rank, for sort methods and T later
             for rr = 1:length(rankn)
                 Tget(rr) = Tfulln(row(rr),rankn(rr));
             end
             T(r) = nanmean(Tget);
         else
             T(r) = nan;
+            ranking(r) = nan;
         end
     end
-    [~,id] = sort(rank);
+    [ranking,id] = sort(ranking);
     mfull = unimfull(id);
     T = T(id);
-    
+    % Rank repetition for DIMA
     unim = unique(mn);
-    rank = nan(length(unim),1);
+    rankd = nan(length(unim),1);
     for r=1:length(unim)
         [~,rankn] = find(strcmp(mn,unim{r}));
         if length(rankn)<size(mfulln,1)
             rankn = [rankn; 30*ones(size(mfulln,1)-length(rankn),1)];   % if method failed for a replicate, add rank 30
         end
-        rank(r) = sum(rankn);
+        rankd(r) = nanmean(rankn);
     end
-    [~,id] = sort(rank);
+    [~,id] = sort(rankd);
     m = unim(id);
      
-    % Get numbers for heatmap
+    %% Get numbers for heatmap
     try     
 %         data = get(O,'data_original');
 %         NR(i) = MNARtest(data);
@@ -106,9 +98,11 @@ for i=1:length(file)
 %         end
         if any(strcmp(mfull,m(1)))
             idx(i) = find(strcmp(mfull,m(1)));
+            rank(i) = ranking(idx(i));
             R(i) =  (T(idx(i)) - T(1)) ./ T(1)*100;
         else
             idx(i) = 0;
+            rank(i) = nan;
             R(i) = nan;
         end
         mr(i) = m(1);
@@ -121,7 +115,7 @@ end
 
 %% Simu Figure
 
-idxs = flipud(reshape(idx,length(MNAR),length(MV)));
+idxs = flipud(reshape(rank,length(MNAR),length(MV)));
 RMSE = flipud(round(reshape(R,length(MNAR),length(MV))));
 [mrc,mrg] = grp2idx(mr);
 [mfc,mfg] = grp2idx(mf);
@@ -148,8 +142,8 @@ for r1=1:length(MNAR)
         else
             c='k';
         end
-        text(r2,r1-0.3,num2str(round(idxs(r1,r2))),'Color',c,'HorizontalAlignment','center','FontSize',12,'FontWeight','bold');     
-        text(r2,r1-0.1,num2str(round(RMSE(r1,r2))),'Color',c,'HorizontalAlignment','center','FontSize',12,'FontWeight','bold');     
+        text(r2,r1-0.3,num2str(round(idxs(r1,r2),1)),'Color',c,'HorizontalAlignment','center','FontSize',12,'FontWeight','bold');     
+        text(r2,r1-0.1,num2str(round(RMSE(r1,r2),1)),'Color',c,'HorizontalAlignment','center','FontSize',12,'FontWeight','bold');     
         text(r2,r1+0.1,mfg(mfs(r1,r2)),'Color',c,'HorizontalAlignment','center','FontWeight','bold','FontSize',12);
         text(r2,r1+0.3,mrg(mrs(r1,r2)),'Color',c,'HorizontalAlignment','center','FontSize',12,'FontWeight','bold');     
     end
