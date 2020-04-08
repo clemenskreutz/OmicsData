@@ -8,10 +8,12 @@
 %   openR
 %   global OPENR
 %   OPENR.Rexe = '/user/bin/R/R.exe'
+%   OPENR.myLibPath = '/home/ck96/R_library'
 
 function openR
 global OPENR
 OPENR = struct;
+OPENR.myLibPath = '';
 if exist(['C:' filesep 'Program Files' filesep 'R'],'dir')
     version = dir(['C:' filesep 'Program Files' filesep 'R' filesep]);
     if exist(['C:' filesep 'Program Files' filesep 'R' filesep version(end).name filesep 'bin' filesep 'x64'],'dir')
@@ -23,6 +25,7 @@ if exist(['C:' filesep 'Program Files' filesep 'R'],'dir')
     end
 elseif exist('/usr/bin/R')==2
     OPENR.Rexe = '/usr/bin/R'; 
+    OPENR.myLibPath = '~/R_library';
 elseif exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R'],'dir')
     if exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R' filesep 'bin' filesep 'R.exe'],'dir')
         OPENR.Rexe = ['"' filesep 'usr' filesep 'local' filesep 'lib' filesep 'R' filesep 'bin' filesep 'R.exe"'];
@@ -31,6 +34,7 @@ elseif exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R'],'dir')
     else
         error('OmicsData/Rlink/openR.m: Change your home directory of R here. You can find the directory by R.home() in R.')
     end
+    OPENR.myLibPath = '~/R_library';
 else
     error('OmicsData/Rlink/openR.m: Change your home directory of R here. You can find the directory by R.home() in R.')
 end

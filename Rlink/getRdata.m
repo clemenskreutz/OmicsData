@@ -27,7 +27,9 @@ evalR_writeAndExecute
 fid = fopen('getRdata.R','w');
 
 fprintf(fid,'%s\n',['setwd("',strrep(pwd,filesep,'/'),'")']);
-fprintf(fid,'%s\n','.libPaths()'); % for debugging purpose
+if ~isempty(OPENR.myLibPath) && exist(OPENR.myLibPath)==7    
+    fprintf(fid,'%s\n',['.libPaths("',OPENR.myLibPath,'")']); % my own library
+end
 fprintf(fid,'require(R.matlab)\n');
 fprintf(fid,'rm(list=ls())\n');
 fprintf(fid,'\n');
