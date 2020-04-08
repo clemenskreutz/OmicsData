@@ -21,6 +21,8 @@ if exist(['C:' filesep 'Program Files' filesep 'R'],'dir')
     else
         error('OmicsData/Rlink/openR.m: Change your home directory of R here. You can find the directory by R.home() in R.')
     end
+elseif exist('/usr/bin/R')==2
+    OPENR.Rexe = '/usr/bin/R'; 
 elseif exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R'],'dir')
     if exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R' filesep 'bin' filesep 'R.exe'],'dir')
         OPENR.Rexe = ['"' filesep 'usr' filesep 'local' filesep 'lib' filesep 'R' filesep 'bin' filesep 'R.exe"'];
@@ -29,8 +31,6 @@ elseif exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R'],'dir')
     else
         error('OmicsData/Rlink/openR.m: Change your home directory of R here. You can find the directory by R.home() in R.')
     end
-elseif exist('/usr/bin/R')==2
-    OPENR.Rexe = '/usr/bin/R'; 
 else
     error('OmicsData/Rlink/openR.m: Change your home directory of R here. You can find the directory by R.home() in R.')
 end
