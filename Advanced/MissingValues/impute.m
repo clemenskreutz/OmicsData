@@ -15,20 +15,15 @@
 function O = impute(O,method,lib,clean)
 
 if ~exist('method','var') || isempty(method)
-    methods = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','SeqRob','KNN','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','svd','MIPCA','norm','cart','imputePCA','Norm','softImpute','MinDet','Amelia','regression','midastouch','mean'};
-end
-if strcmp(method,'fast')
-    methods = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','SeqRob','KNN','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','svd','MIPCA','norm','cart','imputePCA','Norm','softImpute','MinDet','Amelia','regression','midastouch','mean'};
+    method = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','impSeqRob','knn','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','norm','cart','softImpute','MinDet','amelia','regression','midastouch','mean','aregImpute','nlpca'};
+elseif strcmp(method,'fast')
+    methods = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','impSeqRob','knn','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','norm','cart','softImpute','MinDet','amelia','regression','midastouch','mean','aregImpute','nlpca'};
     method = methods(1:10);
     fprintf('impute.m: fast option chosen. Checks 5 best algorithms.')
-end
-if isnumeric(method)
-    methods = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','SeqRob','KNN','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','svd','MIPCA','norm','cart','imputePCA','Norm','softImpute','MinDet','Amelia','regression','midastouch','mean'};
+elseif isnumeric(method)
+    methods = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','impSeqRob','knn','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','norm','cart','softImpute','MinDet','amelia','regression','midastouch','mean','aregImpute','nlpca'};
     method = methods(1:method);
     fprintf(['impute.m: fast option chosen. Checks ' num2str(method) ' best algorithms.'])
-end
-if exist('methods','var')
-    method = methods;
 end
 
 if ~exist('lib','var') || isempty(lib)
@@ -68,13 +63,13 @@ if isempty(npat)
 end
 
 % Amelia does not work for non-symmetric matrices (gets stuck in warning)
-if ~issymmetric(data)
-    if any(strcmpi(method,'amelia'))
-        lib(strcmpi(method,'amelia')) = [];
-        method(strcmpi(method,'amelia')) = [];
-        fprintf('Imputation with amelia is not performed because data is not symmetric.')
-    end
-end
+% if ~issymmetric(data)
+%     if any(strcmpi(method,'amelia'))
+%         lib(strcmpi(method,'amelia')) = [];
+%         method(strcmpi(method,'amelia')) = [];
+%         fprintf('Imputation with amelia is not performed because data is not symmetric.')
+%     end
+% end
 
 % initialize
 ImpM = nan(size(data,1),size(data,2),size(data,3),length(method));
@@ -83,25 +78,10 @@ time = nan(length(method),npat);
 %% Loop over # of patterns to simulate (default: npat = 5)
 for ii=1:npat
     dat = data(:,:,ii);
-    
-    %% Remove not working algorithms
-    rem = [];
-%     if sum(sum(isnan(dat)))> sum(sum(~isnan(dat)))
-%         rem = find(ismember(lib,{'Hmisc','impute'}));
-%         warning('Impute.m: Hmisc and impute packages are skipped because there are more than 50% MV. Try other methods.')
-%     end
-    da = dat;
-    da(isnan(da))=0;
-    sv = abs(svd(da));
-    if min(sv) < max(sv)*1e-8
-        warning('Impute.m: Amelia and ri are skipped because the matrix is singular. Try other methods.')
-        rem = [rem find(ismember(method,{'ri','Amelia'}))];
-    end
 
     fprintf(['\n impute.m: Imputing pattern ' num2str(ii) '/' num2str(npat) ' with ' num2str(length(method)) ' algorithms..'])
 %% Loop over imputation algorithms    
     for i=1:length(method)    
-        if ~ismember(i,rem)
         
             %% Write in R
             putRdata('dat',dat);
@@ -125,7 +105,6 @@ for ii=1:npat
                 fprintf(['Imputation with ' method{i} ' in package ' lib{i} ' was not feasible.'])  
             end   
             deleteR;
-        end
     end
 end
 fprintf('\n')
@@ -162,4 +141,4 @@ if exist('ImpM','var') && ~isempty(ImpM)
     O = set(O,'method_imput',method);
     O = set(O,'time_imput',nanmean(time,2));
 end 
-saveO(O)
+%saveO(O)

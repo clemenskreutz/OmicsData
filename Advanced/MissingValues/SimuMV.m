@@ -1,22 +1,16 @@
-% SimuData(m,n,MNAR,MCAR,mu,sig,plt)
-% Simulates data matrix for peptide intensities with missing values
+% data = SimuMV(full,a,b,file)
+% Simulates missing values on a protein dataset without MV
 %
-% m - number of peptides/rows
-% n - number of replicates/cols
+% full - matrix without a missing value
 % a - percentage of missing values
 % b - percentage Missing Not At Random of MVs
-% mu - mean of mean intensity, conditional differences              [1.5]
-% sigP - standard deviation of mean intensity                       [0.5]
-% sigG - standard deviation between samples                         [0.5]
-% plt - if true, see missing values arising in data matrix         [false]
+% file - if true, plots/saves data matrix         [false]
 % 
 % Output:
-% full - matrix without a missing value
 % data - matrix with assigned missing values
 % 
 % Example:
-% [full, data] = SimuData(pep,rep,a,b,8,0.7);
-% [full, data] = SimuData(3000,10,30,50,8,0.7);
+% data = SimuData(full,0.5,0.8);
 
 
 function data = SimuMV(full,a,b,file)
