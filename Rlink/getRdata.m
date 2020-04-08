@@ -9,6 +9,9 @@
 %  might take some time.
 %  Picking the variables is also rather slow since *.mat workspaces has to
 %  be written.
+% 
+%   This function requires the R.matlab package that has to be installed in
+%   R (e.g. via install.packages("R.matlab")
 
 function val = getRdata(varname)
 global OPENR
@@ -28,7 +31,7 @@ fprintf(fid,'require(R.matlab)\n');
 fprintf(fid,'rm(list=ls())\n');
 fprintf(fid,'\n');
 
-fprintf(fid,'%s\n','load("evalR.RData")');
+fprintf(fid,'%s\n','load("evalR.Rdata")');
 fprintf(fid,'%s\n',sprintf('writeMat("getRdata.mat",%s=%s)',varname,varname));
 fclose(fid);
 
