@@ -13,6 +13,10 @@ global OPENR
 if isfield(OPENR,'cmd')
     fid = fopen('evalR.R','w');
     fprintf(fid,'%s\n',['setwd("',strrep(pwd,filesep,'/'),'")']);
+    
+    if ~isempty(OPENR.myLibPath) && exist(OPENR.myLibPath)==7    
+        fprintf(fid,'%s\n',['.libPaths("',OPENR.myLibPath,'")']); % my own library
+    end
     for i=1:length(OPENR.libraries)
         fprintf(fid,'require(%s)\n',OPENR.libraries{i});
     end
