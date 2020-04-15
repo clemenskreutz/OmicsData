@@ -9,10 +9,8 @@ if exist('varargin','var') && ~isempty(varargin)
     if length(varargin)==1
         k = varargin{1};
     else
-        indg1 = varargin{1,:};
-        if size(varargin,1)>1
-            indg2 = varargin{2,:};
-        end
+        indg1 = varargin{1};
+        indg2 = varargin{2};
     end
 else
     warning('No grouping indeces given for ttest. Separating data into 2 blocks by kmeans clustering. If you want to specify blocks or number of clusters, call RMSEttest(O,k) or RMSEttest(O,indg1,indg2) in GetPerformance(O).')

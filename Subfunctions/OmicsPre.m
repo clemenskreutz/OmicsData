@@ -1,3 +1,7 @@
+% Checks if O is logged, converts 0 to NaN & deletes all(isnan())
+%
+% O - @OmicsData object
+
 function O = OmicsPre(O)
 
 dat_load = get(O,'data');

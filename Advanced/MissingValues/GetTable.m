@@ -60,7 +60,9 @@ if ~isempty(dat_imp)
 
                 RMSE(i) = sqrt(Quad/size(Y,1)); 
                 RSR(i) = RMSE(i)./nanstd(dat(:));
-                F(i) = nansum((X(:,i)-nanmean(X(:,i))).^2)/sum(~isnan(X(:,i)))/nansum((Y-nanmean(Y)).^2)*sum(~isnan(Y));
+                [~,F(i)] = vartest2(X(:,i),Y); 
+                %F(i) = nansum((Y-nanmean(Y)).^2) /sum(~isnan(Y)) / ( nansum((X(:,i) - nanmean(X(:,i))).^2) /sum(~isnan(X(:,i))));
+                %F(i) = nansum((X(:,i)-nanmean(X(:,i))).^2)/sum(~isnan(X(:,i)))/nansum((Y-nanmean(Y)).^2)*sum(~isnan(Y));
                 Acc(i) = length(find(Diffrel(:,i)<0.05))/size(Y,1)*100;   % #values <5% deviation to original value
                 T = [T table([nanmean(X(:,i)); nanstd(X(:,i)); nanmin(X(:,i)); nanmax(X(:,i)); Dev; RMSE(i); RSR(i); F(i); Acc(i); PCC(i+1,1); t(i)])];
             end

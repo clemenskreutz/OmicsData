@@ -1,28 +1,26 @@
 %   A logistic regression model for the occurence of missing values
 %
-%   O         @OmicsData object
+%   O   - @OmicsData object
+%   bio - flag if biological information should be taken into account [false]
+%
+%   out - result of logistic regression function glmfit (incl. types+coefs)
+%
+% Example:
+% out = LearnPattern(O);
+% O = GetComplete(O);
+% O = AssignPattern(O,out);
 
-function out = LearnPattern(O)
+function out = LearnPattern(O,bio)
 
 if ~exist('O','var')
     error('MissingValues/LearnPattern.m requires class O as input argument.')
 end
+if ~exist('bio','var')
+    bio = [];
+end
 
 drin = sum(isnan(O),2)<size(O,2);
 O = O(drin,:);
-
-% Coefficients for linearizing mean
-m = nanmean(O,2);
-%m = (m-nanmean(m))./nanstd(m);
-isna = isnan(O);
-mis = sum(isna,2)./size(isna,2);    
-
-x0=[-1;0];
-fun=@(x)(1./(1+exp(x(1)*m+x(2)))-mis);
-options = optimset('TolFun',1e-20,'TolX',1e-20);%,'Display','iter');
-[lincoef,~] = lsqnonlin(fun,x0,[],[],options);
-out.mean_trans_fun = @(m,x)(1./(1+exp(x(1)*m+x(2))));
-out.lincoef = lincoef;
 
 % Subsample indices
 nfeat = size(O,1);
@@ -35,9 +33,8 @@ else
 end
     
 % Initialize
-dim = ceil(nfeat/nboot)+size(O,2)+2;
-X = nan(dim,size(O,2),nboot);
 b = nan(ceil(nfeat/nboot),nboot);
+out = struct;
 
 for i=1:nboot  % subsample proteins
     if nboot>1
@@ -51,9 +48,11 @@ for i=1:nboot  % subsample proteins
         ind = indrand( nperboot*(i-1)+1 : nperboot*i );
     end
     
-    [X,y,type,typenames] = GetDesign(O(ind,:),out);
-    out.type = [0; type]; % offset gets type=0
-    out.typenames = ['offset'; typenames];
+    [X,y,typ,typnames] = GetDesign(O(ind,:),out,bio);
+    if i==1 || length(typ)+1>length(out.type)
+        out.type = [0; typ]; % offset gets type=0
+        out.typenames = ['offset'; typnames];
+    end
 
     out.stats(i) = LogReg(X,y);
     
@@ -61,9 +60,12 @@ for i=1:nboot  % subsample proteins
 end
 
 % output
+brow = b(out.type==3,:);
+brow = brow(brow~=0);                       % keep all row coefficients
+out.b = [nanmean(b(out.type~=3),2); brow];  % mean of coefficients over bootstrap
+out.type(end+1:length(out.b)) = out.type(end);
+out.typenames(end+1:length(out.b)) = out.typenames(end);
 out.X = X;
-out.b = nanmean(b,2);
-
 %PlotDesign(out,isnan(O(ind,:)),get(O,'path'))
 end
 

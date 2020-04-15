@@ -27,7 +27,6 @@ elseif strcmp(lib,'norm')
     evalR(' thetahat <- em.norm(s)')
     evalR('  rngseed(1)')
     evalR(' ImpR <- imp.norm(s,thetahat,dat)')
-    %evalR(' ImpR <- t(ImpR)')
 
 % missMDA
 elseif strcmp(lib,'missMDA')
@@ -96,9 +95,10 @@ elseif strcmp(lib,'mice')
 
 % Amelia (Expectation maximization with bootstrap)
 elseif strcmp(lib,'Amelia')
-    evalR('f <- amelia(dat, m=1)')
+    evalR('require(R.utils)')
+    evalR('f <- withTimeout({amelia(dat,m=1)},timeout = 1, cpu = 100,elapsed=3600)') % of all pride data the max time of amelia was cpu=1
+    %evalR('f <- amelia(dat, m=1)')
     evalR('ImpR <- f$imputations[[1]]')
- %s   evalR('if (sum(is.na(ImpR))>0) { ImpR <- {} }')
 
 % missForest
 elseif strcmp(lib,'missForest')

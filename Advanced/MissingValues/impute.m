@@ -7,8 +7,8 @@
 % clean - boolean if previous imputations should be cleared beforehand
 %
 % Example:
-% methods = {'impnorm','knn','Seq'};
-% O = impute(O,methods,[],true);
+% method = {'impnorm','knn','Seq'};
+% O = impute(O,method,[],true);
 %
 % See also: WriteinR to see implemented methods and libraries
 
@@ -111,7 +111,7 @@ fprintf('\n')
 closeR;
 
 % Delte not working methods
-if any(isnan(ImpM(:)))
+if any(all(isnan(ImpM),3))
     if size(ImpM,3)>1
         idx = squeeze(any(any(any(isnan(ImpM)))));
     else

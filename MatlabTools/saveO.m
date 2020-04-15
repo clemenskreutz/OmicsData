@@ -1,17 +1,27 @@
+% saves OmicsData object O in a MATLAB® formatted binary file (MAT-file)
+%
+% O       - @OmicsData object
+% file    - filepath to save [path of data file]
+% matname - filename         ['O']
+%
+% Example:
+% saveO(O,'C:\Users\Janine\Documents\Test','Otest')
+
 function saveO(O,file,matname)
 
 if ~exist('file','var') || isempty(file)
     file = get(O,'path');
-    %file = [file get(O,'name')];
 end
 if ~exist('matname','var') || isempty(matname)
     matname = 'O';
 end
-
+if strcmp(file(end),filesep)
+    file = file(1:end-1);
+end
 
 [path,folder,~] = fileparts(file);
 if ~exist([path filesep folder],'dir') % Create folder for data
-    mkdir(path, folder)
+     mkdir(path, folder)
 end
 
 O = set(O,'name',matname);

@@ -9,7 +9,7 @@
 function O = GetPerformance(O,ttestrun,ttestcriteria)
 
 if ~exist('ttestrun','var') || isempty(ttestrun)
-    ttestrun = false;
+    ttestrun = true;
 end
 if ~exist('ttestcriteria','var') || isempty(ttestcriteria)
     ttestcriteria = false;

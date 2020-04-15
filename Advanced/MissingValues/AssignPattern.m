@@ -1,10 +1,9 @@
-% Assign MVs to complete matrix
-% with the logistic regression coefficients learned on the original data
-% in out = LearnPattern(O)
+% Generate patterns of missing values, with the logistic regression 
+% coefficients learned on the original data in out = LearnPattern(O)
 %
 % O - OmicsData class object
 % out - logistic regression coefficients
-% npat - # patterns to simulate (if >1, 3D array is returned)
+% npat - # patterns to simulate (if >1, 3D array is returned)   [5]
 %
 % Example:
 % out = LearnPattern(O);
@@ -12,7 +11,7 @@
 % O = AssignPattern(O,out);
 
 
-function O = AssignPattern(O,out,npat,scale)
+function O = AssignPattern(O,out,npat)
 
 if ~exist('O','var')
     error('AssignPattern.m requires class O as input argument.\n')
@@ -24,24 +23,13 @@ if ~exist('out','var') || isempty(out)
     end
 end
 if ~exist('npat','var') || isempty(npat)
-    npat = 5;
+    npat = 10;
     fprintf('AssignPattern.m: 5 patterns of MV are simulated.\n')
 end
 if ~isfield(out,'b')
     error('AssignPattern.m requires coefficients from logistic regression as input. Do LearnPattern before AssignPattern. Input struct did not include coefficients.\n')
 end
-% if ~isfield(out,'lincoef')
-%     error('AssignPattern.m requires coefficients to linearize mean for logistic regression. Do LearnPattern before AssignPattern.\n')
-% end
-if ~exist('scale','var') || isempty(scale)
-    scale = true;
-end
 
-% Get data
-if scale
-    %O = scaleO(O,'original');
-    % O = QuantileRescaling(O,get(O,'data_original'));
-end
 dat = get(O,'data');
 
 % remember complete dataset
@@ -49,8 +37,8 @@ O = set(O,'data_complete',[]);          % Put in container so it stays same
 O = set(O,'data_complete',dat,'Complete dataset');
 
 % Design matrix
-X = GetDesign(O,out);
-X = QuantileRescalingX(X,out);
+    X = GetDesign(O,out);
+%    X = QuantileRescalingX(X,out);
 
 % Initialize
 dat_patterns = nan(size(O,1),size(O,2),npat);
@@ -70,8 +58,8 @@ for i=1:npat
     p = reshape(yhat(1:size(O,1)*size(O,2)),size(O,1),size(O,2)); % here yhat from regularization is cut off
     r = rand(size(p,1),size(p,2));
     % if (complete/known) data has missing values, binomial draw so total %MV matches 
-    b = boolean(binornd(1,sum(sum(isnan(O)))/size(O,1)/size(O,2),size(O,1),size(O,2))); % binomial draw
-    r2 = (r<=p) & ~b;
+    bino = boolean(binornd(1,sum(sum(isnan(O)))/size(O,1)/size(O,2),size(O,1),size(O,2))); % binomial draw
+    r2 = (r<=p) & ~bino;
     
     dat_mis = dat;
     dat_mis(r2) = NaN;
@@ -79,9 +67,9 @@ for i=1:npat
     % Replace complete missingness
     drin = find(all(isnan(dat_mis),2));
     if sum(drin)>0
-        r = ceil(rand(sum(drin),1)*size(dat_mis,2));
+        back = ceil(rand(sum(drin),1)*size(dat_mis,2));
         for d = 1:length(drin)
-            dat_mis(drin(d),r(d)) = dat(drin(d),r(d));
+            dat_mis(drin(d),back(d)) = dat(drin(d),back(d));
         end
     end
     dat_patterns(:,:,i) = dat_mis;
