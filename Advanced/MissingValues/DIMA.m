@@ -17,7 +17,7 @@ out = LearnPattern(O,bio);
 Os = GetComplete(O);
 Os = AssignPattern(Os,out);
 
-Os = imputation(Os,methods);
+Os = impute(Os,methods);
 [~,algo] = GetRankTable(Os);
 
 O = imputation_original(O,algo); 
