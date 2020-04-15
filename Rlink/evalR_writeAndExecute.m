@@ -14,7 +14,7 @@ if isfield(OPENR,'cmd')
     fid = fopen('evalR.R','w');
     fprintf(fid,'%s\n',['setwd("',strrep(pwd,filesep,'/'),'")']);
     
-    if ~isempty(OPENR.myLibPath) && exist(OPENR.myLibPath)==7    
+    if isfield(OPENR,'myLibPath') && ~isempty(OPENR.myLibPath) && exist(OPENR.myLibPath,'file')  
         fprintf(fid,'%s\n',['.libPaths("',OPENR.myLibPath,'")']); % my own library
     end
     for i=1:length(OPENR.libraries)

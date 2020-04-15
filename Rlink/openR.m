@@ -13,7 +13,7 @@
 function openR
 global OPENR
 OPENR = struct;
-OPENR.myLibPath = '';
+
 if exist(['C:' filesep 'Program Files' filesep 'R'],'dir')
     version = dir(['C:' filesep 'Program Files' filesep 'R' filesep]);
     if exist(['C:' filesep 'Program Files' filesep 'R' filesep version(end).name filesep 'bin' filesep 'x64'],'dir')
@@ -23,9 +23,12 @@ if exist(['C:' filesep 'Program Files' filesep 'R'],'dir')
     else
         error('OmicsData/Rlink/openR.m: Change your home directory of R here. You can find the directory by R.home() in R.')
     end
-elseif exist('/usr/bin/R')==2
+elseif exist('/usr/bin/R')==2 % eg knechte
     OPENR.Rexe = '/usr/bin/R'; 
     OPENR.myLibPath = '~/R_library';
+elseif exist('R_lib','file') || exist('R_library','file') % eg bwcluster
+    OPENR.Rexe = 'R'; 
+    OPENR.myLibPath = 'R_lib';
 elseif exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R'],'dir')
     if exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R' filesep 'bin' filesep 'R.exe'],'dir')
         OPENR.Rexe = ['"' filesep 'usr' filesep 'local' filesep 'lib' filesep 'R' filesep 'bin' filesep 'R.exe"'];
