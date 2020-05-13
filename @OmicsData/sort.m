@@ -36,13 +36,11 @@ end
 dat = get(O,'data');
 
 if dim==1
-    [~,idx] = sortrows(dat,direction);
-      s = struct('type','()');
-  s.subs = {idx,':'};
-  subsref(O,s); 
+    [datsort,idx] = sort(dat,direction);
+    O = set(O,'data',datsort,'Sorted');
     %fprintf('sortnan.m: Rows are sorted by number of missing values.\n');
 elseif dim ==2
-    [~,idx] = sortrows(dat',direction);
+    [~,idx] = sort(dat',direction);
     O = O(:,idx);
     %fprintf('sortnan.m: Columns are sorted by number of missing values.\n');
 else

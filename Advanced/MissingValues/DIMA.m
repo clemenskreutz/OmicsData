@@ -19,5 +19,6 @@ Os = AssignPattern(Os,out);
 
 Os = impute(Os,methods);
 [~,algo] = GetRankTable(Os);
+saveO(O,[],'O_imputations');
 
 O = imputation_original(O,algo); 

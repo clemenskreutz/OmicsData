@@ -56,8 +56,11 @@ for b=1:size(dat1_imp,3)
             t(i) = stat.tstat;
             tm(i) = statm.tstat;
         end
-
+        tm(isinf(tm)) = nan;
         RMSEt(m,b) = sqrt( nansum((t-tm).^2) /length(t));
+        if isinf(RMSEt(m,b))
+            'break'
+        end
     end
 end
 T(end+1,2:end,:) = RMSEt;

@@ -113,7 +113,7 @@ closeR;
 % Delte not working methods
 if any(all(isnan(ImpM),3))
     if size(ImpM,3)>1
-        idx = squeeze(any(any(any(isnan(ImpM)))));
+        idx = squeeze(all(any(any(isnan(ImpM)))));
     else
         idx = squeeze(any(any(isnan(ImpM))));
     end
