@@ -1,1 +1,0 @@
-# Check commit history of submodule
