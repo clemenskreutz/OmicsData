@@ -21,11 +21,7 @@ end
 ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
 
 if isempty(ind)
-    pattern = 'LFQ Intensity';
-    ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
-end
-if isempty(ind)
-    pattern = 'IntensityLFQ';
+    pattern = 'LFQ';
     ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
 end
 if isempty(ind)
@@ -36,6 +32,9 @@ if isempty(ind)
     pattern = 'Abundance';
     ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
 end
+if any(strcmp(fndata,pattern)) % remove column Intensity because it has other meaning in MaxQuant
+    ind(ind==find(strcmp(fndata,pattern))) = []; %{[fndata{strcmp(fndata,pattern)} '_0']};
+end
 while isempty(ind)
     warning('Cannot determine sample names be replacing pattern ''%s''. The data might be SILAC. Alter code be introducing a new pattern.',pattern);
     fprintf('Column names in the file:\n');
@@ -45,15 +44,9 @@ while isempty(ind)
         pattern = input('>Please specify a search pattern used by regexp(...,''ignorecase''): ','s');
     end
     ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
-end
-if any(strcmp(fndata,pattern)) % remove column Intensity because it has other meaning in MaxQuant
-    ind(ind==find(strcmp(fndata,pattern))) = []; %{[fndata{strcmp(fndata,pattern)} '_0']};
-    flag_replace = 0; %1;
-    if isempty(ind)
-        warning('ind is empty')
+    if any(strcmp(fndata,pattern)) % remove column Intensity because it has other meaning in MaxQuant
+        ind(ind==find(strcmp(fndata,pattern))) = []; %{[fndata{strcmp(fndata,pattern)} '_0']};
     end
-else
-    flag_replace = 0;
 end
  
 % Some later operations work only, if the data-type label is not in between
@@ -105,16 +98,13 @@ dataMat = struct;
 % initialized Matrix
 nrows = size(data.(fndata{1}),1);
 for j=1:length(uniDatNames)
-    if ~isletter(uniDatNames{j}(1))
-        uniDatNames{j} = uniDatNames{j}(2:end);
-    end
+%     if ~isletter(uniDatNames{j}(1))
+%         uniDatNames{j} = uniDatNames{j}(2:end);
+%     end
     dataMat.(str2fieldname(uniDatNames{j})) = NaN(nrows,length(relatedNames));
 end
 
 removeFromData = cell(0);
-if flag_replace==1
-    fndata(strcmp(fndata,[pattern '_0'])) = {pattern};
-end
 for i=1:length(relatedNames)
     % Find data fields which match to samplenames
     [~,ia,ib] = intersect(relatedNames{i},uniDatNames);

@@ -1,5 +1,18 @@
 function full = SimuData(npep,rep,mu,sigP,sigG,sige)
 
+if ~exist('mu','var') || isempty(mu)
+    mu = 1.5;
+end
+if ~exist('sigP','var') || isempty(sigP)
+    sigP=0.5;
+end
+if ~exist('sigG','var') || isempty(sigG)
+    sigG=sigP;
+end
+if ~exist('sige','var') || isempty(sige)
+    sige=sigG;
+end
+
 %% Simulate peptides
 P = [normrnd(mu,sigP,npep,1)*ones(1,rep/2), normrnd(mu,sigP,npep,1)*ones(1,rep/2)]; % two groups of proteins
 G = zeros(npep,rep);
