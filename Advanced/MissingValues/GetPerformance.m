@@ -21,6 +21,7 @@ end
 % Create performance tables
 O = GetTable(O);
 if ttestrun
+    O = set(O,'data',get(O,'data_original'),'original'); % cluster by original dataset
     O = RMSEttest(O,2);  
 end
 O = GetRankTable(O,ttestcriteria);
