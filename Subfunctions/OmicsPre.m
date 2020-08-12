@@ -18,4 +18,3 @@ if ~checknan(O)                                  % no nans in data, so write zer
     O = set(O,'data',dat,'Replaced 0 by nan.');
 end
 O = O(:,~all(isnan(O)));                      % delete columns/experiments with all nan
-    

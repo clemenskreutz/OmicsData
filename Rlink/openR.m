@@ -26,9 +26,12 @@ if exist(['C:' filesep 'Program Files' filesep 'R'],'dir')
 elseif exist('/usr/bin/R')==2 % eg knechte
     OPENR.Rexe = '/usr/bin/R'; 
     OPENR.myLibPath = '~/R_library';
-elseif exist('R_lib','file') || exist('R_library','file') % eg bwcluster
+elseif exist('R_libs','dir') || exist('R_library','dir') % eg bwcluster
     OPENR.Rexe = 'R'; 
-    OPENR.myLibPath = 'R_lib';
+    OPENR.myLibPath = 'R_libs';
+elseif exist('../../R_libs','dir') || exist('../../R_library','dir') % eg bwcluster
+    OPENR.Rexe = 'R'; 
+    OPENR.myLibPath = '../../R_libs';
 elseif exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R'],'dir')
     if exist([filesep 'usr' filesep 'local' filesep 'lib' filesep 'R' filesep 'bin' filesep 'R.exe'],'dir')
         OPENR.Rexe = ['"' filesep 'usr' filesep 'local' filesep 'lib' filesep 'R' filesep 'bin' filesep 'R.exe"'];

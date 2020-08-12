@@ -57,12 +57,12 @@ for v=1:length(Os)
     if doforce==0
         c2 = O2.cols.(O2.config.default_col);
         if length(unique(c2)) < length(c2)
-            error('Default-rowumns of O%i is not unique and cannot be used for horzcat. Generate a unique default-rowumn first.',v)
+            error('Default-columns of O%i is not unique and cannot be used for horzcat. Generate a unique default-column first.',v)
         end
         
         [inb,locb] = ismember(c1,c2);
         if sum(inb==0)>0
-            error('Some default-rowss does not occur in all objects.')
+            error('Some default-rows do not occur in all objects.')
         else
             % reorder 2nd object
             S.type = '()';

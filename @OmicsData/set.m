@@ -15,7 +15,7 @@ fnconfig = fieldnames(O.config);
 fncontainer = fieldnames(O.container);
 fninfo = fieldnames(O.info);
 
-switch prop
+switch lower(prop)
     case 'data'
         if isempty(varargin)
             error('Data can only be altered, if the change is annotated via a 3rd argument of this function (Example: set(O,''data'',d,''Data is divided by two.'').')
@@ -70,7 +70,11 @@ switch prop
                 O.container.(prop) = val;  % unknown properties are put in the container
             end
         else
-            [~,s] = get(O,prop,true);
-            O.(s).(prop) = val;
+            try
+                [~,s] = get(O,prop,true);
+                O.(s).(prop) = val;
+            catch
+                O.(prop) = val;
+            end
         end
 end

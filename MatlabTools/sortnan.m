@@ -25,7 +25,6 @@ end
 
 % get data
 dat = get(O,'data');
-dat(dat==0) = nan;                              % Watch out! In most cases 0 = nan, if not 'Comment out (%)' this line
 dat = double(isnan(dat));
 
 if dim==1

@@ -1,0 +1,3 @@
+[submodule "TestSubmodule"]
+	path = TestSubmodule
+	url = https://github.com/kreutz-lab/TestSubmodule.git

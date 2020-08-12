@@ -47,13 +47,16 @@ for i=1:size(y,2)
         b(:,i) = (Xinv*y(:,i));
     end
     
+%     bX = b;
+%     bX(isnan(bX)) = 0; % Janine % for residuen add 0 if b not known
+%     res = y(:,i)-X*bX(:,i);
     res = y(:,i)-X*b(:,i);
     if(nargout>7)
         resout(:,i) = res;
     end
     ndat = sum(~isnan(res));
     nparaTmp = sum(~isnan(b(:,i)));
-    if ndat>nparaTmp+1;
+    if ndat>nparaTmp+1
         varest(i) =  1/(ndat-nparaTmp)* nansum(res.^2) ;
         var_post = (1-prior_weight(i))*varest(i) + prior_weight(i)*varprior(i);
     else
