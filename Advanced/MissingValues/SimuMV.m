@@ -31,7 +31,7 @@ m = size(full,1);
 n = size(full,2);
 
 %% Simulate MNAR
-T = normrnd(quantile(full(:),a),0.01,m,n); % threshold matrix
+T = randn(m,n)*0.01+quantile(full(:),a); % threshold matrix
 mask1 = full<T;
 mask2 = boolean(binornd(1,b,m,n)); % binomial draw
 MNAR = mask1 & mask2;
@@ -41,7 +41,8 @@ end
 
 %% MCAR
 v=find(~MNAR);
-idx = randsample(length(v),int32(m*n*(1-b)*a));
+idx = unique(ceil(rand(m*n,1)*length(v)),'stable');
+idx = idx(1:int32(m*n*(1-b)*a));
 MCAR = false(m,n);
 MCAR(sub2ind([m n],v(idx))) = true;
 % idx = find(MNAR);

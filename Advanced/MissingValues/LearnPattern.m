@@ -10,7 +10,7 @@
 % O = GetComplete(O);
 % O = AssignPattern(O,out);
 
-function out = LearnPattern(O,bio)
+function out = LearnPattern(O,bio,regw,logflag)
 
 if ~exist('O','var')
     error('MissingValues/LearnPattern.m requires class O as input argument.')
@@ -48,13 +48,13 @@ for i=1:nboot  % subsample proteins
         ind = indrand( nperboot*(i-1)+1 : nperboot*i );
     end
     
-    [X,y,typ,typnames] = GetDesign(O(ind,:),out,bio);
+    [X,y,typ,typnames] = GetDesign(O(ind,:),out,bio,logflag);
     if i==1 || length(typ)+1>length(out.type)
         out.type = [0; typ]; % offset gets type=0
         out.typenames = ['offset'; typnames];
     end
 
-    out.stats(i) = LogReg(X,y);
+    out.stats(i) = LogReg(X,y,regw);
     
     b(1:length(out.stats(i).beta),i) = out.stats(i).beta;
 end
@@ -62,7 +62,7 @@ end
 % output
 brow = b(out.type==3,:);
 brow = brow(brow~=0);                       % keep all row coefficients
-out.b = [nanmean(b(out.type~=3),2); brow];  % mean of coefficients over bootstrap
+out.b = [mean(b(out.type~=3),2,'omitnan'); brow];  % mean of coefficients over bootstrap
 out.type(end+1:length(out.b)) = out.type(end);
 out.typenames(end+1:length(out.b)) = out.typenames(end);
 out.X = X;
@@ -70,13 +70,19 @@ out.X = X;
 end
 
 
-function stats = LogReg(X,y)
+function stats = LogReg(X,y,regw)
 
+w = ones(size(y));
 [X,y] = GetRegularization(X,y);
-    
+w(end+1:length(y)) = regw;
 %     lastwarn('');
+
 if size(X,1)<50000
-    [~,~,stats] = glmfit(X,y,'binomial','link','logit');          % faster
+     % [B,FitInfo] = lassoglm(X,y,'binomial','link','logit','Lambda',0.01);
+     
+     [~,~,stats] = glmfit(X,y,'binomial','link','logit','weight',w);
+     
+%    [~,~,stats] = glmfit(X,y,'binomial','link','logit');          % faster
 else
      mdl = fitglm(X,y,'Distribution','binomial','link','logit');  % works for tall matrices
      stats = struct;

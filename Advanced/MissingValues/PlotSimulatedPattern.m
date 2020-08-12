@@ -22,27 +22,29 @@ if exist([filepath '\' name '\' name '_SimulatedMissingPattern_AllX_1.png'],'fil
 end
 
 % Sort for plotting
-[~,idx] = sort(sum(dat,2),'descend','MissingPlacement','last');
+[~,idx] = sort(mean(dat,2),'descend','MissingPlacement','last');
 dat = dat(idx,:);
 [~,idx2] = sort(sum(isnan(dat),2));
 dat = dat(idx2,:);
-dat = dat(~all(isnan(dat),2),:);
-[~,idx] = sort(sum(comp,2),'descend','MissingPlacement','last');
+[~,idx] = sort(mean(comp,2),'descend','MissingPlacement','last');
 comp = comp(idx,:);
 [~,idx2] = sort(sum(isnan(comp),2));
 comp = comp(idx2,:);
-comp = comp(~all(isnan(comp),2),:);
+
+mi = nanmin(nanmin(nanmin(dat)),nanmin(nanmin(comp)));
+ma = nanmax(nanmax(nanmax(dat)),nanmax(nanmax(comp)));
 
 fileID = fopen([filepath filesep name filesep '%Mis.txt'],'w');
 fprintf(fileID,'%s\t%s\n','MV in original','MV in pattern');
 
 for b=1%:size(dat_mis,3)
     A = dat_mis(:,:,b);
-    [~,idx] = sort(sum(A,2),'descend','MissingPlacement','last');
+    [~,idx] = sort(mean(A,2),'descend','MissingPlacement','last');
     A = A(idx,:);
-    [~,idx] = sort(sum(isnan(A),2));
-    A = A(idx,:);
-    A = A(~all(isnan(A),2),:);
+    [~,idx2] = sort(sum(isnan(A),2));
+    A = A(idx2,:);
+%     comp = comp(idx,:);
+%     comp = comp(idx2,:);
     %% Plot matrices original/simulated intensities/nans
 
     figure; set(gcf,'units','points','position',[0,0,1200,600])
@@ -52,15 +54,12 @@ for b=1%:size(dat_mis,3)
     pcolor([dat nan(nr,1); nan(1,nc+1)]);
     shading flat;
     caxis manual
-    caxis([min(nanmin(dat)) max(nanmax(dat))]);
+    caxis([mi ma]);
     title({'original data O'})
     ylabel('Proteins (sorted)')
     xlabel('Samples')
     set(gca, 'ydir', 'reverse');
     set(gca,'FontSize', 20)
-    c = colorbar;
-    c.Label.String = 'log_2(LFQIntensity)';
-    %c.Ticks = [];
     
     h2 = subplot(1,3,2);
     nr = size(comp,1);
@@ -68,13 +67,14 @@ for b=1%:size(dat_mis,3)
     pcolor([comp nan(nr,1); nan(1,nc+1)]);
     shading flat;
     caxis manual
-    caxis([min(nanmin(dat)) max(nanmax(dat))]);
-    c = colorbar('southoutside');
-    c.Label.String = 'log_{2}(Intensity)';
-    h2.Position = [h2.Position(1) h1.Position(2)+h1.Position(4)*(1-size(comp,1)/size(dat,1)) h2.Position(3) h1.Position(4)/size(dat,1)*size(comp,1)];
+    caxis([mi ma]);
+   % c = colorbar('southoutside');
+   % c.Label.String = 'log_{2}(Intensity)';
+   % h2.Position = [h2.Position(1) h1.Position(2)+h1.Position(4)*(1-size(comp,1)/size(dat,1)) h2.Position(3) h1.Position(4)/size(dat,1)*size(comp,1)];
     title({'Known data K'})
+    xlabel('Samples')
     set(gca, 'ydir', 'reverse');
-    ylim([0 size(comp,1)])
+    %ylim([0 size(comp,1)])
     set(gca,'FontSize', 20)
     
     h3 = subplot(1,3,3);
@@ -84,12 +84,12 @@ for b=1%:size(dat_mis,3)
     shading flat;
     set(gca, 'ydir', 'reverse');
     caxis manual
-    caxis([min(nanmin(dat)) max(nanmax(dat))]);
-    h3.Position = [h3.Position(1) h1.Position(2) h3.Position(3) h1.Position(4)];
+    caxis([mi ma]);
+    % h3.Position = [h3.Position(1) h1.Position(2) h3.Position(3) h1.Position(4)];
     %h3.Position = [h3.Position(1) h2.Position(2) h3.Position(3) h2.Position(4)];
     title({'pattern simulation S'})
     xlabel('Samples')
-    ylim([0 size(comp,1)])
+    % ylim([0 size(comp,1)])
     %yticks([0,round(size(A,1)/4,1,'significant'),round(size(A,1)/2,1,'significant'),round(size(A,1)*0.9,2,'significant')])
     %yticklabels([0,round(size(A,1)/4,1,'significant'),round(size(A,1)/2,1,'significant'),round(size(A,1)*0.9,2,'significant')])
     set(gca,'FontSize', 20)

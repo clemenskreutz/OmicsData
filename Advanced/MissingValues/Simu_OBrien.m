@@ -53,21 +53,25 @@ for i=1:nprot
     pep(i,npep(i)+1:end) = NaN;
 end
 %5
-full = nanmean(pep,2)+randn(nprot,ceil(nsam/2))*sig;
+full = mean(pep,2,'omitnan')+randn(nprot,ceil(nsam/2))*sig;
 full(:,end+1:end*2) = full+FC;
 
 % Norm Janine
-protMNAR = (full - quantile(full(:),mv*nr)) ./ nanstd(full(:));
+protMNAR = (full - mean(full(:),'omitnan')) ./ std(full(:),'omitnan');
+protMNAR = protMNAR*mv*nr+ quant(protMNAR(:),mv*nr);
 
 %% MNAR
 MNAR = cdf('Normal',protMNAR,0,1);
-MNAR = ~boolean(binornd(1,MNAR));
+r = rand(size(MNAR));
+MNAR = r<=MNAR;
 
 %% MCAR
 MCAR = false(nprot,nsam);
 %if 0<nr
     v=find(~MNAR);
-    idx = randsample(length(v),int32(nprot*nsam*(1-nr)*mv));
+    idx = unique(ceil(rand(nprot*nsam,1)*length(v)),'stable');
+    idx = idx(1:int32(nprot*nsam*(1-nr)*mv));
+    %idx = randsample(length(v),int32(nprot*nsam*(1-nr)*mv));
     MCAR(sub2ind([nprot nsam],v(idx))) = true;
 %end
 
@@ -76,9 +80,9 @@ mask = MNAR | MCAR;
 data = full;
 data(mask) = NaN;
 
-% nMCAR = sum(sum(MCAR)) / size(data,1) / size(data,2)
-% nMNAR = sum(sum(MNAR)) / size(data,1) / size(data,2)
-% nMV = sum(sum(isnan(data))) / size(data,1) / size(data,2)
+%nMCAR = sum(sum(MCAR)) / size(data,1) / size(data,2)
+%nMNAR = sum(sum(MNAR)) / size(data,1) / size(data,2)
+%nMV = sum(sum(isnan(data))) / size(data,1) / size(data,2)
 
 if exist('file','var') && ~isempty(file)
     [~,idx] = sort(sum(isnan(data),2));

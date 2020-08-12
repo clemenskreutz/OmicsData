@@ -36,7 +36,7 @@ if ~isempty(dat_imp)
         end
         
         % Initialize 
-        T = table([nanmean(Y);nanstd(Y);nanmin(Y);nanmax(Y);0;0;0;0;0;0;0]);
+        T = table([mean(Y,'omitnan');std(Y,'omitnan');min(Y,[],'omitnan');max(Y,[],'omitnan');0;0;0;0;0;0;0]);
         T.Properties.VariableNames = {'original'};
         T.Properties.RowNames = {'mean','std','min','max','MeanError','RMSE','RSR','F','Acc','PCC','time'};
         Diffm = nan(size(X,1),size(dat_imp,4));
@@ -46,25 +46,30 @@ if ~isempty(dat_imp)
         RSR = nan(size(dat_imp,4),1);
         F = nan(size(dat_imp,4),1);
         PCC = corrcoef([Y X],'Rows','complete');
+        t(end+1:size(X,2)) = nan;
         
         %% Calc performance measures per algorithm, write in Table
         for i=1:size(X,2)
-            if all(isnan(X(:,i)))
-                T = [T table([nan(10,1); t(i)])];
+            if any(isnan(X(:,i))) || all(X(:,i)==0)
+                T = [T table([nan(11,1)])];
             else
-                Quad = nansum(nansum(nansum((X(:,i)-Y).^2)));
+                Quad = sum(sum(sum((X(:,i)-Y).^2,'omitnan'),'omitnan'),'omitnan');
                 Diffm(:,i) = X(:,i)-Y;
                 Diffrel(:,i) = abs(Diffm(:,i)./Y);
-                Dev = nansum(nansum(abs(Diffm(:,i))))/size(Y,1);
+                Dev = sum(sum(abs(Diffm(:,i)),'omitnan'),'omitnan')/size(Y,1);
                 %MeanDiff = nansum(nansum(Diffm(:,i)))/size(Y,1);
 
                 RMSE(i) = sqrt(Quad/size(Y,1)); 
-                RSR(i) = RMSE(i)./nanstd(dat(:));
-                [~,F(i)] = vartest2(X(:,i),Y); 
+                RSR(i) = RMSE(i)./std(dat(:),'omitnan');
+               % [~,F(i)] = vartest2(X(:,i),Y); 
+               F(i) = nan;
                 %F(i) = nansum((Y-nanmean(Y)).^2) /sum(~isnan(Y)) / ( nansum((X(:,i) - nanmean(X(:,i))).^2) /sum(~isnan(X(:,i))));
                 %F(i) = nansum((X(:,i)-nanmean(X(:,i))).^2)/sum(~isnan(X(:,i)))/nansum((Y-nanmean(Y)).^2)*sum(~isnan(Y));
                 Acc(i) = length(find(Diffrel(:,i)<0.05))/size(Y,1)*100;   % #values <5% deviation to original value
-                T = [T table([nanmean(X(:,i)); nanstd(X(:,i)); nanmin(X(:,i)); nanmax(X(:,i)); Dev; RMSE(i); RSR(i); F(i); Acc(i); PCC(i+1,1); t(i)])];
+                T = [T table([mean(X(:,i),'omitnan'); std(X(:,i),'omitnan'); min(X(:,i),[],'omitnan'); max(X(:,i),[],'omitnan'); Dev; RMSE(i); RSR(i); F(i); Acc(i); PCC(i+1,1); t(i)])];
+            if Quad==0
+                'b'
+            end
             end
             T.Properties.VariableNames(i+1) = erase(method(i),'.');
         end

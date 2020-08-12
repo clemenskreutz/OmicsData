@@ -18,9 +18,11 @@ else
 end
 
 if exist('k','var')
-    idx = kmeans(get(O,'data_complete')',k);
-    indg1 = idx==1;
-    indg2 = idx==2;
+    erg = clusterR(O,2,2);
+%     comp = get(O,'data_complete');
+%     idx = kmeans(comp',k);
+    indg1 = erg.samplecluster==1;
+    indg2 = erg.samplecluster==2;
 end
 %% instead of indg1, indg2, use idx(1,:) idx(2,:)
     
@@ -56,8 +58,11 @@ for b=1:size(dat1_imp,3)
             t(i) = stat.tstat;
             tm(i) = statm.tstat;
         end
-
-        RMSEt(m,b) = sqrt( nansum((t-tm).^2) /length(t));
+        tm(isinf(tm)) = nan;
+        RMSEt(m,b) = sqrt( sum((t-tm).^2,'omitnan') /length(t));
+        if isinf(RMSEt(m,b))
+            fprintf('Infinite value in RMSEttest.m')
+        end
     end
 end
 T(end+1,2:end,:) = RMSEt;

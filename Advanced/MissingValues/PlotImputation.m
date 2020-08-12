@@ -34,9 +34,9 @@ if isempty(Tab)
     Tab = get(O,'RankTable');
 end
 try
-    Tab = Tab(2,:);
-catch
     Tab = Tab{2,:};
+catch
+    Tab = Tab(2,:);
 end
 method = get(O,'method_imput');
 Rankmethod = get(O,'RankMethod');
@@ -99,7 +99,7 @@ for i=1:s(4)
     title(Rankmethod{idxplot(i)},'Interpreter','none')                    
     set(gca,'FontSize', 11)
 end
-print([filepath filesep name filesep 'ImputationDistribution'],'-djpeg','-r1000');
+print([filepath filesep name filesep 'ImputationDistribution'],'-dtiff','-r1000');
 
 % Histogram
 figure

@@ -33,5 +33,5 @@ legend('Original','Simulated','Location','northwest');
 if isempty(path)
     path = pwd;
 end
-delete([path filesep name filesep 'MissingRowCol_AllX.tif'])
-saveas(gcf,[path filesep name filesep 'MissingRowCol_AllX.tif'])
+% delete([path filesep name filesep 'MissingRowCol_AllX.tif'])
+% saveas(gcf,[path filesep name filesep 'MissingRowCol_AllX.tif'])

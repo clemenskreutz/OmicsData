@@ -15,10 +15,13 @@
 % ODIMA = imputation_original(O,algo);
 
 
-function [O,algos] = GetRankTable(O,rankby,plt)
+function [O,algos] = GetRankTable(O,rankby,rankbyrank,plt)
 
 if ~exist('rankby','var') || isempty(rankby)
     rankby = 'RMSE';
+end
+if ~exist('rankbyrank','var') || isempty(rankbyrank)
+    rankbyrank = true;
 end
 if ~exist('plt','var') || isempty(plt)
     plt = false;
@@ -34,11 +37,14 @@ if isempty(Tab) % if GetTable hasn't been performed before
         return
     end
 end
-
-Tab = Tab(:,2:end,:); % clear 0 first column
-
 method = get(O,'method_imput');
 npat = size(Tab,3);
+
+if size(Tab,2)>length(method)
+    Tab = Tab(:,2:end,:); % clear 0 first column
+end
+
+
 
 %% find lowest rank
 if ~isnumeric(rankby)
@@ -61,22 +67,31 @@ else
 end
 
 %% Rank
-idx = ones(npat,size(Tab,2))*size(Tab,2);    
-idboot = zeros(npat,size(Tab,2));
-for b=1:npat
-    [~,idx(b,:)] = sort(Tab(n,:,b),'MissingPlacement','last'); % idx(:,1) is best algo
-    idboot(b,idx(b,:)) = 1:size(Tab,2);                        % idboot==1 is best algo
-end
-idboot(idboot==0) = size(Tab,2);
-if npat==1
-    [rank,idxrank] = sort(idboot,2,'MissingPlacement','last'); 
+if rankbyrank
+    idx = ones(npat,size(Tab,2))*size(Tab,2);    
+    idboot = zeros(npat,size(Tab,2));
+    for b=1:npat
+        [~,idx(b,:)] = sort(Tab(n,:,b),'MissingPlacement','last'); % idx(:,1) is best algo
+        idboot(b,idx(b,:)) = 1:size(Tab,2);                        % idboot==1 is best algo
+    end
+    idboot(idboot==0) = size(Tab,2);
+    if npat==1
+        [rank,idxrank] = sort(idboot,2,'MissingPlacement','last'); 
+    else
+        [rank,idxrank] = sort(mean(idboot,'omitnan'),2,'MissingPlacement','last'); 
+    end
 else
-    [rank,idxrank] = sort(nanmean(idboot),2,'MissingPlacement','last'); 
+    mu = mean(Tab(n,:,:),3,'omitnan');
+    [rank,idxrank] = sort(mu,2,'MissingPlacement','last'); 
 end
 
-T = nanmean(Tab(5:end,idxrank,:),3);
+T = mean(Tab(:,idxrank,:),3,'omitnan');
 T(end+1,:) = rank;
 algos = method(idxrank);
+
+if size(T,1)>8
+    T = T(5:end,:);
+end
 
 RowName = {'MeanError';'RMSE';'RSR';'pF';'Acc';'PCC';'time'};
 if size(T,1)>8
@@ -86,7 +101,6 @@ RowName = {RowName{:} ['rank_' rankby]};
 T = array2table(T,'VariableNames',algos,'RowNames', RowName);
 O = set(O,'RankTable',T);
 O = set(O,'RankMethod',algos);
-saveO(O,[],'O_imputations');
 
 if plt
     if exist([path filesep filename filesep 'Table_Rank.png'],'file')
