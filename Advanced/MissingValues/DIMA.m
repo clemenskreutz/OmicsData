@@ -23,16 +23,10 @@ if ~exist('npat','var')
     npat = [];
 end
 
-<<<<<<< HEAD
 %% DIMA
 out = LearnPattern(O,bio,regw,logflag);
 O = GetComplete(O,compcut);
 O = AssignPattern(O,out,npat,logflag);
-=======
-Os = impute(Os,methods);
-[~,algo] = GetRankTable(Os);
-saveO(O,[],'O_imputations');
->>>>>>> d8671062bf0008d5dc457cee80560c43597f1bec
 
 O = set(O,'out',out);
 

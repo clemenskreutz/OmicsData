@@ -22,13 +22,10 @@ ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
 
 if isempty(ind)
     pattern = 'LFQ';
-<<<<<<< HEAD
     ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
 end
 if isempty(ind)
     pattern = 'Intensity';
-=======
->>>>>>> d8671062bf0008d5dc457cee80560c43597f1bec
     ind = find(~cellfun(@isempty,regexp(fndata,pattern,'Match','ignorecase')));
 end
 if isempty(ind)

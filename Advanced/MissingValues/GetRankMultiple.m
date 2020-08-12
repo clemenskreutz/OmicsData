@@ -71,19 +71,11 @@ for i=61%:length(file)
         end       
      end
     % Rank repetitions
-<<<<<<< HEAD
     unim = unique(mn);
     T = nan(length(unim),1); ranking = nan(length(unim),1); Tget = nan(size(mn,1),1);
     for r=1:length(unim)
         if ~strcmp(unim{r},'NaN')
             [row,rankn] = find(strcmp(mn,unim{r})); % get ranks of each method to get RMSE
-=======
-    unimfull = unique(mfulln);
-    T = nan(length(unimfull),1); ranking = nan(length(unimfull),1); Tget = nan(size(mfulln,1),1);
-    for r=1:length(unimfull)
-        if ~strcmp(unimfull{r},'NaN')
-            [row,rankn] = find(strcmp(mfulln,unimfull{r})); % get ranks of each method to get RMSE
->>>>>>> d8671062bf0008d5dc457cee80560c43597f1bec
             if length(rankn)<size(mfulln,1)-sum(all(strcmp(mfulln,'NaN'),2))
                 rankn = [rankn; 30*ones(size(mfulln,1)-length(rankn),1)];   % if method failed for a replicate, add rank 30
                 row = [row; setdiff(1:size(mfulln,1),row)'];
