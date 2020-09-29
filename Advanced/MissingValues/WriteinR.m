@@ -18,9 +18,6 @@ if exist('nparallel','var')
     Rrun('tryCatch( { require(foreach) },')
     Rrun('warning=function(c) {install.packages("foreach")')
     Rrun('require(foreach) })')
-    Rrun('tryCatch( { require(foreach) },')
-    Rrun('warning=function(c) {install.packages("foreach")')
-    Rrun('require(foreach) })')
     Rrun('registerDoParallel()')
     datstr = 'dat[,,i]';
 else

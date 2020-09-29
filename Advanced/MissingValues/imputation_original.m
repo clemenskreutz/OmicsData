@@ -9,7 +9,7 @@
 %
 % Example:
 % Oimp = imputation(O,methods);
-% [~,algos] = GetRankTable(Oimp);
+% O = GetTable(Oimp);
 % O = imputation_original(O,algos); 
 
 function O = imputation_original(O,algos,writetxt,plt)
@@ -61,7 +61,7 @@ if writetxt
     Owrite = O;
     Owrite = set(Owrite,'data',dat,['Imputed with ' algo ]);
     WriteData(Owrite,[folder filesep newname]);
-    sprintf(['The imputed dataset was unlogged and written in ' folder filesep newname '\n'])
+    fprintf('%s%s','The imputed dataset was unlogged and written in ', [folder filesep newname])
 end
 
 %% PLOT
@@ -98,8 +98,6 @@ if plt
     [~,idx] = sort(sum(isnan(dat_load),2));
     dat_load = dat_load(idx,:);
     dat = dat(idx,:);
-    dat_load(all(isnan(dat_load),2),:)= [];
-    dat(all(isnan(dat),2),:)= [];
 
     figure; %set(gcf,'units','points','position',[10,10,600,300])
     subplot(1,2,1)

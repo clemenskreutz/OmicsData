@@ -15,13 +15,13 @@
 function O = impute(O,method,lib,clean,Rpath,Rlibpath)
 
 if ~exist('method','var') || isempty(method)
-    method = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','impSeqRob','knn','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','norm','cart','softImpute','MinDet','amelia','regression','midastouch','mean','aregImpute'};
+    method = {'impSeqRob','impSeq','missForest','imputePCA','ppca','MIPCA','bpca','SVDImpute','kNNImpute','regression','aregImpute','softImpute','MinDet','amelia','SVTImpute','irmi','knn','QRILC','nipals','MinProb','rf','sample','pmm','svdImpute','norm','cart','midastouch','mean','ri'};
 elseif strcmp(method,'fast')
-    methods = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','impSeqRob','knn','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','norm','cart','softImpute','MinDet','amelia','regression','midastouch','mean','aregImpute'};
-    method = methods(1:10);
+    methods = {'impSeqRob','impSeq','missForest','imputePCA','ppca','MIPCA','bpca','SVDImpute','kNNImpute','regression','aregImpute','softImpute','MinDet','amelia','SVTImpute','irmi','knn','QRILC','nipals','MinProb','rf','sample','pmm','svdImpute','norm','cart','midastouch','mean','ri'};
+    method = methods(1:9);
     fprintf('impute.m: fast option chosen. Checks 5 best algorithms.')
 elseif isnumeric(method)
-    methods = {'impSeq','missForest','SVDImpute','imputePCA','SVTImpute','irmi','bpca','ppca','MIPCA','kNNImpute','impSeqRob','knn','QRILC','nipals','MinProb','ri','rf','sample','pmm','svdImpute','norm','cart','softImpute','MinDet','amelia','regression','midastouch','mean','aregImpute'};
+    methods = {'impSeqRob','impSeq','missForest','imputePCA','ppca','MIPCA','bpca','SVDImpute','kNNImpute','regression','aregImpute','softImpute','MinDet','amelia','SVTImpute','irmi','knn','QRILC','nipals','MinProb','rf','sample','pmm','svdImpute','norm','cart','midastouch','mean','ri'};
     method = methods(1:method);
     fprintf(['impute.m: fast option chosen. Checks ' num2str(method) ' best algorithms.'])
 end
@@ -73,8 +73,8 @@ ImpM = nan(size(data,1),size(data,2),size(data,3),length(method));
 time = nan(length(method),npat);
 
 
-%for ii=start:npat
-    %dat = data(:,:,ii);
+%for ii=1:npat
+%    dat = data(:,:,ii);
 %    fprintf(['\n impute.m: Imputing pattern ' num2str(ii) '/' num2str(npat) ' with ' num2str(length(method)) ' algorithms..'])
 
     %% Write in R
@@ -92,11 +92,14 @@ time = nan(length(method),npat);
                     fprintf(['impute.m: struct2array needed for conversion of struct in ' method{i}])
                     %Imptemp = struct2array(Imptemp); % aregImpute transform in R
                 end
-                Imptemp = reshape(Imptemp,size(data));
+                Imptemp = reshape(Imptemp,size(data,1),size(data,2),[]);
                 if size(Imptemp,2)>size(ImpM,2)
                     Imptemp = Imptemp(:,1:size(Imptemp,2)/2);  % VIM outputs [imputed_double,imputed_boolean] so columns are doubled
                 end
-                Imptemp(2,2);
+                if size(Imptemp,3)>size(ImpM,3)
+                    Imptemp = Imptemp(:,:,1:size(ImpM,3));
+                end
+                Imptemp(2,2); 
                 if exist('mprev','var')
                     if any(strcmpi(method(i),mprev))
                         ImpM(:,:,:,strcmpi(method(i),mprev)) = Imptemp;
@@ -105,12 +108,12 @@ time = nan(length(method),npat);
                         mprev(end+1) = method(i);
                     end
                 else
-                    ImpM(:,:,:,i) = Imptemp;
+                    ImpM(:,:,1:size(Imptemp,3),i) = Imptemp;
                 end
                 time(i,npat) = cputime-t; 
                 fprintf(['Finished ''' method{i} '''.. '])
             catch
-                fprintf(['Imputation with ' method{i} ' in package ' lib{i} ' was not feasible. '])  
+                fprintf(['Imputation was not feasible. '])  
             end   
     end
     if exist('Rwarn.txt','file')

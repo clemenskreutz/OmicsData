@@ -11,7 +11,7 @@
 % O = OmicsPre(O);
 % O = DIMA(O);
 
-function [O,out] = DIMA(O,compcut,regw,logflag,methods,npat,bio)
+function [O,out] = DIMA(O,methods,npat,bio)
 
 if ~exist('methods','var')
     methods = [];
@@ -24,14 +24,13 @@ if ~exist('npat','var')
 end
 
 %% DIMA
-out = LearnPattern(O,bio,regw,logflag);
-O = GetComplete(O,compcut);
-O = AssignPattern(O,out,npat,logflag);
+out = LearnPattern(O,bio);
+%O = set(O,'out',out);
+O2 = GetComplete(O);
+O2 = AssignPattern(O2,out,npat);
 
-O = set(O,'out',out);
+O2 = impute(O2,methods);
+saveO(O2,[],'O_imputations');
 
-%Os = impute(Os,methods);
-%[~,algo] = GetRankTable(Os);
-%saveO(Os,[],'O_imputations');
-
-%O = imputation_original(O,algo); 
+[~,algo] = GetTable(O2);
+O = imputation_original(O,algo(1)); 

@@ -14,7 +14,7 @@
 % [X,y] = GetDesign(O);
 % out = LogReg(X,y);
 
-function [X,y,type,bnames,group,group2] = GetDesign(O,out,bio,logflag)
+function [X,y,type,bnames] = GetDesign(O,out,bio,logflag)
 
 if ~exist('out','var')
     out = [];
@@ -22,6 +22,12 @@ end
 if ~exist('bio','var') || isempty(bio)
    bio = false;
 end
+
+%% size(O)<1.5e+09
+if size(O,1)*size(O,2)*(size(O,1)+size(O,2))>1.5e+09
+    s = randsample(size(O,1),floor(1.5e+09 / size(O,2) / (size(O,1)+size(O,2))));
+    O = O(s,:);
+end    
 
 % response vector
 isna = isnan(O);
@@ -41,35 +47,25 @@ c = 0;
 % % mean to X
 m = mean(O,2,'omitnan');
 m = m*ones(1,size(isna,2)); 
+mnorm = (m-nanmean(m(:))) ./ nanstd(m(:));
 if ~isfield(out,'typenames') || any(strcmp(out.typenames,'mean'))
-    X = m(:);
+    X = mnorm(:);
     c=c+1;
     bnames{c} = 'mean';
     type(c) = 1; % mean-dependency
 end
 
-if logflag
- X = [X log2(m(:))];
+if exist('logflag','var') && logflag
+ mnorm = (m-nanmin(m(:)))/(nanmax(m(:))-nanmin(m(:)))+1e-5;
+ X = [X sqrt(mnorm(:))];
  c=c+1;
- bnames{c} = 'mean';
+ bnames{c} = 'sqrt(mean)';
+ type(c) = 1;
+ X = [X mnorm(:).^2];
+ c=c+1;
+ bnames{c} = 'mean^2';
  type(c) = 1;
 end
-
-%m = f(m);
-%[~,~,m] = unique(m(:,1));
-% m = m*ones(1,size(isna,2)); 
-% m = m.*std(O,[],2,'omitnan');
-% X = [X, m(:)];
-% c=c+1;
-% bnames{c} = 'mean';
-% type(c) = 1; % mean-dependency
-
-% m = mean(O,2,'omitnan').*std(O,2,'omitnan');
-% m = m*ones(1,size(isna,2)); 
-% X = [X, m(:)];
-% c=c+1;
-% bnames{c} = 'mean';
-% type(c) = 1; % mean-dependency
 
 if bio
     % Predictors from O.cols
@@ -120,46 +116,14 @@ if bio
     end
 end
 
-X = (X-mean(X,'omitnan')) ./ std(X,'omitnan');
-
-% sX = size(X,2);
-% if ~isfield(out,'group')
-%     group = findgroup(O,1);
-% else
-%     group = out.group;
-% end
-% glev = levels(group);
-% groupl = ones(size(isna,1),1)*group;
-% % ColGroup to X
-% for i=1:length(glev)
-%     c = c+1;
-%     X(groupl==glev(i),i+sX) = 1;
-%     bnames{c} = ['Group',num2str(i)];
-%     type(c) = 2; % column-dependency
-% end
-
-
-% sX = size(X,2);
-% if ~isfield(out,'group2')
-%     group2 = findgroup(O,2);
-% else
-%     group2 = out.group;
-% end
-% glev = levels(group2);
-% group2l = ones(size(isna,1),1)*group2;
-% % RowGroup to X
-% for i=1:length(glev)
-%     c = c+1;
-%     X(group2l==glev(i),i+sX) = 1;
-%     bnames{c} = ['Group',num2str(i)];
-%     type(c) = 2; % column-dependency
-% end
+%X = (X-mean(X,'omitnan')) ./ std(X,'omitnan');
 
 sX = size(X,2);
 % Col to X
 for i=1:length(clev)
     c = c+1;
     X(col==clev(i),i+sX) = 1;
+    %X2(col==clev(i),i) = 1;
     bnames{c} = ['Column',num2str(i)];
     type(c) = 2; % column-dependency
 end
@@ -168,7 +132,8 @@ sX = size(X,2);
 % Row to X
 for i=1:length(rlev)
     c = c+1;
-    X(row==rlev(i),i+sX) = 1;
+    X(row==rlev(i),i+sX) = 1;    
+    %X2(row==rlev(i),i+length(clev)) = 1;
     bnames{c} = ['Row',num2str(i)];
     type(c) = 3; % row-dependency
 end

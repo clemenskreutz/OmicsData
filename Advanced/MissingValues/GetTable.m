@@ -1,82 +1,132 @@
+% [O,algo] = GetTable(O,[rankby,RMSEttest,group])
+%
+% Creates table to display performance of imputation algorithms within DIMA
+%
+% O - OmicsData class object
+% rankby - string of performance measure which should serve as rank 
+% criterion                                                        ['RMSE']
+% RMSEttest - flag if RMSE of ttest should be calculated           [false]
+% group - indices for ttest                             
+%
+% algo - imputation algorithms ranked by 'rankby'
 
-function O = GetTable(O)
+function [O,algo] = GetTable(O,rankby,RMSEttest,group)
 
 if ~exist('O','var')
     error('OmicsData object has to be passed in to function GetTable.m.')
 end
+if ~exist('rankby','var') || isempty(rankby)
+    rankby = 'RMSE';
+end
+if ~exist('RMSEttest','var') || isempty(RMSEttest)
+    if strcmp(rankby,'RMSEt')
+        RMSEttest = true;
+    else
+        RMSEttest=false;
+    end
+end
+if exist('group','var')
+    if length(size(group))==1 % if number of clusters is given, do clustering to get sample indices of group
+        O = set(O,'data',get(O,'data_original'),'Set to original');
+        erg = clusterR(O,group,2);
+        group = erg.samplecluster==1;
+        group(2,:) = erg.samplecluster==2;
+    end
+elseif RMSEttest % find 2 clusters if no info is given
+        O = set(O,'data',get(O,'data_original'),'Set to original');
+        erg = clusterR(O,2,2);     
+        group(1,:) = (erg.samplecluster==1)';
+        group(2,:) = (erg.samplecluster==2)';
+end
 
 % Get variables from class
-dat = get(O,'data_complete',true);                % Complete dataset without missing values, to compare "right" solution
-if isempty(dat)
-    dat = get(O,'data_full');
-    dat = dat(:,:,1);
-end
-dat_mis = get(O,'data_mis',true);        % simulated missing values       
-if isempty(dat_mis)
-    dat_mis = get(O,'data');
-end
-dat_imp = get(O,'data_imput');           % Imputed data
+comp = get(O,'data_complete');                % Complete dataset without missing values, to compare "right" solution
+imp = get(O,'data_imput');           % Imputed data
+mis = get(O,'data_mis');
+
 method = get(O,'method_imput');
-%method = meth.name;
-t = get(O,'time_imput'); 
 
-if ~isempty(dat_imp)
-    Tsave = nan(11,size(dat_imp,4)+1,size(dat_mis,3));
-    for b=1:size(dat_mis,3)
-        % Columns of just imputed data
-        Y = dat(isnan(dat_mis(:,:,b)));                         % for complete data     
-        X = nan(size(Y,1),size(dat_imp,4));
-        for i=1:size(dat_imp,4)
-            im = dat_imp(:,:,b,i);
-            X(:,i) = im(isnan(dat_mis(:,:,b)));                 % for imputed data
-        end
-        if sum(~isnan(Y))<20                                  % if too less data
-            warning('Less than 20 MV imputed. Table not calculated.')
-            continue
-        end
-        
-        % Initialize 
-        T = table([mean(Y,'omitnan');std(Y,'omitnan');min(Y,[],'omitnan');max(Y,[],'omitnan');0;0;0;0;0;0;0]);
-        T.Properties.VariableNames = {'original'};
-        T.Properties.RowNames = {'mean','std','min','max','MeanError','RMSE','RSR','F','Acc','PCC','time'};
-        Diffm = nan(size(X,1),size(dat_imp,4));
-        Diffrel = nan(size(X,1),size(dat_imp,4));
-        Acc = nan(size(X,1),size(dat_imp,4));
-        RMSE = nan(size(dat_imp,4),1);
-        RSR = nan(size(dat_imp,4),1);
-        F = nan(size(dat_imp,4),1);
-        PCC = corrcoef([Y X],'Rows','complete');
-        t(end+1:size(X,2)) = nan;
-        
-        %% Calc performance measures per algorithm, write in Table
-        for i=1:size(X,2)
-            if any(isnan(X(:,i))) || all(X(:,i)==0)
-                T = [T table([nan(11,1)])];
-            else
-                Quad = sum(sum(sum((X(:,i)-Y).^2,'omitnan'),'omitnan'),'omitnan');
-                Diffm(:,i) = X(:,i)-Y;
-                Diffrel(:,i) = abs(Diffm(:,i)./Y);
-                Dev = sum(sum(abs(Diffm(:,i)),'omitnan'),'omitnan')/size(Y,1);
-                %MeanDiff = nansum(nansum(Diffm(:,i)))/size(Y,1);
-
-                RMSE(i) = sqrt(Quad/size(Y,1)); 
-                RSR(i) = RMSE(i)./std(dat(:),'omitnan');
-               % [~,F(i)] = vartest2(X(:,i),Y); 
-               F(i) = nan;
-                %F(i) = nansum((Y-nanmean(Y)).^2) /sum(~isnan(Y)) / ( nansum((X(:,i) - nanmean(X(:,i))).^2) /sum(~isnan(X(:,i))));
-                %F(i) = nansum((X(:,i)-nanmean(X(:,i))).^2)/sum(~isnan(X(:,i)))/nansum((Y-nanmean(Y)).^2)*sum(~isnan(Y));
-                Acc(i) = length(find(Diffrel(:,i)<0.05))/size(Y,1)*100;   % #values <5% deviation to original value
-                T = [T table([mean(X(:,i),'omitnan'); std(X(:,i),'omitnan'); min(X(:,i),[],'omitnan'); max(X(:,i),[],'omitnan'); Dev; RMSE(i); RSR(i); F(i); Acc(i); PCC(i+1,1); t(i)])];
-            if Quad==0
-                'b'
+if ~isempty(imp)
+    Dev = nan(size(imp,3),size(imp,4)); RMSE=Dev; RSR=Dev; pF=Dev; Acc=Dev; PCC=Dev; RMSEt=Dev;
+    for p=1:size(imp,3) % for each pattern S of MV
+        if RMSEttest
+            for i=1:size(comp,1)
+                [~,~,~,stat] = ttest2(comp(i,group(1,:)),comp(i,group(2,:)));
+                t(i) = stat.tstat;
             end
-            end
-            T.Properties.VariableNames(i+1) = erase(method(i),'.');
+            t(isinf(t)) = nan;
         end
-        Tsave(:,:,b) = T{:,:};
+        for a=1:size(imp,4)  % for each imputation algorithm
+            im = imp(:,:,p,a);
+            if ~all(isnan(im))
+                ndata = sum(sum(isnan(mis(:,:,p)) & ~isnan(comp))); % # data values which are compared here
+                Diff = im-comp;
+                Dev(p,a) = sum(sum(abs(Diff),'omitnan'),'omitnan')/ndata;
+                RMSE(p,a) = sqrt(sum(sum(Diff.^2,'omitnan'),'omitnan'))/ndata; 
+                RSR(p,a) = RMSE(p,a)/std(comp(:),'omitnan');
+                [~,pF(p,a)] = vartest2(im(:),comp(:));
+                Acc(p,a) = length(find(abs(Diff./comp)<0.05))/size(O,1)/size(O,2)*100;
+                cor = corrcoef([im(:) comp(:)],'Rows','complete');
+                PCC(p,a) = cor(2,1);
+                if RMSEttest
+                    for i=1:size(comp,1)
+                        [~,~,~,statm] = ttest2(im(i,group(1,:)),im(i,group(2,:)));
+                        tm(i) = statm.tstat;
+                    end
+                    tm(isinf(tm)) = nan;
+                    RMSEt(p,a) = sqrt( sum((t-tm).^2,'omitnan') /sum(~isnan(t) & ~isnan(tm)));
+    %                 if isinf(RMSEt(p,a))
+    %                     fprintf('Infinite value in RMSEttest.m')
+    %                 end
+                end
+            end
+        end
     end
+
+    %% Rank algorithms
+    %if rankbyrank
     
+        idx = ones(p,a);    
+        idboot = zeros(p,a);
+        try
+            eval(['rankcriterion = ',rankby,';']);
+        catch
+            error(['Could not find ' rankby ' as ranking variable. Try another like Dev,RMSE,RSR,pF,Acc,PCC,RMSEt, or add your ranking criterion in the previous section.']);
+        end
+        for p=1:size(imp,3)
+            if strncmp(rankby,'p',1)
+                [~,idx(p,:)] = sort(rankcriterion(p,:),'descend','MissingPlacement','last'); 
+            else
+                [~,idx(p,:)] = sort(rankcriterion(p,:),'MissingPlacement','last'); % idx(:,1) is best algo
+            end
+            idboot(p,idx(p,:)) = 1:a;                        % idboot==1 is best algo
+        end
+        idboot(idboot==0) = a;
+        if p==1
+            [rank,rankidx] = sort(idboot,2,'MissingPlacement','last'); 
+        else
+            [rank,rankidx] = sort(mean(idboot,'omitnan'),2,'MissingPlacement','last'); 
+        end
+
+    %else  % Rank by mean instead of doing a ranking of each pattern
+    %    mu = mean(RMSE,2,'omitnan');
+    %    [rank,rankidx] = sort(mu,2,'MissingPlacement','last'); 
+    %end
+    M = [nanmean(Dev);nanmean(RMSE);nanmean(RSR);nanmean(pF);nanmean(Acc);nanmean(PCC)];
+    RowNames = {'MeanError';'RMSE';'RSR';'pF';'Acc';'PCC'};
+    if RMSEttest
+        M = [M; nanmean(RMSEt)];
+        RowNames = [RowNames;'RMSEt'];
+    end
+    M = [M(:,rankidx); rank];
+    algo = method(rankidx);
+    RowNames = [RowNames;'rank'];
+    T = array2table(M,'VariableNames',algo,'RowNames',RowNames);
+
     %% Save
-    O = set(O,'Table',Tsave);
+    O = set(O,'RankTable',T);
+    O = set(O,'RankMethod',algo);
+    O = set(O,'rankidx',rankidx);
+    O = set(O,'DIMA',algo(1));
 end
 

@@ -93,8 +93,10 @@ for i=1:size(dat,2)
 end
 
 for i=1:size(labels1,2)
-    fn = str2fieldname(txtlabels{i});
-    rownames.(fn) = labels1(:,i);        
+    if ~isempty(txtlabels{i})
+        fn = str2fieldname(txtlabels{i});
+        rownames.(fn) = labels1(:,i);   
+    end
 end
 
 
