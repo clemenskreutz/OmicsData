@@ -10,7 +10,7 @@
 % O = GetComplete(O);
 % O = AssignPattern(O,out);
 
-function out = LearnPattern(O,bio,regw,logflag)
+function out = LearnPattern(O,bio)
 
 if ~exist('O','var')
     error('MissingValues/LearnPattern.m requires class O as input argument.')
@@ -34,6 +34,7 @@ end
     
 % Initialize
 b = nan(ceil(nfeat/nboot),nboot);
+p = nan(ceil(nfeat/nboot),nboot);
 out = struct;
 
 for i=1:nboot  % subsample proteins
@@ -48,21 +49,24 @@ for i=1:nboot  % subsample proteins
         ind = indrand( nperboot*(i-1)+1 : nperboot*i );
     end
     
-    [X,y,typ,typnames] = GetDesign(O(ind,:),out,bio,logflag);
+    [X,y,typ,typnames] = GetDesign(O(ind,:),out,bio);
     if i==1 || length(typ)+1>length(out.type)
         out.type = [0; typ]; % offset gets type=0
         out.typenames = ['offset'; typnames];
     end
 
-    out.stats(i) = LogReg(X,y,regw);
+    out.stats(i) = LogReg(X,y);
     
     b(1:length(out.stats(i).beta),i) = out.stats(i).beta;
+    p(1:length(out.stats(i).p),i) = out.stats(i).p;
 end
 
 % output
 brow = b(out.type==3,:);
 brow = brow(brow~=0);                       % keep all row coefficients
 out.b = [mean(b(out.type~=3),2,'omitnan'); brow];  % mean of coefficients over bootstrap
+prow = p(out.type==3,:);
+out.p = [mean(p(out.type~=3),2,'omitnan'); prow(:)];
 out.type(end+1:length(out.b)) = out.type(end);
 out.typenames(end+1:length(out.b)) = out.typenames(end);
 out.X = X;
@@ -70,21 +74,17 @@ out.X = X;
 end
 
 
-function stats = LogReg(X,y,regw)
+function stats = LogReg(X,y)
 
 w = ones(size(y));
 [X,y] = GetRegularization(X,y);
-w(end+1:length(y)) = regw;
+w(end+1:length(y)) = 0.1;
 %     lastwarn('');
 
-if size(X,1)<50000
-     % [B,FitInfo] = lassoglm(X,y,'binomial','link','logit','Lambda',0.01);
-     
-     [~,~,stats] = glmfit(X,y,'binomial','link','logit','weight',w);
-     
-%    [~,~,stats] = glmfit(X,y,'binomial','link','logit');          % faster
+if size(X,1)<50000   
+     [~,~,stats] = glmfit(X,y,'binomial','link','logit','weight',w);    % faster
 else
-     mdl = fitglm(X,y,'Distribution','binomial','link','logit');  % works for tall matrices
+     mdl = fitglm(X,y,'Distribution','binomial','link','logit');        % works for tall matrices
      stats = struct;
      stats.beta = mdl.Coefficients.Estimate;
      stats.p = mdl.Coefficients.pValue;
