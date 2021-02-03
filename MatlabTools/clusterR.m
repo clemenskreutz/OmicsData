@@ -95,6 +95,7 @@ if(size(O,1)>2)
         gn = get(O,'IDs');        
     end
     Rpush('IDs',gn);
+    Rpush('SampleNames',SampleNames);
 	Rpush('data',dat);
 		
     %% R commands
